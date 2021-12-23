@@ -25,9 +25,17 @@ set(srv_files
    # etc
   )
 
+set(action_files
+  "action/Example.action"
+  #"action/Action2.action"
+   # etc
+  )
+
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
+  ${action_files}
  )
 
 
