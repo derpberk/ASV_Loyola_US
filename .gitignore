@@ -5,6 +5,11 @@ bin/
 lib/
 install/
 log/
+*.out
+mav.tlog
+mav.tlog.raw
+eeprom.bin
+mav.parm
 msg_gen/
 srv_gen/
 msg/*Action.msg

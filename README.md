@@ -23,6 +23,7 @@ $sudo apt-get install python3-rosdep2 ~nros-foxy-rqt*
 
 - ![#1589F0](https://via.placeholder.com/15/1589F0/000000?text=+) `Extra`
 Cuando se trabaje con drones estudiar el uso de distintas ROS_DOMAIN_ID 
-En windows necesitamos control de visibilidad https://docs.microsoft.com/en-us/cpp/cpp/dllexport-dllimport
+(C++ Only) En windows necesitamos control de visibilidad https://docs.microsoft.com/en-us/cpp/cpp/dllexport-dllimport
 
 Diferencias ROS-ROS2 https://design.ros2.org/articles/changes.html
+colcon build --symlink-install for developers

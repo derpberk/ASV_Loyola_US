@@ -1,0 +1,11 @@
+# mavros_param.yaml
+mavros:
+  ros__parameters: {}
+
+mavros_router:
+  ros__parameters: {}
+
+mavros_node:
+  ros__parameters:
+    fcu_url: udp://127.0.0.1:14551@14555
+    gcs_url: tcp://5760@

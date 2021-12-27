@@ -27,6 +27,9 @@ setup(
                             'server = python_example.Add2Ints_server:main',
                             'client = python_example.Add2Ints_client:main',
                             'param_talker = python_example.parameters:main',
+                            'fibonacci_action_server = python_example.action_server:main',
+                            'fibonacci_action_client = python_example.action_client:main',
+                            'fibonacci_action_client_feedback = python_example.action_client_feedback:main',
         ],
     },
 )
