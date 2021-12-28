@@ -17,7 +17,6 @@ setup(
         (os.path.join('share', package_name, "config"), ['config/'+'rviz_config.rviz']),
     ],
     install_requires=['setuptools'],
-    zip_safe=True,
     maintainer='alejandro',
     maintainer_email='alexcpesp@gmail.com',
     description='visualization of ardupilot SITL via Rviz',
@@ -25,6 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'test = simulator.test:main',
         ],
     },
 )

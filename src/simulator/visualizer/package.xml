@@ -11,6 +11,7 @@
   <!-- some dependencies -->
   <exec_depend>rclpy</exec_depend> <!-- for python -->
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>mavros_msgs</exec_depend> <!-- for interfaces -->
 
     <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

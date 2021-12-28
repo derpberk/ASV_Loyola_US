@@ -4,7 +4,7 @@ import launch.substitutions
 import launch_ros.actions
 import os
 from ament_index_python.packages import get_package_share_directory
-
+import time
 
 
 
@@ -27,6 +27,7 @@ def generate_launch_description():
     )
 
     #start mavros to create a translation between mavlink and ros
+    time.sleep(2)
     Mavros =launch_ros.actions.Node(
         package='mavros',
         executable='mavros_node',
