@@ -10,10 +10,9 @@
 
 
   <!-- some dependencies -->
-  <exec_depend>rclpy</exec_depend> <!-- for python -->
-  <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
-
-
+  <depend>rclpy</depend> <!-- for python -->
+  <depend>asv_interfaces</depend> <!-- for interfaces -->
+  <depend>mavros_msgs</depend> <!-- for interfaces -->
 
   <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

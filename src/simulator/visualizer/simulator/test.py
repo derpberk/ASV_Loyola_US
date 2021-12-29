@@ -1,3 +1,6 @@
+#este nodo llama a 2 servicios de MavROS para poner el vehículo en modo GUIADO y tras 1 segundo armar el vehículo
+
+
 import sys
 
 from mavros_msgs.srv import CommandBool, CommandLong
