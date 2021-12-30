@@ -1,0 +1,5 @@
+#request
+geometry_msgs/Point new_point
+---
+#response
+geometry_msgs/Point[] point_list

@@ -11,16 +11,17 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 set(msg_files
-  "msg/Example.msg"
+  "msg/Status.msg"
   #"msg/Message2.msg"
   # etc
   )
 
 
 set(srv_files
-  "srv/Example.srv"
+  "srv/Newwaypoint.srv"
   #"srv/Service2.srv"
    # etc
   )

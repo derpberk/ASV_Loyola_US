@@ -13,6 +13,8 @@
   <depend>rclpy</depend> <!-- for python -->
   <depend>asv_interfaces</depend> <!-- for interfaces -->
   <depend>mavros_msgs</depend> <!-- for interfaces -->
+  <depend>python3-paho-mqtt</depend> <!-- for mqtt -->
+
 
   <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

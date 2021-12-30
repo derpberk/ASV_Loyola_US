@@ -3,11 +3,12 @@ import os
 from glob import glob
 
 package_name = 'asv_loyola_us'
+submodule = 'asv_loyola_us/submodulos'
 
 setup(
     name=package_name,
     version='0.0.0',
-    packages=[package_name],
+    packages=[package_name, submodule],
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
@@ -25,6 +26,7 @@ setup(
     entry_points={
         'console_scripts': [
             'dronekit = asv_loyola_us.dronekit_node:main',
+            'mqtt = asv_loyola_us.mqtt_node:main',
         ],
     },
 )

@@ -1,0 +1,3 @@
+main_node:
+    ros__parameters:
+      mission_filename: "1"
