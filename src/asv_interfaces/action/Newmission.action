@@ -1,0 +1,11 @@
+# Request
+geometry_msgs/Point[] point_list
+---
+# Result
+geometry_msgs/Point[] point_list
+asv_interfaces/Samplevalue[] samples
+---
+# Feedback
+string info
+geometry_msgs/Point point
+asv_interfaces/Samplevalue samples

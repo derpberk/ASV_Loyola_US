@@ -11,7 +11,7 @@ import time
 
 def generate_launch_description():
     # open ardupilot SITL in a new terminal
-    os.system("gnome-terminal --command=\"sim_vehicle.py -v Rover --console --map\"")
+    #os.system("gnome-terminal --command=\"sim_vehicle.py -v Rover --console --map\"")
 
     #load the configuration of mavros
     mavros_config = os.path.join(

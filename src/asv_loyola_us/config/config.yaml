@@ -1,3 +1,7 @@
+/**:
+  ros__parameters:
+    debug: false
+
 dronekit_node:
     ros__parameters:
       vehicle_ip: "tcp:127.0.0.1:5762"
@@ -10,11 +14,7 @@ main_node:
 mqtt_node:
   ros__parameters:
     vehicle_id: 1
-  mqtt_addr: 20.126.131.210
-
-/**:
-  ros__parameters:
-    debug: false
+    mqtt_addr: 20.126.131.210
 
 sensor_module_node:
   ros__parameters:

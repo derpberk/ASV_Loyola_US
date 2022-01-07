@@ -24,6 +24,10 @@
 
 #defining constant variables
 
+#default values
+#int32 value 1
+#string mode "MANUAL"
+
 #Constants names have to be UPPERCASE
 #int32 X=123
 #int32 Y=-123

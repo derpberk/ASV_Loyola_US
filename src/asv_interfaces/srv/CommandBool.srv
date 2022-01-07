@@ -1,0 +1,5 @@
+#request
+bool value
+---
+#response
+bool success

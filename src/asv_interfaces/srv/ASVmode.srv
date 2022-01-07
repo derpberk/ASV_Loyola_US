@@ -1,0 +1,8 @@
+#request
+int32 asv_mode
+string asv_mode_srt
+---
+#response
+int32 previous_mode
+string previous_mode_str
+bool success

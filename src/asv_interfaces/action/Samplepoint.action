@@ -1,0 +1,9 @@
+# Request
+geometry_msgs/Point samplepoint
+---
+# Result
+bool success
+---
+# Feedback
+geometry_msgs/Point next_waypoint
+geometry_msgs/Point position

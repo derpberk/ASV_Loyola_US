@@ -7,5 +7,6 @@ mavros_router:
 
 mavros_node:
   ros__parameters:
-    fcu_url: udp://:14550@
+    fcu_url: udp://:14550@192.168.2.2
+    #fcu_url: udp://:14550@
     #gcs_url:

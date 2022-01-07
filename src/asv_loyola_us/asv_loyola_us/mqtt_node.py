@@ -4,7 +4,7 @@ from rclpy.node import Node
 import rclpy
 from mavros_msgs.srv import CommandBool
 from asv_interfaces.msg import Status
-
+from asv_interfaces.srv import Newwaypoint, ASVmode
 
 class MQTT_node(Node):
 
@@ -16,9 +16,10 @@ class MQTT_node(Node):
 
     def declare_services(self):
         self.sendinfo = self.create_service(CommandBool, 'MQTT_send_info', self.sendinfo_callback)
+        self.asv_mode_service = self.create_client(ASVmode, 'change_asv_mode')
 
     def declare_topics(self):
-        self.status_subscriber = self.create_subscription(Status, 'topic', self.status_suscriber_callback, 10)
+        self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
 
     def __init__(self):
         #start the node

@@ -15,6 +15,9 @@ find_package(geometry_msgs REQUIRED)
 
 set(msg_files
   "msg/Status.msg"
+  "msg/Nodeupdate.msg"
+  "msg/String.msg"
+  "msg/Samplevalue.msg"
   #"msg/Message2.msg"
   # etc
   )
@@ -22,12 +25,15 @@ set(msg_files
 
 set(srv_files
   "srv/Newwaypoint.srv"
+  "srv/ASVmode.srv"
+  "srv/CommandBool.srv"
   #"srv/Service2.srv"
    # etc
   )
 
 set(action_files
-  "action/Example.action"
+  "action/Newmission.action"
+  "action/Samplepoint.action"
   #"action/Action2.action"
    # etc
   )
@@ -37,6 +43,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
   ${action_files}
+  DEPENDENCIES geometry_msgs
  )
 
 

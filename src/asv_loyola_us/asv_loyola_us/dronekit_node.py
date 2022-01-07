@@ -1,11 +1,11 @@
 import rclpy
 from rclpy.node import Node
 from dronekit import connect, VehicleMode, LocationGlobal
+import traceback
 
 #import intefaces
-from mavros_msgs.srv import CommandBool
 from asv_interfaces.msg import Status
-
+from asv_interfaces.srv import CommandBool
 
 # This node generates the necessary services for  comunication towards the drone (Mavros is in charge of comm from the drone)
 #parameters are only read at start
@@ -38,10 +38,18 @@ class Dronekit_node(Node):
 
         # connect to vehicle
         self.vehicle= vehicle = connect(self.vehicle_ip, timeout=self.timout)
+            #TODO raise error if there has been a timeout,
+            #we can try to restart the dronekit node
+
+        """        except ConnectionRefusedError:
+            keep_going = False
+            if verbose > 0:
+                self.get_logger().fatal("Connection to navio2 could not be made")
+        """
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
 
         # declare the services
-        self.declare_services()
+        #self.declare_services()
         # start to pubblish
         self.declare_topics()
 
@@ -87,10 +95,22 @@ class Dronekit_node(Node):
 def main(args=None):
     #init ROS2
     rclpy.init(args=args)
-    #start a class that servers the services
-    dronekit_node = Dronekit_node()
-    #loop the node
-    rclpy.spin(dronekit_node)
+    try:
+        #start a class that servers the services
+        dronekit_node = Dronekit_node()
+        #loop the node
+        rclpy.spin(dronekit_node)
+    except:
+        """
+        There has been an error with the program, so we will send the error log
+        """
+        x = rclpy.create_node('dronekit_node') #we state what node we are
+        #we need to make sure we are subscribed to logs, so we create a dummy publisher as subscriptions happen syncronously
+        publisher = x.create_publisher(Log, 'rosout', 10) #we create the publisher
+        while publisher.get_subscription_count() == 0: #while rosout is not up
+            sleep(0.01) #we wait
+        #we publish the error
+        x.get_logger().fatal(traceback.format_exc())
     #after close connection shut down ROS2
     rclpy.shutdown()
 

@@ -10,11 +10,12 @@
 
 
   <!-- some dependencies -->
-  <depend>rclpy</depend> <!-- for python -->
-  <depend>asv_interfaces</depend> <!-- for interfaces -->
-  <depend>mavros_msgs</depend> <!-- for interfaces -->
-  <depend>python3-paho-mqtt</depend> <!-- for mqtt -->
-
+  <exec_depend>rclpy</exec_depend> <!-- for python -->
+  <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>rcl_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>mavros_msgs</exec_depend> <!-- for interfaces -->
+  <exec_depend>python3-paho-mqtt</exec_depend> <!-- for mqtt -->
+  <!-- dronekit must be instaled from apt, still not in rosdep, add as depend in the future -->
 
   <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

@@ -13,7 +13,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name), glob('launch/*.py')),
+        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, "config"), glob('config/*.yaml')),
     ],
     install_requires=['setuptools'],
@@ -27,6 +27,10 @@ setup(
         'console_scripts': [
             'dronekit = asv_loyola_us.dronekit_node:main',
             'mqtt = asv_loyola_us.mqtt_node:main',
+            'mission = asv_loyola_us.mission_node:main',
+            'sensor = asv_loyola_us.sensor_module:main',
+            'planner = asv_loyola_us.planner_node:main',
+            'watchdog = asv_loyola_us.watchdog_node:main',
         ],
     },
 )
