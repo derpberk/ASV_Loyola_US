@@ -204,8 +204,6 @@ class Mission_node(Node):
         """
         this function changes the ASV Mode if the value is between limits
         """
-        a=[]
-        b=a[2]
         #check if mode is between limits
         if request.asv_mode > 4 or request.asv_mode < 0:
             response.success = False

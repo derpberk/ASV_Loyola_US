@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from dronekit import connect, VehicleMode, LocationGlobal
+import pymavlink
 import traceback
 
 #import intefaces
@@ -88,8 +89,81 @@ class Dronekit_node(Node):
         self.publisher_.publish(self.status)
 
 
+    def get_bearing(self, location1, location2):
+        """
+        Returns the bearing between the two LocationGlobal objects passed as parameters.
+        This method is an approximation, and may not be accurate over large distances and close to the
+        earth's poles. It comes from the ArduPilot test code:
+        https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py`
+        Args:
+            location1: Actual position (`dronekit.LocationGlobal`).
+            location2: Reference position (`dronekit.LocationGlobal).
+        Returns:
+            The angle difference from `location1 to `location2
+        """
+        off_x = location2.lon - location1.lon
+        off_y = location2.lat - location1.lat
+        bearing = 90.00 + atan2(-off_y, off_x) * 57.2957795
+        if bearing < 0:
+            bearing += 360.00
+        return bearing
 
 
+    def condition_yaw(self, heading, relative=False):
+        """
+        Send MAV_CMD_CONDITION_YAW message to point vehicle at a specified heading (in degrees).
+        This method sets an absolute heading by default, but you can set the `relative` parameter
+        to `True` to set yaw relative to the current yaw heading.
+        By default the yaw of the vehicle will follow the direction of travel. After setting
+        the yaw using this function there is no way to return to the default yaw "follow direction
+        of travel" behaviour (https://github.com/diydrones/ardupilot/issues/2427)
+        For more information see:
+        http://copter.ardupilot.com/wiki/common-mavlink-mission-command-messages-mav_cmd/#mav_cmd_condition_yaw
+        """
+        if relative:
+            is_relative = 1  # yaw relative to direction of travel
+        else:
+            is_relative = 0  # yaw is an absolute angle
+        # create the CONDITION_YAW command using command_long_encode()
+        msg = vehicle.message_factory.command_long_encode(
+            0, 0,  # target system, target component
+            mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+            0,  # confirmation
+            heading,  # param 1, yaw in degrees
+            0,  # param 2, yaw speed deg/s
+            1,  # param 3, direction -1 ccw, 1 cw
+            is_relative,  # param 4, relative offset 1, absolute angle 0
+            0, 0, 0)  # param 5 ~ 7 not used
+        # send command to vehicle
+        vehicle.send_mavlink(msg)
+
+    def reached_position(señf, current_loc, goal_loc):
+        """
+        Returns the ground distance in metres between two LocationGlobal objects.
+        This method is an approximation, and will not be accurate over large distances and close to the
+        earth's poles. It comes from the ArduPilot test code:
+        https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
+        Args:
+            current_loc: Actual position (dronekit.LocationGlobal).
+            goal_loc: Reference position (dronekit.LocationGlobal).
+        Returns:
+            'True' if the ASV distance respecto to the target Waypoint is less than 1.5 meters.
+        """
+
+        # Convert to radians #
+        lat1 = np.radians(current_loc.lat)
+        lat2 = np.radians(goal_loc.lat)
+        lon1 = np.radians(current_loc.lon)
+        lon2 = np.radians(goal_loc.lon)
+
+        # Obtains the latitude/longitude differences #
+        d_lat = lat2 - lat1
+        d_lon = lon2 - lon1
+
+        # Returns True if the waypoint is within 1.5 meters the ASV position
+        a = np.sin(0.5 * d_lat) ** 2 + np.sin(0.5 * d_lon) ** 2 * np.cos(lat1) * np.cos(lat2)
+        c = 2.0 * np.arctan2(np.sqrt(a), np.sqrt(1.0 - a))
+        return 6378100.0 * c < 0.5
 
 
 def main(args=None):
@@ -113,7 +187,6 @@ def main(args=None):
         x.get_logger().fatal(traceback.format_exc())
     #after close connection shut down ROS2
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()

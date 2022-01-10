@@ -23,3 +23,5 @@ x.get_logger().fatal(traceback.format_exc())
 
 
 una posible solución es utilizar una clase llamada logger con los mismos atributos de log, que alimente a rosout y al watchdog de cada dron a la vez
+
+
