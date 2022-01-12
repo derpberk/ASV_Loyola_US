@@ -3,21 +3,17 @@ from rclpy.node import Node
 from .submodulos.KMLMissionGeneration import KMLMissionGenerator
 import traceback
 from time import sleep
-from geometry_msgs.msg import Point
 from asv_interfaces.srv import Newpoint, ASVmode, CommandBool
 from asv_interfaces.msg import Status, Nodeupdate
-
-from threading import Thread
-
+import os
 import time
 from .submodulos.call_service import call_service
-from rclpy.callback_groups import ReentrantCallbackGroup
-from geometry_msgs.msg import Point
+
 class Mission_node(Node):
 
     #his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('mission_filepath', '/home/aloepacci/ASV_Loyola_US/MisionesLoyola_dron_2.kml')
+        self.declare_parameter('mission_filepath', os.path.expanduser("~/ASV_Loyola_US/MisionesLoyola_dron_2.kml"))
         self.mission_filepath = self.get_parameter('mission_filepath').get_parameter_value().string_value
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value

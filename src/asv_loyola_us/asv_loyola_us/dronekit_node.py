@@ -9,7 +9,7 @@ from math import atan2
 from .submodulos.dictionary import dictionary
 import time
 #import intefaces
-from asv_interfaces.msg import Status
+from asv_interfaces.msg import Status, Nodeupdate
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint
 
 
@@ -262,15 +262,21 @@ def main(args=None):
         rclpy.spin(dronekit_node)
     except:
         """
-        There has been an error with the program, so we will send the error log
+        There has been an error with the program, so we will send the error log to the watchdog
         """
         x = rclpy.create_node('dronekit_node') #we state what node we are
-        #we need to make sure we are subscribed to logs, so we create a dummy publisher as subscriptions happen syncronously
-        publisher = x.create_publisher(Log, 'rosout', 10) #we create the publisher
-        while publisher.get_subscription_count() == 0: #while rosout is not up
+        publisher = x.create_publisher(Nodeupdate, 'internal_error', 10) #we create the publisher
+        #we create the message
+        msg = Nodeupdate()
+        msg.node = "mission_node" #our identity
+        msg.message = traceback.format_exc() #the error
+        #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
+        #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
+        # este topic está oculto en echo al usar _
+        while publisher.get_subscription_count() == 0: #while no one is listening
             sleep(0.01) #we wait
-        #we publish the error
-        x.get_logger().fatal(traceback.format_exc())
+        publisher.publish(msg) #we send the message
+        x.destroy_node() #we destroy node and finish
     #after close connection shut down ROS2
     rclpy.shutdown()
 
