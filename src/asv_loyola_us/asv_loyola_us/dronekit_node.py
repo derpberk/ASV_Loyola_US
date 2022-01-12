@@ -1,14 +1,21 @@
 import rclpy
 from rclpy.node import Node
+#TODO: deprecate dronekit, use pymavlink
 from dronekit import connect, VehicleMode, LocationGlobal
+import numpy as np
 import pymavlink
 import traceback
-
+from math import atan2
+from .submodulos.dictionary import dictionary
+import time
 #import intefaces
 from asv_interfaces.msg import Status
-from asv_interfaces.srv import CommandBool
+from asv_interfaces.srv import CommandBool, ASVmode, Newpoint
 
-# This node generates the necessary services for  comunication towards the drone (Mavros is in charge of comm from the drone)
+
+modes_str = []
+
+# This node generates the necessary services for  comunication towards the drone
 #parameters are only read at start
 
 class Dronekit_node(Node):
@@ -19,10 +26,20 @@ class Dronekit_node(Node):
         self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         self.declare_parameter('timeout', 15)
         self.timout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('vehicle_id', 1)
+        self.vehicle_id=self.get_parameter('vehicle_id').get_parameter_value().integer_value
+
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
-        self.arm_vehicle = self.create_service(CommandBool, 'arm_vehicle', self.arm_vehicle_callback)
+        #host
+        self.arm_vehicle_service = self.create_service(CommandBool, 'arm_vehicle', self.arm_vehicle_callback)
+        self.go_to_point_service = self.create_service(Newpoint, 'go_to_point_command', self.go_to_point_callback)
+        self.change_ASV_mode_service = self.create_service(ASVmode, 'change_asv_mode', self.change_asv_mode_callback)
+        #client
+        self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
+
+
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
@@ -38,7 +55,7 @@ class Dronekit_node(Node):
         self.status = Status()
 
         # connect to vehicle
-        self.vehicle= vehicle = connect(self.vehicle_ip, timeout=self.timout)
+        self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
             #TODO raise error if there has been a timeout,
             #we can try to restart the dronekit node
 
@@ -49,10 +66,14 @@ class Dronekit_node(Node):
         """
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
 
+        self.dictionary()
+
         # declare the services
         #self.declare_services()
         # start to pubblish
+
         self.declare_topics()
+        self.declare_services()
 
     def arm_vehicle_callback(self, request, response):
         """
@@ -79,14 +100,14 @@ class Dronekit_node(Node):
         return response
 
     def status_publish(self):
-        self.status.lat = self.vehicle.location.global_relative_frame.lat,
-        self.status.lon = self.vehicle.location.global_relative_frame.lon,
-        self.status.yaw = self.vehicle.attitude.yaw,
-        self.status.vehicle_id = self.vehicle_id,
-        self.status.battery = self.vehicle.battery.level,
+        self.status.lat = self.vehicle.location.global_relative_frame.lat
+        self.status.lon = self.vehicle.location.global_relative_frame.lon
+        self.status.yaw = self.vehicle.attitude.yaw
+        self.status.vehicle_id = self.vehicle_id
+        self.status.battery = float(self.vehicle.battery.level)
         self.status.armed = self.vehicle.armed
 
-        self.publisher_.publish(self.status)
+        self.status_publisher.publish(self.status)
 
 
     def get_bearing(self, location1, location2):
@@ -125,9 +146,9 @@ class Dronekit_node(Node):
         else:
             is_relative = 0  # yaw is an absolute angle
         # create the CONDITION_YAW command using command_long_encode()
-        msg = vehicle.message_factory.command_long_encode(
+        msg = self.vehicle.message_factory.command_long_encode(
             0, 0,  # target system, target component
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
+            pymavlink.mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
             0,  # confirmation
             heading,  # param 1, yaw in degrees
             0,  # param 2, yaw speed deg/s
@@ -135,7 +156,7 @@ class Dronekit_node(Node):
             is_relative,  # param 4, relative offset 1, absolute angle 0
             0, 0, 0)  # param 5 ~ 7 not used
         # send command to vehicle
-        vehicle.send_mavlink(msg)
+        self.vehicle.send_mavlink(msg)
 
     def reached_position(señf, current_loc, goal_loc):
         """
@@ -165,6 +186,71 @@ class Dronekit_node(Node):
         c = 2.0 * np.arctan2(np.sqrt(a), np.sqrt(1.0 - a))
         return 6378100.0 * c < 0.5
 
+    def change_asv_mode_callback(self, request, response):
+        #string takes preference before int
+        if len(request.asv_mode_str) != 0:
+            if request.asv_mode_str in self.mode_type.values():
+                mode=request.asv_mode_str
+            else:
+                self.get_logger().info(f"{request.asv_mode_str} is not a valid mode")
+                response.success=False
+                return response
+        else:
+            if request.asv_mode in self.mode_type:
+                mode=self.mode_type[str(request.asv_mode)]
+            else:
+                self.get_logger().info(f"{request.asv_mode} is not a valid mode")
+                response.success = False
+                return response
+        self.vehicle.mode = VehicleMode(mode)
+        response.success=True
+        return response
+        #TODO: add other responses
+
+    def go_to_point_callback(self, request, response):
+        if self.vehicle.armed and self.vehicle.mode != VehicleMode("GUIDED"):
+            self.get_logger().error(f'Error: vehicle should be armed and in guided mode\nbut arming is {vehicle.armed} and in {vehicle.mode}. \nSetting mode to Stand-by')
+            msg=ASVmode.Request()
+            msg.asv_mode=0
+            self.call_service(self.asv_mission_mode_client, msg)
+            response.success=False
+            return response
+
+        self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point)} N")
+        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
+        time.sleep(2)
+        self.vehicle.simple_goto(LocationGlobal(request.new_point.lat,request.new_point.lon,0.0))
+        timer=0
+        # Waits until the position has been reached.
+        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point) and timer<15:
+            time.sleep(1)
+            timer=timer+1
+            #self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
+            #TODO: fix infinite loop
+
+        self.get_logger().info(f"Position Reached: {self.vehicle.location.global_relative_frame.lat}, {self.vehicle.location.global_relative_frame.lat} N")
+        response.success=True
+        return response
+
+    def call_service(self, client,  msg):
+        # TODO: raise error to avoid infinite wait if service is not up, after all means a module is not active $$ watchdog will be in charge
+        while not client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info(f'service {client.srv_name} not available, waiting again...', once=True)
+        future = client.call_async(msg)
+        while rclpy.ok():
+            if future.done():
+                try:
+                    response = future.result()
+                except Exception as e:
+                    self.get_logger().info(
+                        'Service call failed %r' % (e,))
+                else:
+                    return response
+                break
+
+
+    def dictionary(self):
+        self.mode_type=dictionary("ASV_MODE")
 
 def main(args=None):
     #init ROS2
@@ -187,6 +273,7 @@ def main(args=None):
         x.get_logger().fatal(traceback.format_exc())
     #after close connection shut down ROS2
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()

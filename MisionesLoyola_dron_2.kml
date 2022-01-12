@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>MisionesLoyola2</name>
+	<gx:CascadingStyle kml:id="__managed_style_040F697FD41D66580F17">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_14E858D0CE1D66580F16">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_0E75804C261D66580F16">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_14E858D0CE1D66580F16</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_040F697FD41D66580F17</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Placemark id="0CCA626A551D66580F16">
+		<name>Mision1</name>
+		<LookAt>
+			<longitude>-5.939998868776211</longitude>
+			<latitude>37.30762411177523</latitude>
+			<altitude>31.61416460034915</altitude>
+			<heading>-0.001143602635787422</heading>
+			<tilt>0.0771443001205044</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>74.69433356873196</range>
+			<altitudeMode>absolute</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_0E75804C261D66580F16</styleUrl>
+		<LineString>
+			<coordinates>
+				-5.940041837792006,37.30746437953318,31.11191962265265 -5.93999193377182,37.30749612721837,31.11191659530508 -5.939939947013012,37.3075372579227,31.18918366662152 -5.939894827788025,37.30758068336964,31.18917968580093 -5.939861383124187,37.30762411943618,31.18918348271723 -5.939836147081782,37.30767131197101,31.2088839385582 -5.939817018947934,37.30772710423525,31.08005377766431 
+			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>

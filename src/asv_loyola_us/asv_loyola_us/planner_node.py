@@ -18,7 +18,7 @@ class Planner_node(Node):
     # this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
         # host
-        self.samplepoint_service = self.create_service(Newwaypoint, 'new_samplepoint', self.new_samplepoint_callback)
+        self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
         # client
@@ -64,13 +64,21 @@ class Planner_node(Node):
             next_waypoint=path.pop()
 
             #TODO:
-            # while not reached position()
             # llamar action control
             # cerrar action si cambia el path debido a deteccion de obstaculos
-            # cerrar si el dron presenta problemas (ej: no esta armado)
+            # cerrar si el dron presenta problemas (ej: no esta armado) es decir, devuelve false
 
+            #TODO:Once the position has been reached, change the autopilot mode to LOITER to maintain actual position (disturbance
+            # rejection)
+            # vehicle.mode = VehicleMode("LOITER")
 
-
+            # Throw some information about the sampling
+            if verbose > 0:
+                if current_asv_mode == 1:
+                    print("TOMANDO MUESTRAS, quedan: ", len(waypoints), "waypoints")
+                else:
+                    print("TOMANDO MUESTRAS")
+            vehicle.mode = VehicleMode("GUIDED")  # Return to GUIDED to pursue the next waypoint
         #goal_handle.publish_feedback(feedback_msg)
 
 
@@ -95,13 +103,7 @@ class Planner_node(Node):
 
         # If the vehicle cannot be armed or the autopilot mode is not GUIDED, raise a Warning and returns False.
         # The mode must be guided always to move to the next waypoint.
-        if not vehicle.armed or vehicle.mode != VehicleMode("GUIDED"):
-            if verbose > 0:
-                print("Error: vehicle should be armed and in guided mode")
-                print(f"but arming is {vehicle.armed} and in {vehicle.mode}.")
-                print("Setting mode to Stand-by")
-            asv_mode = 0
-            return False
+
 
         # When the pre-requisites of armability and the correct mode are setted, obtain the next waypoint.
         # Depending on the mode, obtained from the preloaded mission or from the MQTT broker.

@@ -18,15 +18,17 @@ set(msg_files
   "msg/Nodeupdate.msg"
   "msg/String.msg"
   "msg/Samplevalue.msg"
+  "msg/Location.msg"
   #"msg/Message2.msg"
   # etc
   )
 
 
 set(srv_files
-  "srv/Newwaypoint.srv"
+  "srv/Newpoint.srv"
   "srv/ASVmode.srv"
   "srv/CommandBool.srv"
+  "srv/Newrelativepoint.srv"
   #"srv/Service2.srv"
    # etc
   )

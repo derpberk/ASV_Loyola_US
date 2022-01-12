@@ -43,5 +43,5 @@ def generate_launch_description():
     return launch.LaunchDescription([
         mission,
         watchdog,
-
+        comunication,
     ])

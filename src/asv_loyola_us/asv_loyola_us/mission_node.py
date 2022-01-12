@@ -4,23 +4,28 @@ from .submodulos.KMLMissionGeneration import KMLMissionGenerator
 import traceback
 from time import sleep
 from geometry_msgs.msg import Point
-from asv_interfaces.srv import Newwaypoint, ASVmode, CommandBool
+from asv_interfaces.srv import Newpoint, ASVmode, CommandBool
 from asv_interfaces.msg import Status, Nodeupdate
 
+from threading import Thread
+
+import time
+from .submodulos.call_service import call_service
+from rclpy.callback_groups import ReentrantCallbackGroup
 from geometry_msgs.msg import Point
 class Mission_node(Node):
 
     #his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('mission_filename', '1')
-        self.mission_filename = self.get_parameter('mission_filename').get_parameter_value().string_value
+        self.declare_parameter('mission_filepath', '/home/aloepacci/ASV_Loyola_US/MisionesLoyola_dron_2.kml')
+        self.mission_filepath = self.get_parameter('mission_filepath').get_parameter_value().string_value
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
         #host
-        self.samplepoint_service = self.create_service(Newwaypoint, 'new_samplepoint', self.new_samplepoint_callback)
+        self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
         #client
@@ -28,6 +33,7 @@ class Mission_node(Node):
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
         self.collect_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
         self.change_asv_mode_client = self.create_client(ASVmode, 'change_asv_mode')
+        self.go_to_point_client = self.create_client(Newpoint, 'go_to_point_command')
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
@@ -46,13 +52,17 @@ class Mission_node(Node):
         #declare the services
         self.declare_services()
 
+        #declare topics
+        self.declare_topics()
+
         #start the drone
         self.startup()
         self.get_logger().info('All systems operative')
 
         #loop main
         #TODO: decidir si se prefirere un While True con sleep(1), o dejar un timer
-        #self.main_loop = self.create_timer(1, self.main) #we will run main each 1 second
+        time.sleep(1)
+        self.main_loop = self.create_timer(1, self.main) #we will run main each 1 second
 
     def startup(self):
         self.mission_mode = 0  # el modo del ASV deseado
@@ -70,8 +80,8 @@ class Mission_node(Node):
 
         #TODO: deprecate
         #start MQTT periodic send
-        keepgoing=CommandBool.Request()
-        keepgoing.value=True
+        #keepgoing=CommandBool.Request()
+        #keepgoing.value=True
 
 
         #TODO integrar filosofía signal.signal(signal.SIGTERM, manejador_de_senal)
@@ -79,8 +89,8 @@ class Mission_node(Node):
 
         #INFO: The load of a mission can be implemented externally
         #TODO: Fix error due to path not existing
-        #mg = KMLMissionGenerator(self.mission_filename)
-        #self.samplepoints = mg.get_samplepoints()
+        self.mg = KMLMissionGenerator(self.mission_filepath)
+        self.samplepoints = self.mg.get_samplepoints()
 
         #TODO: this is a workaround, if it returns false means vehicle is not on due to code flow, an action would be fine implementation
         self.get_logger().debug("Connecting to Vehicle")
@@ -102,7 +112,7 @@ class Mission_node(Node):
 
         #TODO: Eliminar si no se va a utilizar al final
         # creamos el hilo que continuamente envia datos de posicion al servidor
-        self.call_service(self.mqtt_send_info, keepgoing)  # this funcion returns whether MQTT start has been a success
+        #self.call_service(self.mqtt_send_info, keepgoing)  # this funcion returns whether MQTT start has been a success
 
 
 
@@ -115,21 +125,27 @@ class Mission_node(Node):
             if self.change_current_mission_mode(self.mission_mode):
                 if self.status.armed:
                     self.arm_vehicle(False)
-                    #TODO: this logger must go in dronekit node
+                    #TODO: this logger must go in dronekit node, self.status is not updated untill the iteration ends due to ros code flow
                     self.get_logger().info("ASV is armed." if self.status.armed else "ASV is disarmed. Standing By.")
+                else:
+                    self.get_logger().info("normal start, system disarmed")
         elif self.mission_mode == 1:  # Pre-loaded Mission
             if self.change_current_mission_mode(self.mission_mode):
+                self.arm_vehicle(True)
                 self.get_logger().info("Starting Pre-loaded Mission.")
-                waypoints = mg.get_mission_list()[0]
+                self.samplepoints = self.mg.get_samplepoints()
 
-            if len(waypoints) == 0:
+            if len(self.samplepoints) == 0:
                 self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
                 #TODO: reset mission list?
                 # self.get_logger().debug("Resetting mission list.")
                 self.mission_mode = 0
-
-            #TODO: action that calls planner to go to waypoint
-            # move2wp()
+            else:
+                #TODO: action that calls planner to go to waypoint
+                # move2wp()
+                msg=Newpoint.Request()
+                msg.new_point=self.get_next_wp()
+                call_service(self.go_to_point_client, msg)
 
         elif self.mission_mode == 2:  # Manual Mode
             if self.change_current_mission_mode(self.mission_mode):
@@ -162,23 +178,6 @@ class Mission_node(Node):
         #TODO: Es necesario implementar una subruntina de acción para volver a home
 
 
-    def call_service(self, client,  msg):
-        # TODO: raise error to avoid infinite wait if service is not up, after all means a module is not active $$ watchdog will be in charge
-        while not client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info(f'service {client.srv_name} not available, waiting again...', once=True)
-        future = client.call_async(msg)
-        while rclpy.ok():
-            if future.done():
-                try:
-                    response = future.result()
-                except Exception as e:
-                    self.get_logger().info(
-                        'Service call failed %r' % (e,))
-                else:
-                    return response
-                break
-
-
 
 
     def new_samplepoint_callback(self, request, response):
@@ -209,7 +208,7 @@ class Mission_node(Node):
             response.success = False
         else:
             response.previous_mode = self.current_mission_mode
-            self.current_mission_mode = request.asv_mode
+            self.mission_mode = request.asv_mode
             response.success = True
         return response
 
@@ -229,13 +228,13 @@ class Mission_node(Node):
         # https://stackoverflow.com/questions/423379/using-global-variables-in-a-function
 
         if self.current_mission_mode == 1:  # Preloaded
-            nextwp = self.waypoints.pop(0)
+            nextwp = self.samplepoints.pop(0)
         elif self.current_mission_mode == 3:
             nextwp = self.received_mqtt_wp
         else:
             raise ValueError(f"Current ASV Mode should be 1: {self.mission_mode_strs[1]} or 3: {self.mission_mode_strs[3]}.")
-        self.get_logger().info("Next waypoint is", nextwp)
-        return LocationGlobal(nextwp[1], nextwp[0], nextwp[2]) #TODO: This is from dronekit
+        self.get_logger().info(f"Next waypoint is {nextwp}" )
+        return nextwp
 
 
 
@@ -271,8 +270,9 @@ class Mission_node(Node):
     def arm_vehicle(self, value):
         aux=CommandBool.Request()
         aux.value=value
-        self.get_logger().debug("asked for ASV arm." if value else "asked for ASV disarm")
-        if self.call_service(self.arm_vehicle_client, aux):
+        self.get_logger().info("asked for ASV arm." if value else "asked for ASV disarm")
+        if call_service(self.arm_vehicle_client, aux):
+            self.get_logger().info("arm competed" if value else "ASV disarm")
             return True
         else:
             self.get_logger().error("ASV arm failed" if value else "ASV disarm failed")
@@ -286,7 +286,7 @@ class Mission_node(Node):
         if type(mode)=='int':
             aux.asv_mode=mode
             self.get_logger().debug(f"asked to change asv to mode: {ASVMODES[mode]}")
-            if self.call_service(self.change_asv_mode_client, aux):
+            if call_service(self.change_asv_mode_client, aux):
                 return True
             else:
                 # TODO: decide if error here or in dronekit
@@ -294,13 +294,11 @@ class Mission_node(Node):
         else:
             aux.asv_mode_str=mode
             self.get_logger().debug(f"asked to change asv to mode: {mode}")
-            if self.call_service(self.change_asv_mode_client, aux):
+            if call_service(self.change_asv_mode_client, aux):
                 return True
             else:
                 #TODO: decide if error here or in dronekit
                 return False
-
-
 
 
 def main(args=None):

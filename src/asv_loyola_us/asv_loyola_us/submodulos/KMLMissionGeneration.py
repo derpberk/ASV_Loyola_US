@@ -1,6 +1,6 @@
 import numpy as np
 import xml.etree.ElementTree as ElementTree
-from geometry_msgs.msg import Point
+from asv_interfaces.msg import Location
 
 
 class KMLMissionGenerator:
@@ -35,12 +35,12 @@ class KMLMissionGenerator:
         return self.missions
 
     def get_samplepoints(self):
-        p=Point()
         samplepoints=[]
-        for point in missions:
-            p.x=point[1]
-            p.y=point[0]
-            p.z=point[2]
+        for point in self.missions[0]:
+            p = Location()
+            p.lat=point[1]
+            p.lon=point[0]
+            #p.alt=point[2]
             samplepoints.append(p)
         return samplepoints
 
