@@ -13,7 +13,6 @@
   <exec_depend>rclpy</exec_depend> <!-- for python -->
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
   <exec_depend>rcl_interfaces</exec_depend> <!-- for interfaces -->
-  <exec_depend>mavros_msgs</exec_depend> <!-- for interfaces -->
   <exec_depend>python3-paho-mqtt</exec_depend> <!-- for mqtt -->
   <!-- dronekit must be instaled from apt, still not in rosdep, add as depend in the future -->
 
