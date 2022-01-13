@@ -7,3 +7,4 @@ install/
 build/
 log/
 nohup.out
+_site/
