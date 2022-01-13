@@ -17,25 +17,29 @@ def generate_launch_description():
     comunication = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='dronekit',
-        name='comunication_node'
+        name='comunication_node',
+        parameters = [config]
     )
 
     planner = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='planner',
-        name='mission_node'
+        name='mission_node',
+        parameters = [config]
     )
 
     watchdog = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='watchdog',
-        name='watchdog_node'
+        name='watchdog_node',
+        parameters = [config]
     )
 
     mission = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='mission',
-        name='mission_node'
+        name='mission_node',
+        parameters = [config]
     )
 
 

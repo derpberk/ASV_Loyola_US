@@ -22,7 +22,7 @@ class Dronekit_node(Node):
 
     #his functions defines and assigns value to the parameters
     def parameters(self):
-        self.declare_parameter('vehicle_ip', 'tcp:127.0.0.1:5762')
+        self.declare_parameter('vehicle_ip', 'tcp:navio.local:5678')
         self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         self.declare_parameter('timeout', 15)
         self.timout = self.get_parameter('timeout').get_parameter_value().integer_value
@@ -56,8 +56,9 @@ class Dronekit_node(Node):
 
         # connect to vehicle
         self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
-            #TODO raise error if there has been a timeout,
-            #we can try to restart the dronekit node
+            #TODO: manage error of timeout
+            #      manage error of connection refused
+            #      manage error of critical startup (failsafe)
 
         """        except ConnectionRefusedError:
             keep_going = False
@@ -83,7 +84,6 @@ class Dronekit_node(Node):
              _vehicle: `dronekit.connection object.
         """
         # Copter should arm in GUIDED mode
-
         try:
             if request.value:
                 self.vehicle.mode = VehicleMode("GUIDED")
@@ -100,13 +100,17 @@ class Dronekit_node(Node):
         return response
 
     def status_publish(self):
-        self.status.lat = self.vehicle.location.global_relative_frame.lat
-        self.status.lon = self.vehicle.location.global_relative_frame.lon
-        self.status.yaw = self.vehicle.attitude.yaw
-        self.status.vehicle_id = self.vehicle_id
-        self.status.battery = float(self.vehicle.battery.level)
-        self.status.armed = self.vehicle.armed
-
+        try:
+            # TODO: es necesario que dronekit te devuelva valores no corruptos, crash otherwise
+            self.status.lat = self.vehicle.location.global_relative_frame.lat
+            self.status.lon = self.vehicle.location.global_relative_frame.lon
+            self.status.yaw = self.vehicle.attitude.yaw
+            self.status.vehicle_id = self.vehicle_id
+            self.status.battery = float(self.vehicle.battery.level)
+            self.status.armed = self.vehicle.armed
+        except:
+            #do not publish this time
+            return
         self.status_publisher.publish(self.status)
 
 

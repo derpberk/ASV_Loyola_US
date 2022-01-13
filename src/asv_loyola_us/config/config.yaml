@@ -4,7 +4,7 @@
 
 dronekit_node:
     ros__parameters:
-      vehicle_ip: "tcp:127.0.0.1:5762"
+      vehicle_ip: "tcp:navio.local:5678"
 	  timeout: 15
 
 main_node:
