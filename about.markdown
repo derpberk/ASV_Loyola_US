@@ -3,16 +3,14 @@ layout: page
 title: About
 permalink: /about/
 ---
+Autonomous Surface Vehicles - Proyecto Universidad de Sevilla - Universidad Loyola
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+this package includes a ROS2 strategy transcode from a python based original aproach made by [Fede Peralta](https://github.com/FedePeralta)
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[minima](https://github.com/jekyll/minima)
+The goal is to implement and deploy a float of Autonomous Surface Vehicles to monitorize enviromental areas.
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
+You can find the original code in [ASV_Loyola_US](https://github.com/FedePeralta/ASV_Loyola_US)
 
+And the ROS2 Code [ASV_Loyola_US](https://github.com/AloePacci/ASV_Loyola_US)
 
-[jekyll-organization]: https://github.com/jekyll
+![drone](/assets/ASV.jpeg)
