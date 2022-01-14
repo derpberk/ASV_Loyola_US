@@ -16,4 +16,4 @@ To configure the raspberry pi you must:
     - This means we will broadcast TCP in port 5678
   - Setting telem2 value to "udp:127.0.0.1:14650"
     - In case we want the raspberry to act over the navio in case of connection loss
-- Remember to configure navio and GPS
+- Remember to configure navio2 and GPS
