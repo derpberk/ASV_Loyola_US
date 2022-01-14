@@ -13,4 +13,4 @@ You can find the original code in [ASV_Loyola_US](https://github.com/FedePeralta
 
 And the ROS2 Code [ASV_Loyola_US](https://github.com/AloePacci/ASV_Loyola_US)
 
-![drone](/assets/ASV.jpeg)
+![drone](./assets/ASV.jpeg)

@@ -9,7 +9,7 @@ The code running in the Jetson Xavier NX is the one that you can find in this [g
 The whole code has been made in Python with a ROS2 foxy architecture.
 
 - For more info about [ROS2 foxy](https://docs.ros.org/en/foxy/index.html)
-- For more info about what the code does check [Behaviour](/funcionamiento.html)
+- For more info about what the code does check [Behaviour](../funcionamiento.html)
 
 To accomplish the requirements we have created 3 packages.
 - [ASV_interfaces](./asv_interfaces/asv_interfaces.html) holds all the interfaces for topics, services and actions that our robot uses

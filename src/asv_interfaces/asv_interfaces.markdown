@@ -25,6 +25,6 @@ This package creates the variable types needed for the communication between top
 </pre>
 
 
-- For more information about used services, topics and actions check [Tree](/tree.html)
+- For more information about used services, topics and actions check [Tree](../../tree.html)
 - For more information about how to create msg check [Message Tutorial](./Example.html)
 

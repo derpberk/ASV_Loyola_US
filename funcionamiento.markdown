@@ -22,8 +22,8 @@ The ASV behaviour is composed of x stages
 Future updates
 ```
 - Node must collect samples once a samplepoint is reached
-- A planificator mode such as [A star](/code/Astar.html) or Lazy Theta
-- Check [list of TODO](/TODO.html) for more information
+- A planificator mode such as [A star](./code/Astar.html) or Lazy Theta
+- Check [list of TODO](./TODO.html) for more information
 
 
 
