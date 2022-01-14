@@ -6,7 +6,7 @@ layout: page
 ---
 Welcome to ASV_Loyola_US project! 
 
-You can find more info about our project in our [About](./about.html)
+You can find more info about our project in our [About](./about)
 
 This project is divided in 2 machines:
 
@@ -19,4 +19,6 @@ You may also want to see
 - [Principle of operation](./funcionamiento.html)
 
 You can also cheok our [Posts](./post.html) to keep updated of changes!
+
+You may also want to check our [workflow](./workflow.html)
 

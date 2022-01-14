@@ -18,12 +18,13 @@ The ASV behaviour is composed of x stages
 6. The drone will change to "GUIDED" mode to follow the waypoints
 7. Once mission is finished it will return to Standby mode
 
-```
+<pre>
 Future updates
-```
 - Node must collect samples once a samplepoint is reached
-- A planificator mode such as [A star](./code/Astar.html) or Lazy Theta
-- Check [list of TODO](./TODO.html) for more information
+- A planificator mode such as <a href="./code/Astar.html">A star</a> or Lazy Theta
+- Check <a href="./TODO.html">List of TODO</a> for more information
+</pre>
+
 
 
 

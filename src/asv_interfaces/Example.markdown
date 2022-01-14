@@ -34,8 +34,9 @@ time (secs/nsecs unsigned 32-bit ints) (rospy.Time)
 duration (secs/nsecs signed 32-bit ints)
 
 #you can also define inside another msg like
-geometry_msgs/PoseStamped Pose
+asv_interfaces/Location Pose
 `you cannot embed another service inside of a service.`
+`If its not from asv_interfaces You need to add the package as dependency in package.xml and cmakelist.txt`
 
 #adding default values
 int32 value 1
