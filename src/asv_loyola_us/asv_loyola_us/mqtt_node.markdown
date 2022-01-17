@@ -6,4 +6,4 @@ layout: page
 ---
 <H1>MQTT Node</H1> 
 in development
-is going to be deprecated
+is going to be deprecated so no documentation will be done

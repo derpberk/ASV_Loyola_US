@@ -16,10 +16,11 @@ This package contains all the ros2 nodes running in the ASV
 │   ├──────  <a href="./asv_loyola_us/submodulos/submodulos.html">submodulos</a>
 ├── <a href="./config/config.html">config</a>
 ├── <a href="./launch/launch.html">launch</a>
+├── <a href="./setup.html">setup</a>
 </pre>
 You can check the relationship between the nodes in the following [diagram](https://drive.google.com/file/d/1oh6L-keFKS1eGakZ9Hyk2_whXmKF11U9/view?usp=sharing)
 
-For more information about the configuration of the package visit [config](./setup)
+For more information about the configuration of the package visit [setup](./setup)
 
 
 
