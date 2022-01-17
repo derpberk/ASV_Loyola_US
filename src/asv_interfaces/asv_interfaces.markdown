@@ -9,19 +9,19 @@ This package creates the variable types needed for the communication between top
 <pre>
 ├── asv_interfaces
 │   ├── <a href="./msg/Example.html">messages</a>
-│   │   ├── <a href="./msg/Location.html">Location</a>
-│   │   ├── <a href="./msg/Nodeupdate.html">Nodeupdate</a>
-│   │   ├── <a href="./msg/Samplevalue.html">Samplevalue</a>
-│   │   ├── <a href="./msg/Status.html">Status</a>
-│   │   ├── <a href="./msg/String.html">String</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/msg/Location.msg">Location</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/msg/Nodeupdate.msg">Nodeupdate</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/msg/Samplevalue.msg">Samplevalue</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/msg/Status.msg">Status</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/msg/String.msg">String</a>
 │   ├── <a href="./srv/Example.html">services</a>
-│   │   ├── <a href="./srv/CommandBool.html">CommandBool</a>
-│   │   ├── <a href="./srv/ASVmode.html">ASVmode</a>
-│   │   ├── <a href="./srv/Newpoint.html">Newpoint</a>
-│   │   ├── <a href="./srv/Newrelativepoint.html">Newrelativepoint</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/srv/CommandBool.srv">CommandBool</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/srv/ASVmode.srv">ASVmode</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/srv/Newpoint.srv">Newpoint</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/srv/Newrelativepoint.srv">Newrelativepoint</a>
 │   ├── <a href="./action/Example.html">actions</a>
-│   │   ├── <a href="./action/Newmission.html">Newmission</a>
-│   │   ├── <a href="./action/Samplepoint.html">Samplepoint</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/action/Newmission.action">Newmission</a>
+│   │   ├── <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_interfaces/action/Samplepoint.action">Samplepoint</a>
 └──
 </pre>
 
