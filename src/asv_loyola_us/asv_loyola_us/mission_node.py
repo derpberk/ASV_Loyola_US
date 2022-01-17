@@ -51,14 +51,18 @@ class Mission_node(Node):
         #declare topics
         self.declare_topics()
 
+        #spin once so that declared things initialize
+        rclpy.spin_once(self)
+
         #start the drone
         self.startup()
         self.get_logger().info('All systems operative')
 
         #loop main
-        #TODO: decidir si se prefirere un While True con sleep(1), o dejar un timer
-        time.sleep(1)
-        self.main_loop = self.create_timer(1, self.main) #we will run main each 1 second
+        while rclpy.ok():
+            rclpy.spin_once(self) #check if a topic has been published or if a timer aired
+            self.main()
+            time.sleep(1)  #we will run main each 1 second
 
     def startup(self):
         self.mission_mode = 0  # el modo del ASV deseado
@@ -106,23 +110,16 @@ class Mission_node(Node):
         """
 
 
-        #TODO: Eliminar si no se va a utilizar al final
-        # creamos el hilo que continuamente envia datos de posicion al servidor
-        #self.call_service(self.mqtt_send_info, keepgoing)  # this funcion returns whether MQTT start has been a success
-
-
-
 
     """
-    This function automatically runs in loop
+    This function automatically runs in loop at 1 Hz
     """
     def main(self):
         if self.mission_mode == 0:  # Stand By
             if self.change_current_mission_mode(self.mission_mode):
                 if self.status.armed:
                     self.arm_vehicle(False)
-                    #TODO: this logger must go in dronekit node, self.status is not updated untill the iteration ends due to ros code flow
-                    self.get_logger().info("ASV is armed." if self.status.armed else "ASV is disarmed. Standing By.")
+                    self.get_logger().info("Standing By.")
                 else:
                     self.get_logger().info("normal start, system disarmed")
         elif self.mission_mode == 1:  # Pre-loaded Mission
@@ -141,8 +138,7 @@ class Mission_node(Node):
                 # move2wp()
                 msg=Newpoint.Request()
                 msg.new_point=self.get_next_wp()
-                call_service(self.go_to_point_client, msg)
-
+                call_service(self, self.go_to_point_client, msg)
         elif self.mission_mode == 2:  # Manual Mode
             if self.change_current_mission_mode(self.mission_mode):
                 if self.status.mode != "MANUAL":
@@ -267,7 +263,7 @@ class Mission_node(Node):
         aux=CommandBool.Request()
         aux.value=value
         self.get_logger().info("asked for ASV arm." if value else "asked for ASV disarm")
-        if call_service(self.arm_vehicle_client, aux):
+        if call_service(self, self.arm_vehicle_client, aux):
             self.get_logger().info("arm competed" if value else "ASV disarm")
             return True
         else:
@@ -282,7 +278,7 @@ class Mission_node(Node):
         if type(mode)=='int':
             aux.asv_mode=mode
             self.get_logger().debug(f"asked to change asv to mode: {ASVMODES[mode]}")
-            if call_service(self.change_asv_mode_client, aux):
+            if call_service(self, self.change_asv_mode_client, aux):
                 return True
             else:
                 # TODO: decide if error here or in dronekit
@@ -290,7 +286,7 @@ class Mission_node(Node):
         else:
             aux.asv_mode_str=mode
             self.get_logger().debug(f"asked to change asv to mode: {mode}")
-            if call_service(self.change_asv_mode_client, aux):
+            if call_service(self, self.change_asv_mode_client, aux):
                 return True
             else:
                 #TODO: decide if error here or in dronekit
@@ -303,8 +299,6 @@ def main(args=None):
     #start a class that servers the services
     try:
         mission_node = Mission_node()
-        # loop the services
-        rclpy.spin(mission_node)
     except:
         """
         There has been an error with the program, so we will send the error log to the watchdog

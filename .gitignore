@@ -60,3 +60,8 @@ CATKIN_IGNORE
 
 .idea/
 _site/
+src/c_example
+src/python_example
+src/simulator/COLCON_IGNORE
+
+

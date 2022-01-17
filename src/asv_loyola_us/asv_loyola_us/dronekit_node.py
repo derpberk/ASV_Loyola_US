@@ -55,6 +55,7 @@ class Dronekit_node(Node):
         self.status = Status()
 
         # connect to vehicle
+        self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
             #TODO: manage error of timeout
             #      manage error of connection refused
@@ -65,8 +66,6 @@ class Dronekit_node(Node):
             if verbose > 0:
                 self.get_logger().fatal("Connection to navio2 could not be made")
         """
-        self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
-
         self.dictionary()
 
         # declare the services
@@ -188,7 +187,7 @@ class Dronekit_node(Node):
         # Returns True if the waypoint is within 1.5 meters the ASV position
         a = np.sin(0.5 * d_lat) ** 2 + np.sin(0.5 * d_lon) ** 2 * np.cos(lat1) * np.cos(lat2)
         c = 2.0 * np.arctan2(np.sqrt(a), np.sqrt(1.0 - a))
-        return 6378100.0 * c < 0.5
+        return 6378100.0 * c < 1.5
 
     def change_asv_mode_callback(self, request, response):
         #string takes preference before int
@@ -226,9 +225,8 @@ class Dronekit_node(Node):
         self.vehicle.simple_goto(LocationGlobal(request.new_point.lat,request.new_point.lon,0.0))
         timer=0
         # Waits until the position has been reached.
-        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point) and timer<15:
+        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point):
             time.sleep(1)
-            timer=timer+1
             #self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
             #TODO: fix infinite loop
 
@@ -272,13 +270,13 @@ def main(args=None):
         publisher = x.create_publisher(Nodeupdate, 'internal_error', 10) #we create the publisher
         #we create the message
         msg = Nodeupdate()
-        msg.node = "mission_node" #our identity
+        msg.node = "dronekit_node" #our identity
         msg.message = traceback.format_exc() #the error
         #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
         #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
         # este topic está oculto en echo al usar _
         while publisher.get_subscription_count() == 0: #while no one is listening
-            sleep(0.01) #we wait
+            time.sleep(0.01) #we wait
         publisher.publish(msg) #we send the message
         x.destroy_node() #we destroy node and finish
     #after close connection shut down ROS2

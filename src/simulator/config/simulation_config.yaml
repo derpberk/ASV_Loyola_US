@@ -1,15 +1,12 @@
 /**:
   ros__parameters:
     debug: false
-
-dronekit_node:
-    ros__parameters:
-      vehicle_ip: "tcp:127.0.0.1:5760"
-	  timeout: 15
+    vehicle_ip: '127.0.0.1:14550'
+    timeout: 15
 
 main_node:
-    ros__parameters:
-      mission_filename: "1"
+  ros__parameters:
+    mission_filename: "1"
 
 mqtt_node:
   ros__parameters:
