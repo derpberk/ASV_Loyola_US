@@ -1,0 +1,29 @@
+/**:
+  ros__parameters:
+    debug: false
+
+dronekit_node:
+    ros__parameters:
+      vehicle_ip: "tcp:127.0.0.1:5760"
+	  timeout: 15
+
+main_node:
+    ros__parameters:
+      mission_filename: "1"
+
+mqtt_node:
+  ros__parameters:
+    vehicle_id: 1
+    mqtt_addr: 20.126.131.210
+
+sensor_module_node:
+  ros__parameters:
+    database_name: "LOCAL_DATABASE.db"
+    USB_string: "USBPort1"
+    timeout: 6
+    baudrate: 115200
+    pump_parameters:
+      charging_time: 7
+      discharging_time: 2
+      serial_string: "/dev/ttyACM0"
+      mode: "BuiltInPin"
