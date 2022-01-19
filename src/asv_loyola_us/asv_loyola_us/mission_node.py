@@ -13,8 +13,9 @@ class Mission_node(Node):
 
     #his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('mission_filepath', os.path.expanduser("~/ASV_Loyola_US/MisionesLoyola_dron_2.kml"))
-        self.mission_filepath = self.get_parameter('mission_filepath').get_parameter_value().string_value
+        self.declare_parameter('mission_filepath', "MisionesLoyola_dron_2.kml")
+        path="~/ASV_Loyola_US/"+self.get_parameter('mission_filepath').get_parameter_value().string_value
+        self.mission_filepath = os.path.expanduser(path)
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
@@ -24,6 +25,7 @@ class Mission_node(Node):
         self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
+        self.close_asv_service = self.create_service(CommandBool, 'load_mission', self.load_mission_callback)
         #client
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
@@ -78,36 +80,19 @@ class Mission_node(Node):
         if self.DEBUG:
             self.get_logger().warning("Debug mode enabled")
 
-        #TODO: deprecate
-        #start MQTT periodic send
-        #keepgoing=CommandBool.Request()
-        #keepgoing.value=True
-
-
-        #TODO integrar filosofía signal.signal(signal.SIGTERM, manejador_de_senal)
-
-
-        #INFO: The load of a mission can be implemented externally
         #TODO: Fix error due to path not existing
         self.mg = KMLMissionGenerator(self.mission_filepath)
         self.samplepoints = self.mg.get_samplepoints()
 
-        #TODO: this is a workaround, if it returns false means vehicle is not on due to code flow, an action would be fine implementation
+        #this is a workaround, if it returns false means vehicle is not on due to code flow
         self.get_logger().debug("Connecting to Vehicle")
         if not self.arm_vehicle_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().fatal('vehicle node is not answering')
             #TODO raise error if there has been a timeout,
-            #we can try to restart the dronekit node
 
         #TODO: wait for all systems operative from vehicle
         #     This includes:
         #           Sensor module
-        #
-        """        except ConnectionRefusedError:
-            keep_going = False
-            if verbose > 0:
-                print("Connection to navio2 could not be made")
-        """
 
 
 
@@ -117,21 +102,22 @@ class Mission_node(Node):
     def main(self):
         if self.mission_mode == 0:  # Stand By
             if self.change_current_mission_mode(self.mission_mode):
-                if self.status.armed:
-                    self.arm_vehicle(False)
-                    self.get_logger().info("Standing By.")
-                else:
-                    self.get_logger().info("normal start, system disarmed")
+                self.get_logger().info("Standing By.")
+            if self.status.armed:
+                self.arm_vehicle(False)
+                self.get_logger().info("Vehicle was armed! Stoping the vehicle.")
         elif self.mission_mode == 1:  # Pre-loaded Mission
             if self.change_current_mission_mode(self.mission_mode):
-                self.arm_vehicle(True)
-                self.get_logger().info("Starting Pre-loaded Mission.")
-                self.samplepoints = self.mg.get_samplepoints()
+                if len(self.samplepoints) == 0:
+                    self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
+                    self.mission_mode = 0
+                else:
+                    self.arm_vehicle(True)
+                    self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
+                    self.samplepoints = self.mg.get_samplepoints()
 
             if len(self.samplepoints) == 0:
                 self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
-                #TODO: reset mission list?
-                # self.get_logger().debug("Resetting mission list.")
                 self.mission_mode = 0
             else:
                 #TODO: action that calls planner to go to waypoint
@@ -139,27 +125,31 @@ class Mission_node(Node):
                 msg=Newpoint.Request()
                 msg.new_point=self.get_next_wp()
                 call_service(self, self.go_to_point_client, msg)
+
         elif self.mission_mode == 2:  # Manual Mode
             if self.change_current_mission_mode(self.mission_mode):
                 if self.status.mode != "MANUAL":
-                    #TODO: actualizar self.status.mode de otra forma
-                    self.status.mode = self.change_ASV_mode("MANUAL")
-                    self.get_logger().info(f"Vehicle is now in {self.status.mode}")
+                    self.change_ASV_mode("MANUAL")
+                    self.get_logger().info(f"vehicle in MANUAL mode")
+                    self.get_logger().info(f"vehicle is armed" if self.status.armed else "vehicle is disarmed")
 
 
+
+        #
         elif self.mission_mode == 3:  # Simple Go-To
             if self.change_current_mission_mode(self.mission_mode):
-                if move2wp():
-                    self.get_logger().info("Finished simple goto.")
-                    self.get_logger().info("Setting mode to Stand-by.")
-                    self.mission_mode = 0
+                self.arm_vehicle(True)
+                self.change_ASV_mode("LOITER")
+                self.get_logger().info("vehicle armed, indicate point to go in \"/go_to_command\" service")
+                self.get_logger().info("vehicle in \'simple Go-To\' mode")
+
 
         elif self.mission_mode == 4:  # RTL
             if self.change_current_mission_mode(self.mission_mode):
-                if vehicle.mode != VehicleMode("RTL"):
-                    vehicle.mode = VehicleMode("RTL")
-                if verbose > 0:
-                    print(f"Vehicle is now in {vehicle.mode}")
+                if self.vehicle.mode != "RTL": #this is reiterative, consider erasing this line of code
+                    self.change_ASV_mode("RTL")
+                self.get_logger().info("vehicle in \'RTL\' mode")
+                self.get_logger().info(f"vehicle is armed" if self.status.armed else "vehicle is disarmed")
         else:
             #raise an error, inconsistent mode
             self.get_logger().fatal("we reached an inconsistent mode")
@@ -262,13 +252,24 @@ class Mission_node(Node):
     def arm_vehicle(self, value):
         aux=CommandBool.Request()
         aux.value=value
-        self.get_logger().info("asked for ASV arm." if value else "asked for ASV disarm")
-        if call_service(self, self.arm_vehicle_client, aux):
-            self.get_logger().info("arm competed" if value else "ASV disarm")
-            return True
-        else:
-            self.get_logger().error("ASV arm failed" if value else "ASV disarm failed")
-            return False
+        self.get_logger().debug("asked for ASV arm." if value else "asked for ASV disarm")
+        call_service(self, self.arm_vehicle_client, aux)
+        return True
+
+
+    def load_mission_callback(self, request, response):
+        if len(request.file_name == 0): #if string is empty load mission
+            self.samplepoints = self.mg.get_samplepoints()
+            response.success = True
+        else: #load indicated mission
+            try:
+                self.mission_filepath = os.path.expanduser("~/ASV_Loyola_US/"+request.file_name)
+                self.mg = KMLMissionGenerator(self.mission_filepath)
+                self.samplepoints = self.mg.get_samplepoints()
+                response.success = True
+            except:
+                response.success = False
+        return response
 
     def change_ASV_mode(self, mode):
         #TODO: Establecer diferenciacion con los modos de ardupilot, se recomienda usar string
@@ -276,21 +277,13 @@ class Mission_node(Node):
         ASVMODES=["STANDBY", "GUIDED", "MANUAL", "SIMPLE", "RTL"]
         aux = ASVmode.Request()
         if type(mode)=='int':
-            aux.asv_mode=mode
+            aux.asv_mode = mode
             self.get_logger().debug(f"asked to change asv to mode: {ASVMODES[mode]}")
-            if call_service(self, self.change_asv_mode_client, aux):
-                return True
-            else:
-                # TODO: decide if error here or in dronekit
-                return False
+            call_service(self, self.change_asv_mode_client, aux)
         else:
-            aux.asv_mode_str=mode
+            aux.asv_mode_str = mode
             self.get_logger().debug(f"asked to change asv to mode: {mode}")
-            if call_service(self, self.change_asv_mode_client, aux):
-                return True
-            else:
-                #TODO: decide if error here or in dronekit
-                return False
+            call_service(self, self.change_asv_mode_client, aux)
 
 
 def main(args=None):
@@ -304,7 +297,7 @@ def main(args=None):
         There has been an error with the program, so we will send the error log to the watchdog
         """
         x = rclpy.create_node('mission_node') #we state what node we are
-        publisher = x.create_publisher(Nodeupdate, 'internal_error', 10) #we create the publisher
+        publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message
         msg = Nodeupdate()
         msg.node = "mission_node" #our identity

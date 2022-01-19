@@ -8,6 +8,7 @@ import traceback
 from math import atan2
 from .submodulos.dictionary import dictionary
 import time
+
 #import intefaces
 from asv_interfaces.msg import Status, Nodeupdate
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint
@@ -56,16 +57,15 @@ class Dronekit_node(Node):
 
         # connect to vehicle
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
-        self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
+        try:
+            self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
+        except ConnectionRefusedError:
+            self.get_logger().fatal(f"Connection to navio2 could not be made")
+
             #TODO: manage error of timeout
             #      manage error of connection refused
             #      manage error of critical startup (failsafe)
 
-        """        except ConnectionRefusedError:
-            keep_going = False
-            if verbose > 0:
-                self.get_logger().fatal("Connection to navio2 could not be made")
-        """
         self.dictionary()
 
         # declare the services
@@ -77,15 +77,14 @@ class Dronekit_node(Node):
 
     def arm_vehicle_callback(self, request, response):
         """
-        Arming vehicle function. To arm, the vehicle must be in GUIDED mode. If so, the _vehicle.armed flag
-        can be activated. The function waits for the vehicle to be armed.
+        Arming vehicle function.
         Args:
-             _vehicle: `dronekit.connection object.
+             request.value:
+                -True : arm vehicle
+                -False: disarm vehicle
         """
-        # Copter should arm in GUIDED mode
         try:
             if request.value:
-                self.vehicle.mode = VehicleMode("GUIDED")
                 self.vehicle.arm()
                 self.get_logger().info('Vehicle armed')
                 response.success=True
@@ -211,14 +210,15 @@ class Dronekit_node(Node):
         #TODO: add other responses
 
     def go_to_point_callback(self, request, response):
-        if self.vehicle.armed and self.vehicle.mode != VehicleMode("GUIDED"):
-            self.get_logger().error(f'Error: vehicle should be armed and in guided mode\nbut arming is {vehicle.armed} and in {vehicle.mode}. \nSetting mode to Stand-by')
+        if self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {vehicle.armed} and vehicle is in {vehicle.mode}. \nSetting mission mode to Stand-by')
             msg=ASVmode.Request()
             msg.asv_mode=0
             self.call_service(self.asv_mission_mode_client, msg)
             response.success=False
             return response
 
+        self.vehicle.mode = VehicleMode("GUIDED")
         self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point)} N")
         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
         time.sleep(2)
@@ -232,6 +232,7 @@ class Dronekit_node(Node):
 
         self.get_logger().info(f"Position Reached: {self.vehicle.location.global_relative_frame.lat}, {self.vehicle.location.global_relative_frame.lat} N")
         response.success=True
+        self.vehicle.mode = VehicleMode("LOITER")
         return response
 
     def call_service(self, client,  msg):
@@ -267,7 +268,7 @@ def main(args=None):
         There has been an error with the program, so we will send the error log to the watchdog
         """
         x = rclpy.create_node('dronekit_node') #we state what node we are
-        publisher = x.create_publisher(Nodeupdate, 'internal_error', 10) #we create the publisher
+        publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message
         msg = Nodeupdate()
         msg.node = "dronekit_node" #our identity

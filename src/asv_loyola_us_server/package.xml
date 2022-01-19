@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>simulator</name>
+  <name>asv_loyola_us_server</name>
   <version>0.0.0</version>
-  <description>visualization of ardupilot SITL via Rviz</description>
+  <description>Working with Navio2 helping the project ASV_Loyola_US merging it in ROS</description>
   <maintainer email="alexcpesp@gmail.com">alejandro</maintainer>
   <license>Apache License 2.0</license>
 
-
-  <!-- some dependencies -->
   <exec_depend>rclpy</exec_depend> <!-- for python -->
-  <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
+    <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>rcl_interfaces</exec_depend> <!-- for interfaces -->
 
     <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

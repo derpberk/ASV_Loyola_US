@@ -1,8 +1,12 @@
 import rclpy
 from rclpy.node import Node
 import traceback
-from asv_interfaces.srv import Newwaypoint, ASVmode, CommandBool
-from asv_interfaces.msg import Status, Nodeupdate
+import numpy as np
+from geopy.distance import lonlat, VincentyDistance
+from time import sleep
+
+from asv_interfaces.srv import Newwaypoint, ASVmode, CommandBool, LoadMap
+from asv_interfaces.msg import Status, Nodeupdate, Location
 from asv_interfaces.action import Samplepoint
 #TODO: Everything
 
@@ -10,22 +14,16 @@ class Planner_node(Node):
 
     # his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('mission_filename', '1')
-        self.mission_filename = self.get_parameter('mission_filename').get_parameter_value().string_value
+        self.declare_parameter('map_filename', 'Loyola.csv')
+        path = "~/ASV_Loyola_US/" + self.get_parameter('map_filename').get_parameter_value().string_value
+        self.map_filepath = os.path.expanduser(path)
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
     # this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
         # host
-        self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
-        self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
-        self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
-        # client
-        self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
-        self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
-        self.collect_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
-        self.change_asv_mode_client = self.create_client(ASVmode, 'change_asv_mode')
+        self.samplepoint_service = self.create_service(LoadMap, 'load_map', self.load_map_callback)
 
     def declare_actions(self):
         self.go_to_server = rclpy.action.ActionServer(self, Samplepoint, 'fibonacci', self.go_to_callback)
@@ -39,14 +37,19 @@ class Planner_node(Node):
         super().__init__('mission_node')
 
         # declare parameter of drone IP
-        #self.parameters()
+        self.parameters()
 
 
         # declare the services
-        #self.declare_services()
+        self.declare_services()
 
         # declare actions
         self.declare_actions()
+
+        if self.preload_map():
+            self.allow_planning=True
+        else:
+            self.allow_planning=False
 
 
     def go_to_callback(self, goal_handle):
@@ -92,6 +95,158 @@ class Planner_node(Node):
         #TODO: everything
         return goal
 
+    def A_star_get_path(self, start_cell, goal_cell):
+
+        # declarations of list
+        self.openlist = []  # here we will store all the cells we have yet to visit
+        self.closedlist = []  # here we will store all the cells we have already visited
+
+        # start point append to the cells to visit the one in which we start, the list gotta start somewhere
+
+        self.openlist.append(Cell([start_cell[0], start_cell[1]], [start_cell[0], start_cell[1]], 0, sqrt(
+            pow(start_cell[0] - goal_cell[0], 2) + pow(start_cell[1] - goal_cell[1], 2))))
+
+        while len(self.openlist) != 0:  # while we have cells to visit
+
+            candidate = self.openlist.pop(0)  # take out one cell we want to visit
+            self.closedlist.append(candidate)  # put it inside the list of cells we have already visited
+
+            if candidate.position == goal_cell:  # if we have reached our goal we exit the main loop
+                break
+
+            # ok, so we have not reached the goal, lets use our 4 neighbourghs (right, left, up and down) as candidates of cells we may want to visit
+
+            neighbour = [[candidate.position[0] + 1, candidate.position[1]],
+                         [candidate.position[0], candidate.position[1] + 1],
+                         [candidate.position[0] - 1, candidate.position[1]],
+                         [candidate.position[0], candidate.position[1] - 1]]
+
+            for x in range(4):  # for each neighbour
+                already_visited = False  # we will firstly say that we have yet to visit that cell
+
+                if self.map[neighbour[x][0], neighbour[x][
+                    1]] == 0:  # ok, first, are we in a wall, 0 means no wall, so we can continue
+
+                    for i in self.openlist:
+                        if ([neighbour[x][0], neighbour[x][
+                            1]] == i.position):  # have we seen this cell before but we have yet to visit it?
+                            already_visited = True  # we will say that we have already visited it
+                            if (
+                                    i.g < candidate.g - 1):  # is it easier to go to our actual cell from where we were before? (the cost is lower)
+                                candidate = self.openlist.pop()  # the cost is lower, so we update the path by saying
+                                candidate.father = i.position  # we come from the cell whose cost is lower
+                                candidate.g = i.g + 1  # we update the travelled distance
+                                self.openlist.append(candidate)  # we store the update
+
+                    for i in self.closedlist:
+                        if ([neighbour[x][0],
+                             neighbour[x][1]] == i.position):  ##have we seen this cell before and visited it?
+                            already_visited = True  # we will say that we have already visited it
+                            if (
+                                    i.g < candidate.g - 1):  # is it easier to go to our actual cell from where we were before? (the cost is lower)
+                                candidate = self.closedlist.pop()  # the cost is lower, so we update the path by saying
+                                candidate.father = i.position  # we come from the cell whose cost is lower
+                                candidate.g = i.g + 1  # we update the travelled distance
+                                self.closedlist.append(candidate)  # we store the update
+
+                    if already_visited == False:  # seems we have yet to see this cell so lets add it to the list of cells we have yet to visit
+
+                        # this if decides how we will measure the cost of the cell
+                        if distance_mode == 1:
+                            self.openlist.append(
+                                Cell([neighbour[x][0], neighbour[x][1]], [candidate.position[0], candidate.position[1]],
+                                     candidate.g + 1,
+                                     pow(neighbour[x][0] - goal_cell[0], 2) + pow(neighbour[x][1] - goal_cell[1], 2)))
+                        else:
+                            self.openlist.append(
+                                Cell([neighbour[x][0], neighbour[x][1]], [candidate.position[0], candidate.position[1]],
+                                     candidate.g + 1,
+                                     abs(neighbour[x][0] - goal_cell[0]) + abs(neighbour[x][1] - goal_cell[1])))
+
+            self.openlist.sort(key=lambda Cell: Cell.f)  # we sort the list by cost to restart the loop
+
+        path = []  # here we will store the optimal path to the goal form the start pose
+        if len(self.openlist) == 0 and self.closedlist[0].position != goal_cell:  # if we have tried all the paths but we didnt reach the goal position
+            self.get_logger.error("we werent able to find a path")
+            return []
+
+
+        else:  # lets compute the path!
+            parent = goal_cell  # we will start with the goal cell
+            while parent != start_cell:  # until we get to the start point
+                position = self.closedlist.pop()  # we take out a cell from the list of points
+                if position.position == parent:  # we look for the cell whose coordinates we want
+                    path.append(position.father)  # we add that cell to the path
+                    parent = position.father  # we update the cell we are looking for
+
+        path.reverse()  # we revert the list, as we want to go from start to finish
+        path.append(goal_cell)  # we add the last point as it doesnt appear on the list
+
+        return path
+
+
+
+
+
+    def load_map_callback(self, request, response):
+        if len(request.file_name)>0:
+            try:
+                self.map_filepath = os.path.expanduser( "~/ASV_Loyola_US/" + request.file_name)
+            except:
+                response.success=False
+                return response
+            if self.preload_map():
+                response.success = True
+                return response
+            response.success = False
+            return response
+
+        else:
+            self.origin = request.origin
+            self.resolution = request.resolution
+            if self.calculate_map(request.data, request.width, request.height):
+                response.success=True
+                return response
+            response.success=False
+            return response
+
+
+
+
+    def calculate_map(self, data, width, height):
+        if len(data) != width*height:
+            return False
+
+        down = VincentyDistance(height * self.resolution).destination([self.origin.lon, self.origin.lat], bearing=270)
+        right= VincentyDistance(width * self.resolution).destination([self.origin.lon, self.origin.lat], bearing=0)
+
+        self.geo_range = [[self.origin.lon, right],
+                          [self.origin.lat, down]]
+
+        self.map = np.zeros(height, width)
+        counter = 0
+        counter2 = 0
+        for i in data.data:
+            if i != 0:
+                self.map[counter2][counter] = 1  # obstacle
+            counter += 1
+            if counter == self.width:
+                counter = 0
+                counter2 += 1
+
+    def preload_map(self):
+
+        data=np.genfromtxt(self.map_filepath, sep=',')
+        height = self.map.shape[0]
+        width = self.map.shape[1]
+        self.origin=Location()
+        #TODO: read origin an resolution from file
+        self.origin.lon=0
+        self.origin.lat=0
+        self.resolution=1
+        if self.calculate_map(data, width, height):
+            return True
+        return False
 
     def move2wp(self):
         """
@@ -174,7 +329,7 @@ def main(args=None):
         There has been an error with the program, so we will send the error log to the watchdog
         """
         x = rclpy.create_node('planner_node') #we state what node we are
-        publisher = x.create_publisher(Nodeupdate, 'internal_error', 10) #we create the publisher
+        publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message
         msg = Nodeupdate()
         msg.node = "planner_node" #our identity

@@ -1,15 +1,17 @@
 /**:
   ros__parameters:
     debug: false
+    vehicle_ip: "tcp:navio.local:5678"
+    mission_filename: "MisionesLoyola_dron_2.kml"
 
 dronekit_node:
   ros__parameters:
-    vehicle_ip: "tcp:navio.local:5678"
+
     timeout: 15
 
 main_node:
   ros__parameters:
-    mission_filename: "1"
+
 
 mqtt_node:
   ros__parameters:

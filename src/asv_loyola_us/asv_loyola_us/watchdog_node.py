@@ -12,7 +12,7 @@ nodes=["mission_node","planner_node", "communication"]
 class Watchdog_node(Node):
 
     def declare_topics(self):
-        self.error_subscriber = self.create_subscription(Nodeupdate, 'internal_error', self.error_callback, 10)
+        self.error_subscriber = self.create_subscription(Nodeupdate, '_internal_error', self.error_callback, 10)
         self.watchdog_subscriber = self.create_subscription(Nodeupdate, 'Watchdog', self.watchdog_callback, 10)
         self.error_log_publisher = self.create_publisher(String, 'error', 10)
         self.error_log_publisher_timer = self.create_timer(1, self.error_log_publish)

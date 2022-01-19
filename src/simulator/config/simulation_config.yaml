@@ -3,10 +3,7 @@
     debug: false
     vehicle_ip: '127.0.0.1:14550'
     timeout: 15
-
-main_node:
-  ros__parameters:
-    mission_filename: "1"
+    mission_filename: "MisionesLoyola_dron_2.kml"
 
 mqtt_node:
   ros__parameters:

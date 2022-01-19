@@ -1,0 +1,20 @@
+#request
+#The file name takes preference over other parameters
+string file_name ""
+
+#array of obstacles '1' and not obstacles '0'
+#ordered by from left to right and from top to bottom
+int8[] data
+
+#resolution of the map, 1 = 1 meter per bit
+float32 resolution
+
+#width and height of the map
+int32 width
+int32 height
+
+#latitude and longitude of the top left corner of the map
+asv_interfaces/Location origin
+---
+#response
+bool success
