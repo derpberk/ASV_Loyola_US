@@ -12,6 +12,7 @@ This project is divided in 2 machines:
 
 - [Rapberry Pi](./Raspberry/Raspi.html)
 - [Jetson Xavier NX](./src/Xavier.html)
+- [Server](./src/Server.html)
 
 You may also want to see
 

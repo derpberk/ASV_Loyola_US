@@ -6,14 +6,16 @@ layout: page
 ---
 <H1>Mission Node</H1> 
 
-This is the main node of the ASV. It contains the state machine of the robot and the main services that an user will use.
+This is the main node of the ASV. It contains the <a href="#main">state machine(value)</a> of the robot and the main services that an user will use.
 
 
 <pre>
 Services
 /<a href="./services/close_asv.html">close_asv</a>  <a href="#" style="float:right;text-align:right;">close_asv_callback</a>
+/<a href="./services/load_mission.html">load_mission</a> <a href="#load_mission" style="float:right;text-align:right;">load_mission_callback</a>
 /<a href="./services/change_mission_mode.html">change_mission_mode</a> <a href="#new_mission_mode" style="float:right;text-align:right;">change_mission_mode_callback</a>
 /<a href="./services/new_samplepoint.html">new_samplepoint</a> <a href="#new_samplepoint_callback" style="float:right;text-align:right;">new_samplepoint_callback</a>
+
 </pre>
 <pre>
 Topics
@@ -31,6 +33,7 @@ functions
 <a href="#change_current_mission_mode">change_current_mission_mode(desired_mode)</a>
 <a href="#close_asv_callback">close_asv_callback(request, response)</a>
 <a href="#get_next_wp">get_next_wp()</a>
+<a href="#load_mission_callback">load_mission_callback(request, response)</a>
 <a href="#main">main()</a>
 <a href="#new_mission_mode">new_mission_mode(request, response)</a>
 <a href="#new_samplepoint_callback">new_samplepoint_callback(request, response)</a>
@@ -128,38 +131,52 @@ This function pops a samplepoint from the list of points
 - Deprecate MQTT from this function  <br>
 - return false if list is empty</FONT>
 
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LOAD MISSION CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>load_mission_callback(request, response) <a href="    def load_mission_callback(self, request, response):" style="float:right;text-align:right;">code</a></H3> 
+<a id="load_mission_callback"></a>
+This function loads a mission from file
+
+- params
+  - request
+    - file_name: Name of the file (example) "MisionesLoyola_dron_2.kml", empty string "" to load last mission
+- output
+  - response
+    - success: True upon success False otherwise
+- managed variables
+  - <a href="#self.samplepoints">samplepoints</a>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>main() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/mission_node.py#L119" style="float:right;text-align:right;">code</a></H3>
+<H3>main() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L102" style="float:right;text-align:right;">code</a></H3>
 <a id="main"></a>
 
-This function contains all the states of the robot.
+This function contains all the states of the robot. It is executed at a period of 1Hz
  <ol start="0">
   <li>Standby</li>
-  <dd>- disarm robot and wait</dd>
+  <dd>- Initial state, the robot is always disarmed and waiting for signals</dd>
 
   <li>Pre-loaded mission</li>
-  <dd>- arm vehicle</dd>
-  <dd>- load samplepoint list</dd>
+  <dd>- checks if there is a mission loaded, giving instructions</dd>
+  <dd>- arms vehicle</dd>
   <dd>- call go_to service while there are points left</dd>
+  <dd>- Indicates the mission have finished and changes to Standby mode</dd>
 <FONT COLOR="#ff0000">TODO:<br>
     - use planner and collect samples making sure to store them</FONT>
 
 <li>Manual mode</li>
-  <dd>- Call service to change ASV mode to "MANUAL"</dd>
-<FONT COLOR="#ff0000">TODO:<br>
-    - check if vehicle is armed</FONT>
+  <dd>- Call service to change ASV mode to "MANUAL", indicates whether armed</dd>
 
-<li>Simple Go-TO</li>
+<li>Go-To Mode</li>
   <dd>- Arm vehicle</dd>
-  <dd>- Go to a point and take a sample</dd>
-  <dd>- Change to Standby mode</dd>
+  <dd>- Sets vehicle into Loiter mode</dd>
+  <dd>- Waits for points to be received</dd>
 
 <li>RTL</li>
-  <dd>- change vehicle mode to "RTL"</dd>
-
+  <dd>- change vehicle mode to "RTL" and indicates whether it is armed</dd>
+<FONT COLOR="#ff0000">TODO:<br>
+    - vehicle should be armed</FONT>
 </ol> 
 
 It logs an error if mode is different than the ones listed here

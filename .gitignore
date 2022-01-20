@@ -8,3 +8,7 @@ build/
 log/
 nohup.out
 _site/
+src/python_example
+src/c_example
+src/.idea/
+.idea

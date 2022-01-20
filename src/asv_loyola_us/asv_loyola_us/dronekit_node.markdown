@@ -137,12 +137,15 @@ This method is an approximation, and may not be accurate over large distances an
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO POINT CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>go_to_point_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L214" style="float:right;text-align:right;">code</a></H3>
+<H3>go_to_point_callback(request, response) <a href="    def go_to_point_callback(self, request, response):" style="float:right;text-align:right;">code</a></H3>
 <a id="go_to_point_callback"></a>
 
 Callback function from the service [go_to_point_command](./404) 
 executes a simple go to routine towards the new_point requested, returns True when the drone reaches the point.
 If vehicle not armed, changes ASV_mission_mode to Standby, and returns false
+
+This function returns false if vehicle is not armed and drone is not in Loiter mode (this means asv_mission_mode != 3)
+This function changes ASV_mode to "GUIDED", calls simple goto and <a href="#condition_yaw">condition_yaw()</a>, and upon <a href="#reached_position">reached_position()</a> it changes back to "LOITER" asv_mode and returns True
 
 - params
   - request:
