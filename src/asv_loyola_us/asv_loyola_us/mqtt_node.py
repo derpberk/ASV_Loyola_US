@@ -1,11 +1,16 @@
-from .submodulos.MQTT import MQTT
-import json, traceback
+from rclpy.action import ActionClient #for defining actions
 from rclpy.node import Node
 import rclpy
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
-from asv_interfaces.msg import Status, Nodeupdate
-from asv_interfaces.srv import ASVmode, CommandBool
+from asv_interfaces.msg import Status, Nodeupdate, Location
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint
+from asv_interfaces.action import Goto
+from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
+from .submodulos.MQTT import MQTT
+import json, traceback
 
 class MQTT_node(Node):
 
@@ -21,6 +26,11 @@ class MQTT_node(Node):
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
+
+    def declare_actions(self):
+        self.goto_action_client = ActionClient(self, Goto, 'goto')
+        self.New_waypoint = None
+        self.waiting_for_action=False
 
     def __init__(self):
         #start the node
@@ -38,9 +48,14 @@ class MQTT_node(Node):
         #call services
         self.declare_services()
 
+        #call actions
+        self.declare_actions()
+
         self.declare_topics()
         while rclpy.ok():
             rclpy.spin_once(self)
+            if self.New_waypoint is not None and not self.waiting_for_action:
+                self.go_to(self.New_waypoint)
             sleep(0.1)
 
     def asv_send_info(self):
@@ -72,25 +87,28 @@ class MQTT_node(Node):
         """
         self.get_logger().info(f"Received {msg}")
         if msg.topic == f"veh{self.status.vehicle_id}":
-            msg=ASVmode.Request()
             message = json.loads(msg.payload.decode('utf-8'))  # Decode the msg into UTF-8
+            call_msg=ASVmode.Request()
             self.get_logger().info(f"Received {message} on topic {msg.topic}")
             if message["mission_type"] == "STANDBY":  # Change the asv mission mode flag
-                msg.asv_mode = 0
-                call_service(self, self.asv_mission_mode_client, msg)
+                call_msg.asv_mode = 0
+                call_service(self, self.asv_mission_mode_client, call_msg)
             elif message["mission_type"] == "GUIDED":
-                msg.asv_mode = 1
-                call_service(self, self.asv_mission_mode_client, msg)
+                call_msg.asv_mode = 2
+                call_service(self, self.asv_mission_mode_client, call_msg)
             elif message["mission_type"] == "MANUAL":
-                msg.asv_mode = 2
-                call_service(self, self.asv_mission_mode_client, msg)
+                call_msg.asv_mode = 3
+                call_service(self, self.asv_mission_mode_client, call_msg)
             elif message["mission_type"] == "SIMPLE":
-                msg.asv_mode = 3
-                call_service(self, self.asv_mission_mode_client, msg)
-                received_mqtt_wp = [message["lon"], message["lat"], 0]
+                call_msg.asv_mode = 1
+                call_service(self, self.asv_mission_mode_client, call_msg)
+                sleep(2.0)
+                self.New_waypoint=Location()
+                self.New_waypoint.lat = message["lat"]
+                self.New_waypoint.lon = message["lon"]
             elif message["mission_type"] == "RTL":
-                msg.asv_mode = 4
-                call_service(self, self.asv_mission_mode_client, msg)
+                call_msg.asv_mode = 4
+                call_service(self, self.asv_mission_mode_client, call_msg)
 
 
 
@@ -112,6 +130,42 @@ class MQTT_node(Node):
             self.get_logger().error('Couldn\'t use MQTT com')
             response.success=False
         return response
+
+
+    def go_to(self, location):
+        self.get_logger().info(f"going to {location}")
+        self.goto_action_client.wait_for_server()
+        self.waiting_for_action=True
+        goal_msg = Goto.Goal()
+        goal_msg.samplepoint = location
+        self.get_logger().debug('Sending goal request...')
+        self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+        self._send_goal_future.add_done_callback(self.go_to_response)
+
+    def goto_feedback_callback(self, feedback):
+        distance= feedback.feedback.distance #TODO: unused
+        self.get_logger().info(f"distance={distance}")
+
+    def go_to_response(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected :(')
+            self.waiting_for_action=False
+            #TODO: decide what to do if goal is rejected, in other words, action busy
+            return
+        self.get_logger().info('Goal accepted :)')
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.go_to_finished)
+
+    def go_to_finished(self, future):
+        result = future.result().result
+        status = future.result().status
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info('Goal succeeded! Result: {0}'.format(result.success))
+        else:
+            self.get_logger().info('Goal failed with status: {0}'.format(status))
+        self.waiting_for_action=False
+        self.New_waypoint = None
 
 
 

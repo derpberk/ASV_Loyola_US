@@ -78,7 +78,7 @@ class Mission_node(Node):
         while rclpy.ok():
             rclpy.spin_once(self) #check if a topic has been published or if a timer aired
             self.main()
-            sleep(1)  #we will run main each 1 second
+            sleep(0.1)  #we will run main each 1 second
 
     def startup(self):
         self.mission_mode = 0  # el modo del ASV deseado
