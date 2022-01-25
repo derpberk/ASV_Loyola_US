@@ -21,6 +21,9 @@ def call_service(self, client, msg):
             return response
             break
 
+
+#TODO: use self.spin_until_future_complete
+
 def call_service_spin(client_ori, msg):
     x=rclpy.create_node("service_call") #we state what node we are
     client=x.create_client(client_ori.srv_type,client_ori.srv_name)

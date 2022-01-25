@@ -1,0 +1,8 @@
+# Request
+asv_interfaces/Location samplepoint
+---
+# Result
+bool success
+---
+# Feedback
+float64 distance

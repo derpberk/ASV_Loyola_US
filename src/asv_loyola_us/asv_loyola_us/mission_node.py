@@ -1,13 +1,22 @@
-import rclpy
-from rclpy.node import Node
-from .submodulos.KMLMissionGeneration import KMLMissionGenerator
-import traceback
-from time import sleep
+#ros libraries
+import rclpy #main librarie
+from rclpy.node import Node #for defining a node
+from rclpy.action import ActionClient #for defining actions
+
+
+import os #to read paths
+from .submodulos.KMLMissionGeneration import KMLMissionGenerator #for reading missions
+from .submodulos.call_service import call_service #to call services
+import traceback #for code errors
+from time import sleep #delay
+
+#custom interfaces
 from asv_interfaces.srv import Newpoint, ASVmode, CommandBool
 from asv_interfaces.msg import Status, Nodeupdate
-import os
-import time
-from .submodulos.call_service import call_service
+from asv_interfaces.action import Goto
+
+from action_msgs.msg import GoalStatus
+
 
 class Mission_node(Node):
 
@@ -37,6 +46,9 @@ class Mission_node(Node):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         #TODO: Topic que publique el estado de la mision para lectura de datos
 
+    def declare_actions(self):
+        self.goto_action_client = ActionClient(self, Goto, 'goto')
+
     def __init__(self):
         #start the node
         super().__init__('mission_node')
@@ -53,6 +65,8 @@ class Mission_node(Node):
         #declare topics
         self.declare_topics()
 
+        self.declare_actions()
+
         #spin once so that declared things initialize
         rclpy.spin_once(self)
 
@@ -64,13 +78,13 @@ class Mission_node(Node):
         while rclpy.ok():
             rclpy.spin_once(self) #check if a topic has been published or if a timer aired
             self.main()
-            time.sleep(1)  #we will run main each 1 second
+            sleep(1)  #we will run main each 1 second
 
     def startup(self):
         self.mission_mode = 0  # el modo del ASV deseado
         self.current_mission_mode = -1  # el modo del ASV actual
 
-        self.mission_mode_strs = ["STANDBY", "GUIDED", "MANUAL", "SIMPLE", "RTL"]  # Strings para modos
+        self.mission_mode_strs = ["REST", "STANDBY", "PRELOADED_MISSION", "MANUAL", "RTL"]  # Strings para modos
 
         self.mqtt_waypoint = [] #store waypoint from Server
         self.status = Status() #Status of the robot
@@ -93,63 +107,68 @@ class Mission_node(Node):
         #TODO: wait for all systems operative from vehicle
         #     This includes:
         #           Sensor module
+        if not self.mqtt_send_info.wait_for_service(timeout_sec=1.0):
+            self.get_logger().fatal('mqtt node is not answering')
+        msg=CommandBool.Request()
+        msg.value=True
+        call_service(self, self.mqtt_send_info, msg)
 
 
 
     """
     This function automatically runs in loop at 1 Hz
+    we MUST avoid spin_until_future_complete
     """
     def main(self):
-        if self.mission_mode == 0:  # Stand By
+        if self.mission_mode == 0:  # Rest
             if self.change_current_mission_mode(self.mission_mode):
-                self.get_logger().info("Standing By.")
+                self.get_logger().info("vehicle resting.")
             if self.status.armed:
                 self.arm_vehicle(False)
                 self.get_logger().info("Vehicle was armed! Stoping the vehicle.")
-        elif self.mission_mode == 1:  # Pre-loaded Mission
-            if self.change_current_mission_mode(self.mission_mode):
-                if len(self.samplepoints) == 0:
-                    self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
-                    self.mission_mode = 0
-                else:
-                    self.arm_vehicle(True)
-                    self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
-                    self.samplepoints = self.mg.get_samplepoints()
 
-            if len(self.samplepoints) == 0:
-                self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
-                self.mission_mode = 0
-            else:
-                #TODO: action that calls planner to go to waypoint
-                # move2wp()
-                msg=Newpoint.Request()
-                msg.new_point=self.get_next_wp()
-                call_service(self, self.go_to_point_client, msg)
-
-        elif self.mission_mode == 2:  # Manual Mode
-            if self.change_current_mission_mode(self.mission_mode):
-                if self.status.mode != "MANUAL":
-                    self.change_ASV_mode("MANUAL")
-                    self.get_logger().info(f"vehicle in MANUAL mode")
-                    self.get_logger().info(f"vehicle is armed" if self.status.armed else "vehicle is disarmed")
-
-
-
-        #
-        elif self.mission_mode == 3:  # Simple Go-To
+        elif self.mission_mode == 1:  # Stand_By
             if self.change_current_mission_mode(self.mission_mode):
                 self.arm_vehicle(True)
                 self.change_ASV_mode("LOITER")
                 self.get_logger().info("vehicle armed, indicate point to go in \"/go_to_command\" service")
-                self.get_logger().info("vehicle in \'simple Go-To\' mode")
+                self.get_logger().info("vehicle in \'STANDBY\' mode")
 
+        elif self.mission_mode == 2:  # Pre-loaded Mission
+            #check if we come from other mode
+            if self.change_current_mission_mode(self.mission_mode):
+                #set ASV mode to Loiter
+                self.change_ASV_mode("LOITER")
+                #check if we have a mission to follow, go to rest if not
+                if len(self.samplepoints) == 0:
+                    self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
+                    self.mission_mode = 0 #return vehicle to
+                else:
+                    self.arm_vehicle(True)
+                    self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
+                    self.waiting_for_action = False
+            else: #we have a mission to follow, so we enter this part of the code
+                if len(self.samplepoints) == 0: #first check if mission is finished
+                    self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
+                    self.mission_mode = 0
+                elif self.waiting_for_action: #check if we are waiting to reach a new point
+                    pass
+                else: #go to the next point
+                    self.go_to(self.get_next_wp())
+
+        elif self.mission_mode == 3:  # Manual Mode
+            if self.change_current_mission_mode(self.mission_mode):
+                self.arm_vehicle(True)
+                if self.status.mode != "MANUAL":
+                    self.change_ASV_mode("MANUAL")
+                self.get_logger().info(f"vehicle in \'MANUAL\' mode")
 
         elif self.mission_mode == 4:  # RTL
             if self.change_current_mission_mode(self.mission_mode):
+                self.arm_vehicle(True)
                 if self.vehicle.mode != "RTL": #this is reiterative, consider erasing this line of code
                     self.change_ASV_mode("RTL")
                 self.get_logger().info("vehicle in \'RTL\' mode")
-                self.get_logger().info(f"vehicle is armed" if self.status.armed else "vehicle is disarmed")
         else:
             #raise an error, inconsistent mode
             self.get_logger().fatal("we reached an inconsistent mode")
@@ -210,11 +229,13 @@ class Mission_node(Node):
         # https://stackoverflow.com/questions/423379/using-global-variables-in-a-function
 
         if self.current_mission_mode == 1:  # Preloaded
-            nextwp = self.samplepoints.pop(0)
-        elif self.current_mission_mode == 3:
             nextwp = self.received_mqtt_wp
+
+        elif self.current_mission_mode == 2:
+            nextwp = self.samplepoints.pop(0)
         else:
-            raise ValueError(f"Current ASV Mode should be 1: {self.mission_mode_strs[1]} or 3: {self.mission_mode_strs[3]}.")
+            self.get_logger().fatal(f"Current ASV Mode should be 1: {self.mission_mode_strs[1]} or 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
+            raise ValueError(f"Current ASV Mode should be 1: {self.mission_mode_strs[1]} or 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
         self.get_logger().info(f"Next waypoint is {nextwp}" )
         return nextwp
 
@@ -274,16 +295,51 @@ class Mission_node(Node):
     def change_ASV_mode(self, mode):
         #TODO: Establecer diferenciacion con los modos de ardupilot, se recomienda usar string
         #TODO: protección si se indica un modo fuera de rango
-        ASVMODES=["STANDBY", "GUIDED", "MANUAL", "SIMPLE", "RTL"]
         aux = ASVmode.Request()
         if type(mode)=='int':
             aux.asv_mode = mode
-            self.get_logger().debug(f"asked to change asv to mode: {ASVMODES[mode]}")
+            self.get_logger().debug(f"asked to change asv to mode: {[mode]}")
             call_service(self, self.change_asv_mode_client, aux)
         else:
             aux.asv_mode_str = mode
             self.get_logger().debug(f"asked to change asv to mode: {mode}")
             call_service(self, self.change_asv_mode_client, aux)
+
+    def go_to(self, location):
+        self.get_logger().info(f"going to {location}")
+        self.goto_action_client.wait_for_server()
+        self.waiting_for_action=True
+        goal_msg = Goto.Goal()
+        goal_msg.samplepoint = location
+        self.get_logger().debug('Sending goal request...')
+        self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+        self._send_goal_future.add_done_callback(self.go_to_response)
+
+    def goto_feedback_callback(self, feedback):
+        distance= feedback.feedback.distance #TODO: unused
+        self.get_logger().info(f"distance={distance}")
+
+    def go_to_response(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().info('Goal rejected :(')
+            self.waiting_for_action=False
+            #TODO: decide what to do if goal is rejected, in other words, action busy
+            return
+        self.get_logger().info('Goal accepted :)')
+        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.go_to_finished)
+
+    def go_to_finished(self, future):
+        result = future.result().result
+        status = future.result().status
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().info('Goal succeeded! Result: {0}'.format(result.success))
+        else:
+            self.get_logger().info('Goal failed with status: {0}'.format(status))
+        self.waiting_for_action=False
+
+    #TODO: add a cancel to the action function if ever necessary
 
 
 def main(args=None):

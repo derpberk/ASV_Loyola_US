@@ -36,6 +36,7 @@ set(srv_files
 set(action_files
   "action/Newmission.action"
   "action/Samplepoint.action"
+  "action/Goto.action"
   #"action/Action2.action"
    # etc
   )

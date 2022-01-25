@@ -3,6 +3,8 @@
     debug: false
     vehicle_ip: "tcp:navio.local:5678"
     mission_filename: "MisionesLoyola_dron_2.kml"
+    vehicle_id: 1
+    mqtt_addr: 127.0.0.1
 
 dronekit_node:
   ros__parameters:
@@ -15,8 +17,8 @@ main_node:
 
 mqtt_node:
   ros__parameters:
-    vehicle_id: 1
-    mqtt_addr: 20.126.131.210
+
+
 
 sensor_module_node:
   ros__parameters:

@@ -1,5 +1,8 @@
 import rclpy
 from rclpy.node import Node
+from rclpy.action import ActionServer, CancelResponse, GoalResponse
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
 #TODO: deprecate dronekit, use pymavlink
 from dronekit import connect, VehicleMode, LocationGlobal
 import numpy as np
@@ -12,6 +15,7 @@ import time
 #import intefaces
 from asv_interfaces.msg import Status, Nodeupdate
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint
+from asv_interfaces.action import Goto
 
 
 modes_str = []
@@ -35,17 +39,23 @@ class Dronekit_node(Node):
     def declare_services(self):
         #host
         self.arm_vehicle_service = self.create_service(CommandBool, 'arm_vehicle', self.arm_vehicle_callback)
-        self.go_to_point_service = self.create_service(Newpoint, 'go_to_point_command', self.go_to_point_callback)
         self.change_ASV_mode_service = self.create_service(ASVmode, 'change_asv_mode', self.change_asv_mode_callback)
         #client
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
-
-
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
         self.status_publisher = self.create_publisher(Status, 'status', 10)
         self.status_publisher_timer = self.create_timer(timer_period, self.status_publish)
+
+    def declare_actions(self):
+        self.go_to_server = ActionServer(self, Goto, 'goto', execute_callback=self.goto_execute_callback,
+                                         goal_callback=self.goto_accept,
+                                         handle_accepted_callback=self.goto_accepted_callback,
+                                         cancel_callback=self.goto_cancel,
+                                         callback_group=ReentrantCallbackGroup())
+        self.goto_goal_handle = None
+        #TODO: if we want to call this server more than once at a time consider using multithread executor in sping and reentrant_callback_group in action servers
 
     def __init__(self):
         # start the node
@@ -74,6 +84,7 @@ class Dronekit_node(Node):
 
         self.declare_topics()
         self.declare_services()
+        self.declare_actions()
 
     def arm_vehicle_callback(self, request, response):
         """
@@ -160,23 +171,32 @@ class Dronekit_node(Node):
         # send command to vehicle
         self.vehicle.send_mavlink(msg)
 
-    def reached_position(señf, current_loc, goal_loc):
+    def reached_position(self, goal_loc):
+        """
+        Args:
+            goal_loc: Reference position (dronekit.LocationGlobal).
+        Returns:
+            'True' if the ASV distance respecto to the target Waypoint is less than 1.5 meters.
+        """
+
+        return self.calculate_distance(goal_loc) < 1.5
+
+    def calculate_distance(self, goal_loc):
         """
         Returns the ground distance in metres between two LocationGlobal objects.
         This method is an approximation, and will not be accurate over large distances and close to the
         earth's poles. It comes from the ArduPilot test code:
         https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
         Args:
-            current_loc: Actual position (dronekit.LocationGlobal).
             goal_loc: Reference position (dronekit.LocationGlobal).
         Returns:
-            'True' if the ASV distance respecto to the target Waypoint is less than 1.5 meters.
+            distance from the ASV to the goal_loc in meters
         """
 
         # Convert to radians #
-        lat1 = np.radians(current_loc.lat)
+        lat1 = np.radians(self.vehicle.location.global_relative_frame.lat)
         lat2 = np.radians(goal_loc.lat)
-        lon1 = np.radians(current_loc.lon)
+        lon1 = np.radians(self.vehicle.location.global_relative_frame.lon)
         lon2 = np.radians(goal_loc.lon)
 
         # Obtains the latitude/longitude differences #
@@ -186,7 +206,7 @@ class Dronekit_node(Node):
         # Returns True if the waypoint is within 1.5 meters the ASV position
         a = np.sin(0.5 * d_lat) ** 2 + np.sin(0.5 * d_lon) ** 2 * np.cos(lat1) * np.cos(lat2)
         c = 2.0 * np.arctan2(np.sqrt(a), np.sqrt(1.0 - a))
-        return 6378100.0 * c < 1.5
+        return 6378100.0 * c
 
     def change_asv_mode_callback(self, request, response):
         #string takes preference before int
@@ -211,7 +231,7 @@ class Dronekit_node(Node):
 
     def go_to_point_callback(self, request, response):
         if self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
-            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {vehicle.armed} and vehicle is in {vehicle.mode}. \nSetting mission mode to Stand-by')
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
             msg=ASVmode.Request()
             msg.asv_mode=0
             self.call_service(self.asv_mission_mode_client, msg)
@@ -235,6 +255,94 @@ class Dronekit_node(Node):
         self.vehicle.mode = VehicleMode("LOITER")
         return response
 
+
+    def go_to_callback(self, goal_handle):
+        feedback_msg = Goto.Feedback()
+        result = Goto.Result()
+        request=goal_handle.request
+        if self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
+            msg=ASVmode.Request()
+            msg.asv_mode=0
+            self.call_service(self.asv_mission_mode_client, msg)
+            result.success=False
+            return result
+
+        self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point)} N")
+        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
+        time.sleep(2)
+        self.vehicle.simple_goto(LocationGlobal(request.new_point.lat, request.new_point.lon, 0.0))
+        # Waits until the position has been reached.
+        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point):
+            time.sleep(1)
+            # self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
+            # TODO: fix infinite loop
+
+        self.get_logger().info(f"Position Reached: {self.vehicle.location.global_relative_frame.lat}, {self.vehicle.location.global_relative_frame.lat} N")
+
+
+
+
+
+
+    ######################################### ACTION GOTO DESCRIPTION ############################################
+
+    def goto_accept(self, goal_request):
+        self.get_logger().info(f'Action call received')
+        #if we are attending another call exit
+        if self.goto_goal_handle is not None and self.goto_goal_handle.is_active:
+            self.get_logger().error(f'Action is busy')
+            return GoalResponse.REJECT
+        if not self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
+            return GoalResponse.REJECT #To move we must be armed and in loiter
+        self.get_logger().info(f'Action accepted')
+        return GoalResponse.ACCEPT
+
+    def goto_accepted_callback(self, goal_handle):
+        #we could make a list of goal handles and make a queue of points to go to and accept everything,
+        #for the time being, we will just start executing
+        self.goto_goal_handle=goal_handle
+        goal_handle.execute() #execute goto_execute_callback
+
+    def goto_cancel(self, goal_handle):
+        #someone asked to cancel the action
+        return CancelResponse.REJECT #for the time being we wont allow cancel
+
+
+    def goto_execute_callback(self, goal_handle):
+        feedback_msg = Goto.Feedback()
+        self.get_logger().info(
+        f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint)} N")
+        self.vehicle.mode = VehicleMode("GUIDED")
+        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+        time.sleep(2)
+        self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
+        while rclpy.ok() and not self.reached_position(goal_handle.request.samplepoint):
+            """if self.goto_goal_handle.is_cancel_requested:
+                self.get_logger().info('Goal canceled')
+                self.vehicle.mode = VehicleMode("LOITER")
+                return Goto.Result()
+            if self.goto_goal_handle.is_active:
+                self.get_logger().info('Goal aborted')
+                self.vehicle.mode = VehicleMode("LOITER")
+                return Goto.Result()"""
+            feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
+            goal_handle.publish_feedback(feedback_msg)
+            time.sleep(1)
+        # after reaching
+        self.vehicle.mode = VehicleMode("LOITER")
+        goal_handle.succeed()
+        result=Goto.Result()
+        result.success = True
+        return result
+
+
+
+    ####################################### END ACTION DEFINITION ############################################
+
+
+
     def call_service(self, client,  msg):
         # TODO: raise error to avoid infinite wait if service is not up, after all means a module is not active $$ watchdog will be in charge
         while not client.wait_for_service(timeout_sec=1.0):
@@ -252,6 +360,8 @@ class Dronekit_node(Node):
                 break
 
 
+
+
     def dictionary(self):
         self.mode_type=dictionary("ASV_MODE")
 
@@ -262,7 +372,7 @@ def main(args=None):
         #start a class that servers the services
         dronekit_node = Dronekit_node()
         #loop the node
-        rclpy.spin(dronekit_node)
+        rclpy.spin(dronekit_node, executor=MultiThreadedExecutor())
     except:
         """
         There has been an error with the program, so we will send the error log to the watchdog
