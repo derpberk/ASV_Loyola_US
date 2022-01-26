@@ -12,7 +12,7 @@ from time import sleep #delay
 
 #custom interfaces
 from asv_interfaces.srv import Newpoint, ASVmode, CommandBool
-from asv_interfaces.msg import Status, Nodeupdate
+from asv_interfaces.msg import Status, Nodeupdate, String
 from asv_interfaces.action import Goto
 
 from action_msgs.msg import GoalStatus
@@ -27,6 +27,7 @@ class Mission_node(Node):
         self.mission_filepath = os.path.expanduser(path)
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
@@ -44,7 +45,8 @@ class Mission_node(Node):
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
-        #TODO: Topic que publique el estado de la mision para lectura de datos
+        self.mission_mode_publisher = self.create_publisher(String, 'mission_mode', 10)
+        self.mission_mode_publisher_timer = self.create_timer(1, self.mission_mode_publish)
 
     def declare_actions(self):
         self.goto_action_client = ActionClient(self, Goto, 'goto')
@@ -159,15 +161,13 @@ class Mission_node(Node):
         elif self.mission_mode == 3:  # Manual Mode
             if self.change_current_mission_mode(self.mission_mode):
                 self.arm_vehicle(True)
-                if self.status.mode != "MANUAL":
-                    self.change_ASV_mode("MANUAL")
+                self.change_ASV_mode("MANUAL")
                 self.get_logger().info(f"vehicle in \'MANUAL\' mode")
 
         elif self.mission_mode == 4:  # RTL
             if self.change_current_mission_mode(self.mission_mode):
                 self.arm_vehicle(True)
-                if self.vehicle.mode != "RTL": #this is reiterative, consider erasing this line of code
-                    self.change_ASV_mode("RTL")
+                self.change_ASV_mode("RTL")
                 self.get_logger().info("vehicle in \'RTL\' mode")
         else:
             #raise an error, inconsistent mode
@@ -340,6 +340,14 @@ class Mission_node(Node):
         self.waiting_for_action=False
 
     #TODO: add a cancel to the action function if ever necessary
+
+    def mission_mode_publish(self):
+        msg=String()
+        try:
+            msg.string=self.mission_mode_strs[self.mission_mode]
+            self.mission_mode_publisher.publish(msg)
+        except:
+            pass
 
 
 def main(args=None):

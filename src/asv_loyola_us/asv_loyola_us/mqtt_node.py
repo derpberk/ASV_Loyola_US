@@ -4,7 +4,7 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
-from asv_interfaces.msg import Status, Nodeupdate, Location
+from asv_interfaces.msg import Status, Nodeupdate, Location, String
 from asv_interfaces.srv import ASVmode, CommandBool, Newpoint
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -26,11 +26,12 @@ class MQTT_node(Node):
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
+        self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
 
     def declare_actions(self):
         self.goto_action_client = ActionClient(self, Goto, 'goto')
         self.New_waypoint = None
-        self.waiting_for_action=False
+        self.waiting_for_action=True
 
     def __init__(self):
         #start the node
@@ -45,6 +46,7 @@ class MQTT_node(Node):
 
         #declare variables
         self.status=Status()
+        self.mission_mode = ""
         #call services
         self.declare_services()
 
@@ -66,10 +68,11 @@ class MQTT_node(Node):
         msg = json.dumps({
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
-            "yaw": self.status.yaw,
+                "yaw": self.status.yaw,
             "veh_num": self.status.vehicle_id,
             "battery": self.status.battery,
-            "armed": self.status.armed
+            "armed": self.status.armed,
+            "mission_mode": self.mission_mode
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
@@ -90,16 +93,16 @@ class MQTT_node(Node):
             message = json.loads(msg.payload.decode('utf-8'))  # Decode the msg into UTF-8
             call_msg=ASVmode.Request()
             self.get_logger().info(f"Received {message} on topic {msg.topic}")
-            if message["mission_type"] == "STANDBY":  # Change the asv mission mode flag
+            if message["mission_type"] == "REST":  # Change the asv mission mode flag
                 call_msg.asv_mode = 0
                 call_service(self, self.asv_mission_mode_client, call_msg)
-            elif message["mission_type"] == "GUIDED":
+            elif message["mission_type"] == "PREMISSION":
                 call_msg.asv_mode = 2
                 call_service(self, self.asv_mission_mode_client, call_msg)
             elif message["mission_type"] == "MANUAL":
                 call_msg.asv_mode = 3
                 call_service(self, self.asv_mission_mode_client, call_msg)
-            elif message["mission_type"] == "SIMPLE":
+            elif message["mission_type"] == "STANDBY":
                 call_msg.asv_mode = 1
                 call_service(self, self.asv_mission_mode_client, call_msg)
                 sleep(2.0)
@@ -169,7 +172,8 @@ class MQTT_node(Node):
 
 
 
-
+    def mission_mode_suscriber_callback(self, msg):
+        self.mission_mode=msg.string
 
 def main():
     rclpy.init()
