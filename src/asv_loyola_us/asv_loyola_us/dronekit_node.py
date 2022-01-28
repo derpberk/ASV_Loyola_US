@@ -117,6 +117,8 @@ class Dronekit_node(Node):
             self.status.vehicle_id = self.vehicle_id
             self.status.battery = float(self.vehicle.battery.level)
             self.status.armed = self.vehicle.armed
+            asv_mode= str(self.vehicle.mode)
+            self.status.asv_mode=asv_mode[12:]
         except:
             #do not publish this time
             return
@@ -228,61 +230,6 @@ class Dronekit_node(Node):
         response.success=True
         return response
         #TODO: add other responses
-
-    def go_to_point_callback(self, request, response):
-        if self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
-            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
-            msg=ASVmode.Request()
-            msg.asv_mode=0
-            self.call_service(self.asv_mission_mode_client, msg)
-            response.success=False
-            return response
-
-        self.vehicle.mode = VehicleMode("GUIDED")
-        self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point)} N")
-        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
-        time.sleep(2)
-        self.vehicle.simple_goto(LocationGlobal(request.new_point.lat,request.new_point.lon,0.0))
-        timer=0
-        # Waits until the position has been reached.
-        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point):
-            time.sleep(1)
-            #self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
-            #TODO: fix infinite loop
-
-        self.get_logger().info(f"Position Reached: {self.vehicle.location.global_relative_frame.lat}, {self.vehicle.location.global_relative_frame.lat} N")
-        response.success=True
-        self.vehicle.mode = VehicleMode("LOITER")
-        return response
-
-
-    def go_to_callback(self, goal_handle):
-        feedback_msg = Goto.Feedback()
-        result = Goto.Result()
-        request=goal_handle.request
-        if self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
-            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
-            msg=ASVmode.Request()
-            msg.asv_mode=0
-            self.call_service(self.asv_mission_mode_client, msg)
-            result.success=False
-            return result
-
-        self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point)} N")
-        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
-        time.sleep(2)
-        self.vehicle.simple_goto(LocationGlobal(request.new_point.lat, request.new_point.lon, 0.0))
-        # Waits until the position has been reached.
-        while not self.reached_position(self.vehicle.location.global_relative_frame, request.new_point):
-            time.sleep(1)
-            # self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, request.new_point))
-            # TODO: fix infinite loop
-
-        self.get_logger().info(f"Position Reached: {self.vehicle.location.global_relative_frame.lat}, {self.vehicle.location.global_relative_frame.lat} N")
-
-
-
-
 
 
     ######################################### ACTION GOTO DESCRIPTION ############################################

@@ -50,6 +50,7 @@ class Mission_node(Node):
 
     def declare_actions(self):
         self.goto_action_client = ActionClient(self, Goto, 'goto')
+        self.waiting_for_action = False
 
     def __init__(self):
         #start the node
@@ -86,9 +87,9 @@ class Mission_node(Node):
         self.mission_mode = 0  # el modo del ASV deseado
         self.current_mission_mode = -1  # el modo del ASV actual
 
-        self.mission_mode_strs = ["REST", "STANDBY", "PRELOADED_MISSION", "MANUAL", "RTL"]  # Strings para modos
+        self.mission_mode_strs = ["REST", "STANDBY", "PRELOADED_MISSION", "MANUAL", "SIMPLE POINT", "RTL"]  # Strings para modos
 
-        self.mqtt_waypoint = [] #store waypoint from Server
+        self.mqtt_waypoint = None #store waypoint from Server
         self.status = Status() #Status of the robot
 
         self.get_logger().debug("Starting startup")
@@ -131,9 +132,8 @@ class Mission_node(Node):
 
         elif self.mission_mode == 1:  # Stand_By
             if self.change_current_mission_mode(self.mission_mode):
-                self.arm_vehicle(True)
                 self.change_ASV_mode("LOITER")
-                self.get_logger().info("vehicle armed, indicate point to go in \"/go_to_command\" service")
+                self.arm_vehicle(True)
                 self.get_logger().info("vehicle in \'STANDBY\' mode")
 
         elif self.mission_mode == 2:  # Pre-loaded Mission
@@ -144,15 +144,14 @@ class Mission_node(Node):
                 #check if we have a mission to follow, go to rest if not
                 if len(self.samplepoints) == 0:
                     self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
-                    self.mission_mode = 0 #return vehicle to
+                    self.mission_mode = 1 #return vehicle to
                 else:
                     self.arm_vehicle(True)
                     self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
-                    self.waiting_for_action = False
             else: #we have a mission to follow, so we enter this part of the code
                 if len(self.samplepoints) == 0: #first check if mission is finished
                     self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
-                    self.mission_mode = 0
+                    self.mission_mode = 1
                 elif self.waiting_for_action: #check if we are waiting to reach a new point
                     pass
                 else: #go to the next point
@@ -160,11 +159,22 @@ class Mission_node(Node):
 
         elif self.mission_mode == 3:  # Manual Mode
             if self.change_current_mission_mode(self.mission_mode):
-                self.arm_vehicle(True)
                 self.change_ASV_mode("MANUAL")
+                self.arm_vehicle(True)
                 self.get_logger().info(f"vehicle in \'MANUAL\' mode")
 
-        elif self.mission_mode == 4:  # RTL
+        elif self.mission_mode == 4:  # Simple GO-TO
+            if self.change_current_mission_mode(self.mission_mode):
+                self.change_ASV_mode("LOITER")
+                self.arm_vehicle(True)
+                self.get_logger().info("vehicle armed, indicate point to go in \"/goto\" action")
+                self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
+            if self.mqtt_waypoint is not None and not self.waiting_for_action: #if we have a point and we are not busy
+                self.go_to(self.mqtt_waypoint) #go to the point
+                self.mqtt_waypoint = None #discard the point
+                #TODO: may be, implement a buffer for points
+
+        elif self.mission_mode == 5:  # RTL
             if self.change_current_mission_mode(self.mission_mode):
                 self.arm_vehicle(True)
                 self.change_ASV_mode("RTL")
@@ -189,13 +199,13 @@ class Mission_node(Node):
         it appends a new samplepoint to the samplepoint list
         it sends back the samplepoints list
         """
-        self.get_logger().info('new waypoint received: ', request.new_point)
-        if self.current_mission_mode == 1:
+        self.get_logger().info(f'new waypoint received: {request.new_point}')
+        if self.current_mission_mode == 2: #'PRELOADED MISSION' mode
             self.samplepoints.append(request.new_point)
             response.point_list = self.samplepoints
-        elif self.current_mission_mode == 3:
-            self.mqtt_waypoint=request.new_point
-            response.point_list = request.new_point
+        elif self.current_mission_mode == 4: #'SIMPLE POINT' mode
+            self.mqtt_waypoint = request.new_point
+            response.point_list = [self.mqtt_waypoint]
         return response
 
     def new_mission_mode(self, request, response):
@@ -205,7 +215,7 @@ class Mission_node(Node):
         this function changes the ASV Mode if the value is between limits
         """
         #check if mode is between limits
-        if request.asv_mode > 4 or request.asv_mode < 0:
+        if request.asv_mode > len(self.mission_mode_strs) or request.asv_mode < 0:
             response.success = False
         else:
             response.previous_mode = self.current_mission_mode
@@ -228,7 +238,7 @@ class Mission_node(Node):
         # global received_mqtt_wp  solo en escritura es útil poner una variable como global, para lectura no es necesario
         # https://stackoverflow.com/questions/423379/using-global-variables-in-a-function
 
-        if self.current_mission_mode == 1:  # Preloaded
+        if self.current_mission_mode == 5:  # Preloaded
             nextwp = self.received_mqtt_wp
 
         elif self.current_mission_mode == 2:

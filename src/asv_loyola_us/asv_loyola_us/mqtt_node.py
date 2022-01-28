@@ -6,11 +6,13 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String
 from asv_interfaces.srv import ASVmode, CommandBool, Newpoint
+from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
 from .submodulos.MQTT import MQTT
 import json, traceback
+from datetime import datetime
 
 class MQTT_node(Node):
 
@@ -23,15 +25,13 @@ class MQTT_node(Node):
     def declare_services(self):
         self.sendinfo = self.create_service(CommandBool, 'MQTT_send_info', self.sendinfo_callback)
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
-
+        self.new_samplepoint_client = self.create_client(Newpoint, 'new_samplepoint')
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
+        self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
 
-    def declare_actions(self):
-        self.goto_action_client = ActionClient(self, Goto, 'goto')
-        self.New_waypoint = None
-        self.waiting_for_action=True
+    #def declare_actions(self):
 
     def __init__(self):
         #start the node
@@ -47,18 +47,27 @@ class MQTT_node(Node):
         #declare variables
         self.status=Status()
         self.mission_mode = ""
+        self.processing = False
+        self.call_msg=ASVmode.Request()
+        self.mqtt_point= None
         #call services
         self.declare_services()
 
         #call actions
-        self.declare_actions()
+        #self.declare_actions()
 
         self.declare_topics()
         while rclpy.ok():
             rclpy.spin_once(self)
-            if self.New_waypoint is not None and not self.waiting_for_action:
-                self.go_to(self.New_waypoint)
+            if self.call_msg.asv_mode != -1:
+                call_service(self, self.asv_mission_mode_client, self.call_msg)
+                if self.mqtt_point is not None:
+                    call_service(self, self.new_samplepoint_client, self.mqtt_point)
+                    self.get_logger().info(f"point sent")
+                self.call_msg.asv_mode = -1
+                self.processing = False
             sleep(0.1)
+
 
     def asv_send_info(self):
         """
@@ -72,7 +81,8 @@ class MQTT_node(Node):
             "veh_num": self.status.vehicle_id,
             "battery": self.status.battery,
             "armed": self.status.armed,
-            "mission_mode": self.mission_mode
+            "mission_mode": self.mission_mode,
+            "asv_mode": self.status.asv_mode
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
@@ -88,36 +98,34 @@ class MQTT_node(Node):
             _client: Client object
             msg: MQTT message object.
         """
-        self.get_logger().info(f"Received {msg}")
+        #TODO: if message are spammed it may crash
+        if self.processing==True:
+            return
         if msg.topic == f"veh{self.status.vehicle_id}":
+            self.processing=True
             message = json.loads(msg.payload.decode('utf-8'))  # Decode the msg into UTF-8
-            call_msg=ASVmode.Request()
             self.get_logger().info(f"Received {message} on topic {msg.topic}")
             if message["mission_type"] == "REST":  # Change the asv mission mode flag
-                call_msg.asv_mode = 0
-                call_service(self, self.asv_mission_mode_client, call_msg)
-            elif message["mission_type"] == "PREMISSION":
-                call_msg.asv_mode = 2
-                call_service(self, self.asv_mission_mode_client, call_msg)
-            elif message["mission_type"] == "MANUAL":
-                call_msg.asv_mode = 3
-                call_service(self, self.asv_mission_mode_client, call_msg)
+                self.call_msg.asv_mode = 0
             elif message["mission_type"] == "STANDBY":
-                call_msg.asv_mode = 1
-                call_service(self, self.asv_mission_mode_client, call_msg)
-                sleep(2.0)
-                self.New_waypoint=Location()
-                self.New_waypoint.lat = message["lat"]
-                self.New_waypoint.lon = message["lon"]
+                self.call_msg.asv_mode = 1
+            elif message["mission_type"] == "PREMISSION":
+                self.call_msg.asv_mode = 2
+            elif message["mission_type"] == "MANUAL":
+                self.call_msg.asv_mode = 3
+            elif message["mission_type"] == "SIMPLEPOINT":
+                self.call_msg.asv_mode = 4
+                self.mqtt_point = Newpoint.Request()
+                self.mqtt_point.new_point.lat = message["lat"]
+                self.mqtt_point.new_point.lon = message["lon"]
             elif message["mission_type"] == "RTL":
-                call_msg.asv_mode = 4
-                call_service(self, self.asv_mission_mode_client, call_msg)
+                self.call_msg.asv_mode = 5
+
 
 
 
     def sendinfo_callback(self, request, response):
         try:
-
             if request.value:
                 self.get_logger().info(f"Requested to send MQTT")
                 # create a timer
@@ -134,46 +142,26 @@ class MQTT_node(Node):
             response.success=False
         return response
 
-
-    def go_to(self, location):
-        self.get_logger().info(f"going to {location}")
-        self.goto_action_client.wait_for_server()
-        self.waiting_for_action=True
-        goal_msg = Goto.Goal()
-        goal_msg.samplepoint = location
-        self.get_logger().debug('Sending goal request...')
-        self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
-        self._send_goal_future.add_done_callback(self.go_to_response)
-
-    def goto_feedback_callback(self, feedback):
-        distance= feedback.feedback.distance #TODO: unused
-        self.get_logger().info(f"distance={distance}")
-
-    def go_to_response(self, future):
-        goal_handle = future.result()
-        if not goal_handle.accepted:
-            self.get_logger().info('Goal rejected :(')
-            self.waiting_for_action=False
-            #TODO: decide what to do if goal is rejected, in other words, action busy
-            return
-        self.get_logger().info('Goal accepted :)')
-        self._get_result_future = goal_handle.get_result_async()
-        self._get_result_future.add_done_callback(self.go_to_finished)
-
-    def go_to_finished(self, future):
-        result = future.result().result
-        status = future.result().status
-        if status == GoalStatus.STATUS_SUCCEEDED:
-            self.get_logger().info('Goal succeeded! Result: {0}'.format(result.success))
-        else:
-            self.get_logger().info('Goal failed with status: {0}'.format(status))
-        self.waiting_for_action=False
-        self.New_waypoint = None
-
-
-
     def mission_mode_suscriber_callback(self, msg):
         self.mission_mode=msg.string
+
+    def log_subscriber_callback(self, msg):
+        timestamp= msg.stamp.sec #time of the message
+        name=msg.name #name of the node that sent the message
+        log=msg.msg #log
+        file=msg.file #file the message comes from
+        function=msg.function #function the message comes from
+        line=msg.line #line the message comes from
+        time= datetime.utcfromtimestamp(timestamp+3600).strftime('%Y-%m-%d %H:%M:%S') #add +86400 for Spains Clocktime
+
+        message = json.dumps({
+            "veh_num": self.status.vehicle_id,
+            "origin node": name,
+            "time": time,
+            "msg": log
+        })  # Must be a JSON format file.
+        self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
+
 
 def main():
     rclpy.init()
