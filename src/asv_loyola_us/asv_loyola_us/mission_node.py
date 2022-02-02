@@ -35,7 +35,7 @@ class Mission_node(Node):
         self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
-        self.close_asv_service = self.create_service(CommandBool, 'load_mission', self.load_mission_callback)
+        self.load_mission_service = self.create_service(CommandBool, 'load_mission', self.load_mission_callback)
         #client
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')

@@ -19,7 +19,7 @@ class MQTT_node(Node):
     def parameters(self):
         self.declare_parameter('vehicle_id', 1)
         self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
-        self.declare_parameter('mqtt_addr', "20.126.131.210")
+        self.declare_parameter('mqtt_addr', "127.0.0.1")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
 
     def declare_services(self):
@@ -165,25 +165,27 @@ class MQTT_node(Node):
 
 def main():
     rclpy.init()
-    try:
-        mqtt_node = MQTT_node()
-    except:
-        """
-        There has been an error with the program, so we will send the error log to the watchdog
-        """
-        x = rclpy.create_node('mqtt_node') #we state what node we are
-        publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
-        #we create the message
-        msg = Nodeupdate()
-        msg.node = "mqtt_node" #our identity
-        msg.message = traceback.format_exc() #the error
-        #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
-        #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
-        # este topic está oculto en echo al usar _
-        while publisher.get_subscription_count() == 0: #while no one is listening
-            sleep(0.01) #we wait
-        publisher.publish(msg) #we send the message
-        x.destroy_node() #we destroy node and finish
+    while rclpy.ok():
+        try:
+            mqtt_node = MQTT_node()
+        except:
+            """
+            There has been an error with the program, so we will send the error log to the watchdog
+            """
+            x = rclpy.create_node('mqtt_node') #we state what node we are
+            publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
+            #we create the message
+            msg = Nodeupdate()
+            msg.node = "mqtt_node" #our identity
+            msg.message = traceback.format_exc() #the error
+            #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
+            #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
+            # este topic está oculto en echo al usar _
+            while publisher.get_subscription_count() == 0: #while no one is listening
+                sleep(0.01) #we wait
+            publisher.publish(msg) #we send the message
+            x.destroy_node() #we destroy node and finish
+        rclpy.shutdown()
 
 
 if __name__ == '__main__':

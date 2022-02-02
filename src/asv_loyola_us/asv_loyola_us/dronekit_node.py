@@ -274,12 +274,18 @@ class Dronekit_node(Node):
                 self.get_logger().info('Goal aborted')
                 self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()"""
+            if not self.status.armed:
+                self.get_logger().info('Goal aborted')
+                return Goto.Result()
             feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
             goal_handle.publish_feedback(feedback_msg)
             time.sleep(1)
         # after reaching
+
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()
+        self.get_logger().info('Goal reached, waiting for sample')
+        time.sleep(6)
         result=Goto.Result()
         result.success = True
         return result
