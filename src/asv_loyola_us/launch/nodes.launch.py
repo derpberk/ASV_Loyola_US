@@ -42,10 +42,18 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    mqtt = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='mqtt',
+        name='mqtt_node',
+        parameters = [config]
+    )
+
 
 
     return launch.LaunchDescription([
         mission,
         watchdog,
         comunication,
+        mqtt,
     ])

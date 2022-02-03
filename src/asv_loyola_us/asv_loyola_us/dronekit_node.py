@@ -113,10 +113,20 @@ class Dronekit_node(Node):
             # TODO: es necesario que dronekit te devuelva valores no corruptos, crash otherwise
             self.status.lat = self.vehicle.location.global_relative_frame.lat
             self.status.lon = self.vehicle.location.global_relative_frame.lon
+        except:
+            self.status.lat = 0.0
+            self.status.lon = 0.0
+        try:
             self.status.yaw = self.vehicle.attitude.yaw
-            self.status.vehicle_id = self.vehicle_id
+        except:
+            self.status.yaw= 500.0
+        self.status.vehicle_id = self.vehicle_id
+        try:
             self.status.battery = float(self.vehicle.battery.level)
+        except:
+            self.status.battery=-1.0
             self.status.armed = self.vehicle.armed
+        try:
             asv_mode= str(self.vehicle.mode)
             self.status.asv_mode=asv_mode[12:]
         except:

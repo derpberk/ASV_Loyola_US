@@ -38,6 +38,6 @@ class MQTT(object):
         print(message)
 
     def send_new_msg(self, msg, topic="coordinator"):
-        while not self.client.is_connected():
-            continue
+        #while not self.client.is_connected():
+            #continue
         self.client.publish(topic, msg)
