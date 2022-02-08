@@ -14,10 +14,10 @@ def generate_launch_description():
         'config',
         'simulation_config.yaml')
 
-    comunication = launch_ros.actions.Node(
+    drone = launch_ros.actions.Node(
         package='asv_loyola_us',
-        executable='dronekit',
-        name='Dronekit_node',
+        executable='drone',
+        name='drone_node',
         parameters = [config]
     )
 
@@ -49,11 +49,18 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    sensors = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='sensors',
+        name='sensors_node',
+        parameters = [config]
+    )
 
 
     return launch.LaunchDescription([
         mission,
         watchdog,
-        comunication,
+        drone,
         mqtt,
+        sensors,
     ])

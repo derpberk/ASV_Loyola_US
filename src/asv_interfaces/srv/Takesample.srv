@@ -1,0 +1,9 @@
+#request
+bool debug True
+---
+#response
+float64 ph
+float64 turbidity
+float64 algae
+float64 salinity
+float64 o2

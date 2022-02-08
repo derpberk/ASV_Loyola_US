@@ -1,7 +1,10 @@
 import rclpy
 from rclpy.node import Node
-from .submodulos.SensorModule import WaterQualityModule
+#from .submodulos.SensorModule import WaterQualityModule
 import json
+import time
+import random
+from asv_interfaces.srv import Takesample
 
 #TODO: EVERYTHING
 
@@ -22,7 +25,7 @@ class Sensor_node(Node):
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
-        self.get_sample = self.create_service(CommandBool, 'get_water_module_sample', self.get_sample_callback)
+        self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
 
     def declare_topics(self):
         dummy=0
@@ -37,20 +40,27 @@ class Sensor_node(Node):
 
 
         #TODO: Study how nested parameters work, it should be passed as JSON
-        pump_parameters = json.loads(config['WATER']['pump_parameters'])
+        #pump_parameters = json.loads(config['WATER']['pump_parameters'])
 
-        modulo_de_sensores = WaterQualityModule(database_name=self.database_name,
+        """modulo_de_sensores = WaterQualityModule(database_name=self.database_name,
                                                 USB_string=self.USB_string,
                                                 timeout=self.USB_string,
                                                 baudrate=self.baudrate,
-                                                pump_parameters=self.pump_parameters)
-        #declarations
-        self.samplepoints=[] #list of waypoints to follow
+                                                pump_parameters=self.pump_parameters)"""
         #declare the services
         self.declare_services()
 
-    def get_sample_callback(self):
-        dummy=0
+    def get_sample_callback(self, request, response):
+        self.get_logger().info(f"Sample requested")
+        if request.debug:
+            self.get_logger().info(f"The sample will return a debug value")
+            time.sleep(6.0)
+            response.ph=random.random()*8.0
+            response.turbidity=random.random()*100.0
+            response.algae=random.random()*100.0
+            response.salinity=random.random()*4.0
+            response.o2=random.random()*98.0
+        return response
 
 
 def main(args=None):

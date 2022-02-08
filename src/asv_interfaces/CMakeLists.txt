@@ -29,6 +29,7 @@ set(srv_files
   "srv/ASVmode.srv"
   "srv/CommandBool.srv"
   "srv/Newrelativepoint.srv"
+  "srv/Takesample.srv"
   #"srv/Service2.srv"
    # etc
   )

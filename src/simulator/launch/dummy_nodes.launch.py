@@ -10,11 +10,11 @@ import time
 def generate_launch_description():
 
     config = os.path.join(
-        get_package_share_directory('asv_loyola_us'),
+        get_package_share_directory('simulator'),
         'config',
-        'config.yaml')
+        'simulation_config.yaml')
 
-    comunication = launch_ros.actions.Node(
+    drone = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='drone',
         name='drone_node',
@@ -56,12 +56,19 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    dummy_publisher = launch_ros.actions.Node(
+        package='simulator',
+        executable='dummy_publisher',
+        name='dummy_drone_node',
+        parameters = [config]
+    )
+
 
 
     return launch.LaunchDescription([
         mission,
         watchdog,
-        comunication,
+        dummy_publisher,
         mqtt,
         sensors,
     ])

@@ -67,18 +67,17 @@ class Dronekit_node(Node):
         self.status = Status()
 
         # connect to vehicle
-        self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
-        try:
-            self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
-        except ConnectionRefusedError:
-            self.get_logger().fatal(f"Connection to navio2 could not be made")
-
+        self.get_logger().info(f"dummying to vehicle in {self.vehicle_ip}")
             #TODO: manage error of timeout
             #      manage error of connection refused
             #      manage error of critical startup (failsafe)
-
+        self.mode = VehicleMode("Manual")
+        self.armed = False
         self.dictionary()
 
+        self.yaw=0.0
+        self.lon=-5.9397094
+        self.lat=37.3082922
         # declare the services
         #self.declare_services()
         # start to pubblish
@@ -97,46 +96,31 @@ class Dronekit_node(Node):
         """
         try:
             if request.value:
-                self.vehicle.arm()
                 self.get_logger().info('Vehicle armed')
                 response.success=True
+                self.armed = True
             else:
-                self.vehicle.disarm()
                 self.get_logger().info('Vehicle disarmed')
                 response.success=True
+                self.armed = False
         except:
             self.get_logger().error('Couldn\'t arm vehicle')
             response.success=False
         return response
 
     def status_publish(self):
-        try:
-            # TODO: es necesario que dronekit te devuelva valores no corruptos, crash otherwise
-            self.status.lat = self.vehicle.location.global_relative_frame.lat
-            self.status.lon = self.vehicle.location.global_relative_frame.lon
-            self.status.yaw = self.vehicle.attitude.yaw
-        except:
-            self.status.lat = 0.0
-            self.status.lon = 0.0
-            self.status.yaw= 500.0
-        #Treat batery apart, as it uses to fail
-        try:
-            self.status.battery = float(self.vehicle.battery.level)
-        except:
-            self.status.battery=-1.0
-        #finally if one of these values fails, dont send the message, this values are always reported
-        try:
-            self.status.armed = self.vehicle.armed
-            self.status.vehicle_id = self.vehicle_id
-            asv_mode= str(self.vehicle.mode)
-            self.status.asv_mode=asv_mode[12:]
-        except:
-            #do not publish this time
-            return
+        self.status.lat = self.lat
+        self.status.lon = self.lon
+        self.status.yaw = self.yaw
+        self.status.battery=100.0
+        self.status.armed = self.armed
+        self.status.vehicle_id = self.vehicle_id
+        asv_mode= str(self.mode)
+        self.status.asv_mode=asv_mode[12:]
         self.status_publisher.publish(self.status)
 
 
-    def get_bearing(self, location1, location2):
+    def get_bearing(self, location2):
         """
         Returns the bearing between the two LocationGlobal objects passed as parameters.
         This method is an approximation, and may not be accurate over large distances and close to the
@@ -148,11 +132,16 @@ class Dronekit_node(Node):
         Returns:
             The angle difference from `location1 to `location2
         """
-        off_x = location2.lon - location1.lon
-        off_y = location2.lat - location1.lat
+
+        off_x = location2.lon - self.lon
+        off_y = location2.lat - self.lat
+
+        self.lon=location2.lon
+        self.lat=location2.lat
         bearing = 90.00 + atan2(-off_y, off_x) * 57.2957795
         if bearing < 0:
             bearing += 360.00
+        self.yaw=bearing
         return bearing
 
 
@@ -171,18 +160,6 @@ class Dronekit_node(Node):
             is_relative = 1  # yaw relative to direction of travel
         else:
             is_relative = 0  # yaw is an absolute angle
-        # create the CONDITION_YAW command using command_long_encode()
-        msg = self.vehicle.message_factory.command_long_encode(
-            0, 0,  # target system, target component
-            pymavlink.mavutil.mavlink.MAV_CMD_CONDITION_YAW,  # command
-            0,  # confirmation
-            heading,  # param 1, yaw in degrees
-            0,  # param 2, yaw speed deg/s
-            1,  # param 3, direction -1 ccw, 1 cw
-            is_relative,  # param 4, relative offset 1, absolute angle 0
-            0, 0, 0)  # param 5 ~ 7 not used
-        # send command to vehicle
-        self.vehicle.send_mavlink(msg)
 
     def reached_position(self, goal_loc):
         """
@@ -207,9 +184,9 @@ class Dronekit_node(Node):
         """
 
         # Convert to radians #
-        lat1 = np.radians(self.vehicle.location.global_relative_frame.lat)
+        lat1 = np.radians(self.status.lat)
         lat2 = np.radians(goal_loc.lat)
-        lon1 = np.radians(self.vehicle.location.global_relative_frame.lon)
+        lon1 = np.radians(self.status.lon)
         lon2 = np.radians(goal_loc.lon)
 
         # Obtains the latitude/longitude differences #
@@ -237,7 +214,7 @@ class Dronekit_node(Node):
                 self.get_logger().info(f"{request.asv_mode} is not a valid mode")
                 response.success = False
                 return response
-        self.vehicle.mode = VehicleMode(mode)
+        self.mode = VehicleMode(mode)
         response.success=True
         return response
         #TODO: add other responses
@@ -251,8 +228,8 @@ class Dronekit_node(Node):
         if self.goto_goal_handle is not None and self.goto_goal_handle.is_active:
             self.get_logger().error(f'Action is busy')
             return GoalResponse.REJECT
-        if not self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
-            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
+        if not self.armed and self.mode != VehicleMode("LOITER"):
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.armed} and vehicle is in {self.mode}. \nSetting mission mode to Stand-by')
             return GoalResponse.REJECT #To move we must be armed and in loiter
         self.get_logger().info(f'Action accepted')
         return GoalResponse.ACCEPT
@@ -270,13 +247,10 @@ class Dronekit_node(Node):
 
     def goto_execute_callback(self, goal_handle):
         feedback_msg = Goto.Feedback()
-        self.get_logger().info(
-        f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint)} N")
-        self.vehicle.mode = VehicleMode("GUIDED")
-        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+        self.mode = VehicleMode("GUIDED")
         time.sleep(2)
-        self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
-        while rclpy.ok() and not self.reached_position(goal_handle.request.samplepoint):
+        counter = 0.0
+        while rclpy.ok() and counter <10:
             """if self.goto_goal_handle.is_cancel_requested:
                 self.get_logger().info('Goal canceled')
                 self.vehicle.mode = VehicleMode("LOITER")
@@ -285,17 +259,19 @@ class Dronekit_node(Node):
                 self.get_logger().info('Goal aborted')
                 self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()"""
-            if not self.status.armed:
+            if not self.armed:
                 self.get_logger().info('Goal aborted')
                 return Goto.Result()
-            feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
+            feedback_msg.distance = 10-counter
+            counter = counter + 1.0
             goal_handle.publish_feedback(feedback_msg)
             time.sleep(1)
         # after reaching
 
-        self.vehicle.mode = VehicleMode("LOITER")
+        self.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
+        self.get_bearing(goal_handle.request.samplepoint)
         value=self.call_service(self.take_sample_client, Takesample.Request())
         self.get_logger().info(f'Sample value {value}')
         result=Goto.Result()

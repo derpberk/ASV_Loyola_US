@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'test = simulator.test:main',
+            'dummy_publisher = simulator.dummy_publisher:main',
         ],
     },
 )
