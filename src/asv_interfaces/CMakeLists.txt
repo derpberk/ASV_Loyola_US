@@ -19,6 +19,7 @@ set(msg_files
   "msg/String.msg"
   "msg/Samplevalue.msg"
   "msg/Location.msg"
+  "msg/Sensor.msg"
   #"msg/Message2.msg"
   # etc
   )

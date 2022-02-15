@@ -6,7 +6,7 @@ import time
 import serial
 import random
 from asv_interfaces.srv import Takesample
-from asv_interfaces.msg import Status
+from asv_interfaces.msg import Status, Sensor
 import Jetson.GPIO as GPIO
 from datetime import datetime
 
@@ -35,6 +35,7 @@ class Sensor_node(Node):
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
+        self.sensor_publisher = self.create_publisher(Sensor, 'sensors', 10)
 
 
     def __init__(self):
@@ -44,18 +45,13 @@ class Sensor_node(Node):
         #declare parameter of drone IP
         self.parameters()
 
+        self.declare_topics()
+
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pump_channel, GPIO.OUT)
-        self.sensor_data = {}
+        self.sensor_data = Sensor()
+        self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
 
-        #TODO: Study how nested parameters work, it should be passed as JSON
-        #pump_parameters = json.loads(config['WATER']['pump_parameters'])
-
-        """modulo_de_sensores = WaterQualityModule(database_name=self.database_name,
-                                                USB_string=self.USB_string,
-                                                timeout=self.USB_string,
-                                                baudrate=self.baudrate,
-                                                pump_parameters=self.pump_parameters)"""
         #declare the services
         self.declare_services()
 
@@ -69,31 +65,31 @@ class Sensor_node(Node):
             response.algae=random.random()*100.0
             response.salinity=random.random()*4.0
             response.o2=random.random()*98.0
-        else
+        else:
             GPIO.output(self.pump_channel, GPIO.HIGH)
-            time.sleep(8.0)
+            time.sleep(10.0)
             GPIO.output(self.pump_channel, GPIO.LOW)
             self.read_sensor()
-            print("after test")
-            print(self.sensor_data)
-
-
+            response.date=self.sensor_data.date
+            response.ph_volt = self.sensor_data.ph_volt
+            response.ph_temp = self.sensor_data.ph_temp
+            response.salinity = self.sensor_data.salinity
+            response.o2_percentage = self.sensor_data.o2_percentage
+            response.temperature = self.sensor_data.temperature
+            response.conductivity = self.sensor_data.conductivity
+            response.conductivity_res = self.sensor_data.conductivity_res
+            response.oxidation_reduction_potential = self.sensor_data.oxidation_reduction_potential
         return response
 
     def read_sensor(self):
         self.get_logger().info(f"Taking sample")
 
         self.read_frame()  # Read a frame from the buffer
-
         str_date = str(datetime.now())  # Leemos la fecha y la convertimos en string
         # Metemos la fecha en el diccionario de variables
-        self.sensor_data['DATE'] = str_date
-
-        #TODO: read position
-        # Almacenamos la posicion
-        self.sensor_data['LATITUD'] = self.status.lat
-        self.sensor_data['LONGITUD'] = self.status.lon
-
+        # Metemos la fecha en el diccionario de variables
+        self.sensor_data.date = str_date
+        self.sensor_publisher.publish(self.sensor_data)
 
 
     def read_frame(self):
@@ -112,30 +108,96 @@ class Sensor_node(Node):
                 try:
                     bytes = self.serial.read_all()  # Read all the buffer #
 
-                    bytes = bytes.decode('ascii', 'ignore')  # Convert to ASCII and ignore non readible characters
+                    string = bytes.decode('ascii', 'ignore').split(":")  # Convert to ASCII and ignore non readible characters
+                    while len(string) > 1:
 
-                    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-                    print(bytes)
-                    print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+                        sensor_name = string.pop(0)
+                        sensor_value = ""
+                        aux = string.pop(0)
 
-                    frames = bytes.split('<=>')  # Frame separator
+                        #the name of the sensor can be found here https://development.libelium.com/smart_water_sensor_guide/sensors
+                        if sensor_name == "Temperature (celsius degrees)":
+                            for i in aux:
+                                if i == " ":
+                                    continue
+                                if i == "\r":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.temperature=float(sensor_value)
+                            self.get_logger().info(f"Found temperature data {self.sensor_data.temperature}")
 
-                    last_frame = frames[-1].split('#')[
-                                 :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
-                    print(last_frame)
+                        elif sensor_name == "Conductivity Output Resistance":
+                            sensor_value=aux.split(" ")
+                            self.sensor_data.conductivity_res = float(sensor_value[1])
+                            # sensor_name == " Conductivity of the solution (uS/cm)":
+                            sensor_value = ""
+                            aux=string.pop()
+                            for i in aux:
+                                if i == " ":
+                                    continue
+                                if i == "\r":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.conductivity=float(sensor_value)
+                            self.get_logger().info(f"Found conductivity data, resistance:{self.sensor_data.temperature}, ")
 
-                    for field in last_frame:  # Iterate over the frame fields
 
-                        data = field.split(':')
-                        if len(data) < 2:
-                            # This is not a data field #
-                            pass
+                        elif sensor_name == "DO Output Voltage":
+                            sensor_value = aux.split(" ")
+                            self.sensor_data.o2 = float(sensor_value[1])
+                            # sensor_name == " DO Percentage ":
+                            sensor_value = ""
+                            aux = string.pop()
+                            for i in aux:
+                                if i == " ":
+                                    continue
+                                if i == "\r":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.o2_percentage = float(sensor_value)
+
+
+
+                        elif sensor_name == "pH value":
+                            aux = aux.split(" ")
+                            sensor_value = ""
+                            for i in aux[1]:
+                                if i == " ":
+                                    continue
+                                if i == "v":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.ph_volt = float(sensor_value)
+                            # sensor_name == " temperature ":
+                            sensor_value = ""
+                            aux = string.pop(0)
+
+                            for i in aux:
+                                if i == " ":
+                                    continue
+                                if i == "d":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.ph_temp = float(sensor_value)
+                            print(aux, self.sensor_data.ph_temp)
+                            # sensor_name == " pH Estimated: ":
+                            sensor_value = ""
+                            aux = string.pop(0)
+                            for i in aux:
+                                if i == " ":
+                                    continue
+                                if i == "\r":
+                                    break
+                                sensor_value = sensor_value + i
+                            self.sensor_data.ph = float(sensor_value)
+
+                        elif sensor_name == " ORP Estimated":
+                            sensor_value = aux.split(" ")
+                            self.sensor_data.oxidation_reduction_potential = float(sensor_value[1])
+
                         else:
-                            # This is a data field #
-                            sensor_str = data[0]
-                            sensor_val = float(data[1])
-                            self.sensor_data[sensor_str] = sensor_val
-
+                            self.get_logger().error(f"Sensor not known{sensor_name}")
+                        #TODO: turbidity
                     is_frame_ok = True
 
                 except Exception as E:

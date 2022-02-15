@@ -1,7 +1,3 @@
-#request
-bool debug True
----
-#response
 float64 ph -1.0
 float64 ph_volt -1.0
 float64 ph_temp -1.0
