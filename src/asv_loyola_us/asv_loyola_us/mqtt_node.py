@@ -4,7 +4,7 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
-from asv_interfaces.msg import Status, Nodeupdate, Location, String
+from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor
 from asv_interfaces.srv import ASVmode, CommandBool, Newpoint
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
@@ -30,6 +30,7 @@ class MQTT_node(Node):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
+        create_subscription = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
 
     #def declare_actions(self):
 
@@ -161,6 +162,30 @@ class MQTT_node(Node):
             "msg": log
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
+
+    def sensors_subscriber_callback(self, msg):
+
+        message = json.dumps({
+            "veh_num": self.status.vehicle_id,
+            "date": msg.date,
+        })  # Must be a JSON format file.
+        msg.date = self.sensor_data.date
+        if msg.ph_volt != -1:
+            message['ph_volt']=msg.ph_volt
+            message['ph_temp']=msg.ph_temp
+        if msg.salinity != -1:
+            message['salinity']=msg.salinity
+        if msg.o2_percentage != -1:
+            message['o2_percentage']=msg.o2_percentage
+        if msg.temperature != -1:
+            message['temperature']=msg.temperature
+        if msg.conductivity != -1:
+            message['conductivity']=msg.conductivity
+            message['conductivity_res'] = msg.conductivity_res
+        if msg.oxidation_reduction_potential != -1:
+            message['temperature']=msg.oxidation_reduction_potential
+
+        self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
 
 
 def main():
