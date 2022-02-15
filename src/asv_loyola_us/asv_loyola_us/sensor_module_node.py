@@ -68,8 +68,8 @@ class Sensor_node(Node):
         else:
             GPIO.output(self.pump_channel, GPIO.HIGH)
             time.sleep(10.0)
-            GPIO.output(self.pump_channel, GPIO.LOW)
             self.read_sensor()
+            GPIO.output(self.pump_channel, GPIO.LOW)
             response.date=self.sensor_data.date
             response.ph_volt = self.sensor_data.ph_volt
             response.ph_temp = self.sensor_data.ph_temp

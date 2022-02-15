@@ -165,27 +165,30 @@ class MQTT_node(Node):
 
     def sensors_subscriber_callback(self, msg):
 
-        message = json.dumps({
-            "veh_num": self.status.vehicle_id,
+        z = { "veh_num":self.status.vehicle_id,
             "date": msg.date,
-        })  # Must be a JSON format file.
-        msg.date = self.sensor_data.date
+            "Latitude": self.status.lat,
+            "Longitude": self.status.lon,
+        }  # Must be a JSON format file.
         if msg.ph_volt != -1:
-            message['ph_volt']=msg.ph_volt
-            message['ph_temp']=msg.ph_temp
+            y= {"ph_volt":msg.ph_volt,
+                "ph_temp":msg.ph_temp}
+            z.update(y)
         if msg.salinity != -1:
             message['salinity']=msg.salinity
         if msg.o2_percentage != -1:
             message['o2_percentage']=msg.o2_percentage
         if msg.temperature != -1:
-            message['temperature']=msg.temperature
+            y = {"temperature": msg.temperature}
+            z.update(y)
         if msg.conductivity != -1:
             message['conductivity']=msg.conductivity
             message['conductivity_res'] = msg.conductivity_res
         if msg.oxidation_reduction_potential != -1:
             message['temperature']=msg.oxidation_reduction_potential
-
+        message = json.dumps(z)
         self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
+        self.get_logger().info('sensor data sent to database')
 
 
 def main():
