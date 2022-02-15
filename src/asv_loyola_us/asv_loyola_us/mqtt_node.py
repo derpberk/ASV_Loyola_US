@@ -175,17 +175,21 @@ class MQTT_node(Node):
                 "ph_temp":msg.ph_temp}
             z.update(y)
         if msg.salinity != -1:
-            message['salinity']=msg.salinity
+            y = {"salinity": msg.salinity}
+            z.update(y)
         if msg.o2_percentage != -1:
-            message['o2_percentage']=msg.o2_percentage
+            y = {"o2_percentage": msg.o2_percentage}
+            z.update(y)
         if msg.temperature != -1:
             y = {"temperature": msg.temperature}
             z.update(y)
         if msg.conductivity != -1:
-            message['conductivity']=msg.conductivity
-            message['conductivity_res'] = msg.conductivity_res
+            y = {"conductivity": msg.conductivity,
+                 "conductivity_res": msg.conductivity_res}
+            z.update(y)
         if msg.oxidation_reduction_potential != -1:
-            message['temperature']=msg.oxidation_reduction_potential
+            y = {"oxidation_reduction_potential": msg.oxidation_reduction_potential}
+            z.update(y)
         message = json.dumps(z)
         self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
         self.get_logger().info('sensor data sent to database')
