@@ -153,7 +153,7 @@ class MQTT_node(Node):
         file=msg.file #file the message comes from
         function=msg.function #function the message comes from
         line=msg.line #line the message comes from
-        time= datetime.utcfromtimestamp(timestamp+3600).strftime('%Y-%m-%d %H:%M:%S') #add +86400 for Spains Clocktime
+        time= datetime.utcfromtimestamp(timestamp+3600).strftime('%Y-%m-%d %H:%M:%S') #add +3600 for Spains Clocktime
 
         message = json.dumps({
             "veh_num": self.status.vehicle_id,
