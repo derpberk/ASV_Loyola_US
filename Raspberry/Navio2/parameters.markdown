@@ -1,4 +1,4 @@
-Raspi.markdownRaspi.markdown---
+---
 # Feel free to add content and custom Front Matter to this file.
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
@@ -19,7 +19,7 @@ Once connected, open mission planner, on the topright options select TCP, click 
 
 If everything has been done right, mission planner must connect (if you just restarted the Raspberry, it may spend 2 minutes to startup) if there is a problem check [solver](./parameters_solve.html)
 
-Download the general parameter list from [here](../../assets/ASV_parametres.yaml)
+Download the general parameter list from <a href="../../assets/ASV_parametres.param">here</a>
 
 Once connected navigate to the tab "Config".
 click on Full parameters list
