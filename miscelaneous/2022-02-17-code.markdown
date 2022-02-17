@@ -1,0 +1,87 @@
+---
+layout: page
+---
+
+
+1. We were using Serial library instead of Pyserial
+2. Last debug changes forgot to add Nodeupdate msg to imported msgs
+3. the USB port is not allowed for user functions, it has been temporally solved using "chmod 666 /dev/ttyUSB0" 
+4. The smartwater has a different code from the one in the us, the result can be found in this log
+
+
+
+
+{% highlight ruby %}
+1645094525.7765090 [INFO] [launch]: All log files can be found below /home/xavier/.ros/log/2022-02-17-11-42-05-771288-xavier-desktop-14512
+1645094525.7772152 [INFO] [launch]: Default logging verbosity is set to INFO
+1645094526.1493959 [INFO] [mission-1]: process started with pid [14515]
+1645094526.1516700 [INFO] [watchdog-2]: process started with pid [14516]
+1645094526.1522770 [INFO] [drone-3]: process started with pid [14517]
+1645094526.1528313 [INFO] [mqtt-4]: process started with pid [14518]
+1645094526.1533403 [INFO] [sensors-5]: process started with pid [14519]
+1645094528.7552516 [drone-3] [INFO] [1645094528.753807048] [ASVNot_defined.drone_node]: Connecting to vehicle in tcp:navio.local:5678
+1645094529.5850809 [mission-1] [INFO] [1645094529.583889960] [ASVNot_defined.mission_node]: Starting mode:0 REST.
+1645094529.5899117 [mission-1] [INFO] [1645094529.589136296] [ASVNot_defined.mission_node]: mission_node is calling service MQTT_send_info
+1645094529.9139733 [mqtt-4] [INFO] [1645094529.912998888] [ASVNot_defined.mqtt_node]: Requested to send MQTT
+1645094529.9164841 [mqtt-4] [INFO] [1645094529.915874120] [ASVNot_defined.mqtt_node]: MQTT start sending
+1645094529.9215257 [mission-1] [INFO] [1645094529.920641512] [ASVNot_defined.mission_node]: All systems operative
+1645094529.9256361 [mission-1] [INFO] [1645094529.925010504] [ASVNot_defined.mission_node]: Changed current ASV mode to REST.
+1645094529.9281609 [mission-1] [INFO] [1645094529.927336488] [ASVNot_defined.mission_node]: vehicle resting.
+1645094529.9352527 [mission-1] [INFO] [1645094529.931096456] [ASVNot_defined.mission_node]: mission_node is calling service arm_vehicle
+1645094531.0506692 [drone-3] [INFO] [1645094531.037744904] [ASVNot_defined.drone_node]: Vehicle disarmed
+1645094531.0520644 [mission-1] [INFO] [1645094531.049391176] [ASVNot_defined.mission_node]: Vehicle was armed! Stoping the vehicle.
+1645094531.1548312 [mission-1] [INFO] [1645094531.153433416] [ASVNot_defined.mission_node]: mission_node is calling service arm_vehicle
+1645094531.1576400 [drone-3] [INFO] [1645094531.156577384] [ASVNot_defined.drone_node]: Vehicle disarmed
+1645094531.1623607 [mission-1] [INFO] [1645094531.161603432] [ASVNot_defined.mission_node]: Vehicle was armed! Stoping the vehicle.
+1645094534.0812688 [mission-1] [INFO] [1645094534.074855016] [ASVNot_defined.mission_node]: Changed current ASV mode to SIMPLE POINT.
+1645094534.0901644 [mission-1] [INFO] [1645094534.089267208] [ASVNot_defined.mission_node]: mission_node is calling service change_asv_mode
+1645094534.0963788 [mission-1] [INFO] [1645094534.095427880] [ASVNot_defined.mission_node]: mission_node is calling service arm_vehicle
+1645094535.0078852 [drone-3] [INFO] [1645094535.004556488] [ASVNot_defined.drone_node]: Vehicle armed
+1645094535.0146480 [mission-1] [INFO] [1645094535.011178664] [ASVNot_defined.mission_node]: vehicle armed, indicate point to go in "/goto" action
+1645094535.0151892 [mission-1] [INFO] [1645094535.013631784] [ASVNot_defined.mission_node]: vehicle in 'SIMPLE POINT' mode
+1645094539.7393219 [mission-1] [INFO] [1645094539.735126344] [ASVNot_defined.mission_node]: new waypoint received: asv_interfaces.msg.Location(lon=-5.940327925648651, lat=37.30736509353165)
+1645094539.7436690 [mission-1] [INFO] [1645094539.741971784] [ASVNot_defined.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940327925648651, lat=37.30736509353165)
+1645094539.7552624 [drone-3] [INFO] [1645094539.754295400] [ASVNot_defined.drone_node]: Action call received
+1645094539.7629020 [drone-3] [INFO] [1645094539.758115240] [ASVNot_defined.drone_node]: Action accepted
+1645094539.7686672 [drone-3] [INFO] [1645094539.767923784] [ASVNot_defined.drone_node]: Turning to : 238.52896954371133 N
+1645094540.0611792 [mission-1] [INFO] [1645094540.059439528] [ASVNot_defined.mission_node]: Goal accepted :)
+1645094541.7855289 [mission-1] [INFO] [1645094541.784557352] [ASVNot_defined.mission_node]: distance=13.95841438029787
+1645094542.7922993 [mission-1] [INFO] [1645094542.790586824] [ASVNot_defined.mission_node]: distance=13.965734299770327
+1645094543.7980156 [mission-1] [INFO] [1645094543.794130504] [ASVNot_defined.mission_node]: distance=14.091181234073579
+1645094544.8017910 [mission-1] [INFO] [1645094544.798077512] [ASVNot_defined.mission_node]: distance=13.603794908810759
+1645094545.8042307 [mission-1] [INFO] [1645094545.803181928] [ASVNot_defined.mission_node]: distance=12.92900261423222
+1645094546.8097084 [mission-1] [INFO] [1645094546.808681992] [ASVNot_defined.mission_node]: distance=12.43515270797676
+1645094547.9156320 [mission-1] [INFO] [1645094547.912112392] [ASVNot_defined.mission_node]: distance=12.129357936469752
+1645094548.9122665 [mission-1] [INFO] [1645094548.910422472] [ASVNot_defined.mission_node]: distance=11.547034041871209
+1645094549.9163268 [mission-1] [INFO] [1645094549.914395400] [ASVNot_defined.mission_node]: distance=10.772267260717694
+1645094550.9164593 [mission-1] [INFO] [1645094550.914417032] [ASVNot_defined.mission_node]: distance=9.815979816498025
+1645094551.9160054 [mission-1] [INFO] [1645094551.912983400] [ASVNot_defined.mission_node]: distance=8.776352256500513
+1645094552.9161880 [mission-1] [INFO] [1645094552.913509896] [ASVNot_defined.mission_node]: distance=7.723708606208708
+1645094553.9139791 [mission-1] [INFO] [1645094553.912061768] [ASVNot_defined.mission_node]: distance=6.716957483636328
+1645094554.9164798 [mission-1] [INFO] [1645094554.914808104] [ASVNot_defined.mission_node]: distance=5.7470096746420785
+1645094555.9159305 [mission-1] [INFO] [1645094555.913275240] [ASVNot_defined.mission_node]: distance=4.742051263821002
+1645094556.9161713 [mission-1] [INFO] [1645094556.913745160] [ASVNot_defined.mission_node]: distance=3.7111184408228284
+1645094557.9164765 [mission-1] [INFO] [1645094557.914498856] [ASVNot_defined.mission_node]: distance=2.661297324610732
+1645094558.9162071 [mission-1] [INFO] [1645094558.913428328] [ASVNot_defined.mission_node]: distance=1.6126678527355764
+1645094559.8456976 [drone-3] [INFO] [1645094559.844511176] [ASVNot_defined.drone_node]: Goal reached, waiting for sample
+1645094559.9170120 [sensors-5] [INFO] [1645094559.916109800] [ASVNot_defined.sensors_node]: Sample requested
+
+Current ASCII Frame
+[ERROR] [1645094890.987714568] [sensor_node]: Sensor not known 80
+Frame Type
+[ERROR] [1645094890.990277192] [sensor_node]: Sensor not known 3C3D3E86062335433             346314345383139363233434246235357332337234241543A39382357543A31352E34322350483A2             D352E343623444F3A382E3023434F4E443A302E36234F52503A302E35343523
+frame (STR)
+[ERROR] [1645094890.992842856] [sensor_node]: Sensor not known98#WT
+[ERROR] [1645094890.995245928] [sensor_node]: Sensor not known-5.46#DO
+[ERROR] [1645094890.997644872] [sensor_node]: Sensor not known0.6#ORP
+xº
+
+{% endhighlight %}
+
+{% highlight ruby %}
+TODO:
+- fix message definition
+- fix message parsing
+{% endhighlight %}
+
+

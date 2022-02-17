@@ -29,4 +29,4 @@ The camera test has proceeded using the RC controller, the ROS2 code will be giv
 It has been decided that all the tools needed to check the drone and GPS will be carried home for debug, so that we can complete next test.
 
 
-The needed configuration that will be carried for next nmew drones is going to be published in the [configuration guide](../Raspberry/Raspi.html)
+The needed configuration that will be carried for next nmew drones is going to be published in the [configuration guide](../../../../../Raspberry/Raspi.html)
