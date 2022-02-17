@@ -1,4 +1,4 @@
----
+Raspi.markdownRaspi.markdown---
 # Feel free to add content and custom Front Matter to this file.
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
@@ -11,10 +11,18 @@ ROS is deprecated as it will be no longer supported in 2022
 
 To configure the raspberry pi you must:
 
-according to [Navio2 Instructions](https://docs.emlid.com/navio2/ardupilot/installation-and-running)
+according to [Navio2 Instructions](https://docs.emlid.com/navio2/ardupilot/installation-and-running) you must change the configuration in "sudo nano /etc/default/ardurover"
 - Modify the IP of ardurover by:
   - Setting telem1 value to 'tcp:0.0.0.0:5678'
     - This means we will broadcast TCP in port 5678
   - Setting telem2 value to "udp:127.0.0.1:14650"
     - In case we want the raspberry to act over the navio in case of connection loss
   - Add a Telem3 to “-B /ttyAMA0”
+    - To read the data from the Emlid M+ GPS
+
+Afterwards you can activate ardupilot/ardurover by using
+{% highlight ruby %}
+sudo systemctl enable ardurover
+{% endhighlight %}
+
+afterwards you must configure all the internal parameters of [Navio2](./Navio2.html)
