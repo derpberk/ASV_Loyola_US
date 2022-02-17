@@ -6,8 +6,8 @@ import time
 import serial
 import random
 from asv_interfaces.srv import Takesample
-from asv_interfaces.msg import Status, Sensor
-import Jetson.GPIO as GPIO
+from asv_interfaces.msg import Status, Sensor, Nodeupdate
+#import Jetson.GPIO as GPIO
 from datetime import datetime
 
 #TODO: EVERYTHING
@@ -47,8 +47,8 @@ class Sensor_node(Node):
 
         self.declare_topics()
 
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.pump_channel, GPIO.OUT)
+        #GPIO.setmode(GPIO.BOARD)
+        #GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
         self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
 
@@ -67,10 +67,10 @@ class Sensor_node(Node):
             response.o2=random.random()*98.0
             response.temperature = 20 + random.random()*10
         else:
-            GPIO.output(self.pump_channel, GPIO.HIGH)
+            #GPIO.output(self.pump_channel, GPIO.HIGH)
             time.sleep(10.0)
             self.read_sensor()
-            GPIO.output(self.pump_channel, GPIO.LOW)
+            #GPIO.output(self.pump_channel, GPIO.LOW)
             response.date=self.sensor_data.date
             response.ph_volt = self.sensor_data.ph_volt
             response.ph_temp = self.sensor_data.ph_temp
@@ -224,7 +224,7 @@ def main(args=None):
         """
         There has been an error with the program, so we will send the error log to the watchdog
         """
-        GPIO.cleanup() #release GPIO
+        #GPIO.cleanup() #release GPIO
         x = rclpy.create_node('sensor_node') #we state what node we are
         publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message

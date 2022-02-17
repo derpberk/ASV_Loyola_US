@@ -126,9 +126,9 @@ class Mission_node(Node):
         if self.mission_mode == 0:  # Rest
             if self.change_current_mission_mode(self.mission_mode):
                 self.get_logger().info("vehicle resting.")
-            if self.status.armed:
                 self.arm_vehicle(False)
-                self.get_logger().info("Vehicle was armed! Stoping the vehicle.")
+            if self.status.armed:
+                self.get_logger().info("Vehicle was armed externally! .", once=True)
 
         elif self.mission_mode == 1:  # Stand_By
             if self.change_current_mission_mode(self.mission_mode):
