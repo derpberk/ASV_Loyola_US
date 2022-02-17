@@ -40,6 +40,14 @@ TODO:
 - Fix RC override
 {% endhighlight %}
 
+
+
+{% highlight ruby %}
+The sensor read was:
+<=>#5C3F1CE819623CBF#SW3#7#BAT:98#WT:15.42#PH:-5.46#DO:8.0#COND:0.6#ORP:0.545#
+{% endhighlight %}
+
+
 No camera test was performed
 
 The next test must be performed using all the features of the drone, the one tested today + the server, both separately has been tried successfully, but never together
