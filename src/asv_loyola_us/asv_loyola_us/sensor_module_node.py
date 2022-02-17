@@ -65,6 +65,7 @@ class Sensor_node(Node):
             response.algae=random.random()*100.0
             response.salinity=random.random()*4.0
             response.o2=random.random()*98.0
+            response.temperature = 20 + random.random()*10
         else:
             GPIO.output(self.pump_channel, GPIO.HIGH)
             time.sleep(10.0)
@@ -73,6 +74,7 @@ class Sensor_node(Node):
             response.date=self.sensor_data.date
             response.ph_volt = self.sensor_data.ph_volt
             response.ph_temp = self.sensor_data.ph_temp
+            response.ph = self.sensor_data.ph
             response.salinity = self.sensor_data.salinity
             response.o2_percentage = self.sensor_data.o2_percentage
             response.temperature = self.sensor_data.temperature
