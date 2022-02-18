@@ -6,11 +6,10 @@ import time
 import serial
 import random
 from asv_interfaces.srv import Takesample
-from asv_interfaces.msg import Status, Sensor
+from asv_interfaces.msg import Status, Sensor, Nodeupdate
 import Jetson.GPIO as GPIO
 from datetime import datetime
-
-#TODO: EVERYTHING
+import traceback
 
 class Sensor_node(Node):
 
@@ -50,10 +49,14 @@ class Sensor_node(Node):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
-        self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
-
+        try:
+            self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
+            self.declare_services()
+        except:
+            self.get_logger().error("Failed to connect to SmartWater module, either it is off or disconnected")
+            self.get_logger().fatal("Sensor module is dead")
+            self.destroy_node()
         #declare the services
-        self.declare_services()
 
     def get_sample_callback(self, request, response):
         self.get_logger().info(f"Sample requested")

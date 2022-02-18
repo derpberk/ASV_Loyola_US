@@ -70,22 +70,21 @@ class Dronekit_node(Node):
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         try:
             self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
-        except ConnectionRefusedError:
-            self.get_logger().fatal(f"Connection to navio2 could not be made")
+            self.dictionary()
+            self.declare_topics()
+            self.declare_services()
+            self.declare_actions()
+        except: #ConnectionRefusedError:
+            #error = traceback.format_exc()
+            self.get_logger().error(f"Connection to navio2 could not be made error:\n {message}")
+            self.get_logger().fatal("Drone module is dead")
+            self.destroy_node()
 
             #TODO: manage error of timeout
             #      manage error of connection refused
             #      manage error of critical startup (failsafe)
 
-        self.dictionary()
-
-        # declare the services
-        #self.declare_services()
-        # start to pubblish
-
-        self.declare_topics()
-        self.declare_services()
-        self.declare_actions()
+        
 
     def arm_vehicle_callback(self, request, response):
         """

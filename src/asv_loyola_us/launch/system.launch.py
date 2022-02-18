@@ -13,7 +13,7 @@ from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
 def generate_launch_description():
 
     namespace = DeclareLaunchArgument(
-        "namespace", default_value=TextSubstitution(text="ASVNot_defined")
+        "namespace", default_value=TextSubstitution(text="ASV")
     )
     node_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(

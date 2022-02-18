@@ -1,7 +1,10 @@
 import rclpy
 from rclpy.node import Node
 from datetime import datetime
-
+import launch_ros.actions
+import launch
+import os
+from ament_index_python.packages import get_package_share_directory
 from asv_interfaces.msg import Nodeupdate, String
 
 # TODO: we must assure watchdog never crashes, so keep code simple
@@ -71,6 +74,21 @@ class Watchdog_node(Node):
                 for i in self.error_list:
                     msg.string=str(i)
                     self.error_log_publisher.publish(msg)
+
+    #TODO: start the node from here, so that we can restart things from MQTT
+    """def start_sensor_module_callback(self):
+        config = os.path.join(
+        get_package_share_directory('asv_loyola_us'),
+        'config',
+        'config.yaml')
+
+        sensors = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='sensors',
+        name='sensors_node',
+        parameters = [config]
+        launch.LaunchDescription([sensors])
+    )"""
 
 def main(args=None):
     # init ROS2
