@@ -74,11 +74,24 @@ class Dronekit_node(Node):
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
-        except: #ConnectionRefusedError:
-            #error = traceback.format_exc()
-            self.get_logger().error(f"Connection to navio2 could not be made error:\n {message}")
+        except ConnectionRefusedError:
+            self.get_logger().error(f"Connection to navio2 was refused")
             self.get_logger().fatal("Drone module is dead")
             self.destroy_node()
+        except OSError:
+            self.get_logger().error(f"Navio2 was not found in the same network")
+            self.get_logger().fatal("Drone module is dead")
+            self.destroy_node()
+        except TimeoutError:
+            self.get_logger().error(f"Navio2 port was busy, timeout error")
+            self.get_logger().fatal("Drone module is dead")
+            self.destroy_node()
+        except:
+            error = traceback.format_exc()
+            self.get_logger().error(f"Connection to navio2 could not be made, unknown error:\n {error}")
+            self.get_logger().fatal("Drone module is dead")
+            self.destroy_node()
+            print(str(E))
 
             #TODO: manage error of timeout
             #      manage error of connection refused

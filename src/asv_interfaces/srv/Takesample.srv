@@ -1,5 +1,5 @@
 #request
-bool debug True
+bool debug False
 ---
 #response
 float64 ph -1.0

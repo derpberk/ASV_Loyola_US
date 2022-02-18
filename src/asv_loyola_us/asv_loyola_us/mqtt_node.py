@@ -42,8 +42,13 @@ class MQTT_node(Node):
         self.parameters()
 
         #start MQTT Connection
-        self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message)
-        #TODO raise error if MQTT fails so that main node knows about it to retry connection.
+
+        try:
+            self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
+            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message)
+        except:
+            self.get_logger().fatal("MQTT connection failed")
+            #TODO raise error if MQTT fails so that main node knows about it to retry connection.
 
         #declare variables
         self.status=Status()

@@ -27,6 +27,8 @@ class Sensor_node(Node):
         self.baudrate = self.get_parameter('baudrate').get_parameter_value().integer_value
         self.declare_parameter('pump_parameters', None)
         self.pump_parameters = self.get_parameter('pump_parameters').get_parameter_value()
+        self.declare_parameter('debug', False)
+        self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
@@ -50,7 +52,8 @@ class Sensor_node(Node):
         GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
         try:
-            self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
+            if self.DEBUG == False:
+                self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
             self.declare_services()
         except:
             self.get_logger().error("Failed to connect to SmartWater module, either it is off or disconnected")
@@ -63,12 +66,16 @@ class Sensor_node(Node):
         if request.debug:
             self.get_logger().info(f"The sample will return a debug value")
             time.sleep(6.0)
+            response.date=str(datetime.now())
             response.ph=random.random()*8.0
-            response.turbidity=random.random()*100.0
-            response.algae=random.random()*100.0
+            response.ph_volt=random.random()*8.0
+            response.ph_temp=15.0+random.random()*10.0
+            response.temperature=15.0+random.random()*10.0
             response.salinity=random.random()*4.0
-            response.o2=random.random()*98.0
-            response.temperature = 20 + random.random()*10
+            response.o2_percentage=random.random()*98.0
+            response.conductivity = 20 + random.random()*10
+            response.conductivity_res = 4+  random.random()*10
+            response.oxidation_reduction_potential =  4+  random.random()*10
         else:
             GPIO.output(self.pump_channel, GPIO.HIGH)
             time.sleep(10.0)
@@ -88,18 +95,76 @@ class Sensor_node(Node):
 
     def read_sensor(self):
         self.get_logger().info(f"Taking sample")
-
         self.read_frame()  # Read a frame from the buffer
-        str_date = str(datetime.now())  # Leemos la fecha y la convertimos en string
-        # Metemos la fecha en el diccionario de variables
-        # Metemos la fecha en el diccionario de variables
-        self.sensor_data.date = str_date
-        self.sensor_publisher.publish(self.sensor_data)
 
 
     def read_frame(self):
+
         is_frame_ok = False  # While a frame hasnt correctly readed #
         self.serial.reset_input_buffer()  # Erase the input buffer to start listening
+
+        while not is_frame_ok:
+
+            time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
+
+            if self.serial.inWaiting() < 27:  # If the frame has a lenght inferior to the minimum of the Header
+                continue
+
+            else:
+
+                try:
+                    bytes = self.serial.read_all()  # Read all the buffer 
+                    #bytes = "3C3D3E86062335433346314345383139363233434246235357332337234241543A39382357543A31352E34322350483A2D352E343623444F3A382E3023434F4E443A302E36234F52503A302E35343523"
+
+                    bytes = bytes.decode('ascii', 'ignore')  # Convert to ASCII and ignore non readible characters
+
+                    frames = bytes.split('<=>')  # Frame separator
+
+                    last_frame = frames[-1].split('#')[
+                    :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
+                    self.get_logger().info("sensor read: {last_frame}")
+
+                    for field in last_frame:  # Iterate over the frame fields
+
+                        data = field.split(':')
+                        if len(data) < 2:
+                            # This is not a data field #
+                            pass
+                        else:
+                            # This is a data field #
+                            sensor_str = data[0]
+                            sensor_val = float(data[1])
+
+                            if sensor_str == "SAMPLE_NUM":
+                                self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
+                            if sensor_str == "BAT":
+                                self.get_logger().info(f"Found Battery {sensor_val}")
+                            if sensor_str == "WT":
+                                self.get_logger().info(f"Found temperature {sensor_val}")
+                            if sensor_str == "PH":
+                                self.get_logger().info(f"Found ph value {sensor_val}")
+                            if sensor_str == "DO":
+                                self.get_logger().info(f"Found Disolved Oxygen {sensor_val}")
+                            if sensor_str == "COND":
+                                self.get_logger().info(f"Found Conductivity {sensor_val}")
+                            if sensor_str == "ORP":
+                                self.get_logger().info(f"Found Oxidation Reduction Potential {sensor_val}")
+
+                    is_frame_ok = True
+
+                except Exception as E:
+
+                    print("ERROR READING THE SENSOR. THIS IS NO GOOD!")
+                    print("The cause of the exception: " + E)
+                    self.serial.reset_input_buffer()
+
+
+    def read_frame_string(self):
+        is_frame_ok = False  # While a frame hasnt correctly readed #
+        self.serial.reset_input_buffer()  # Erase the input buffer to start listening
+
+        self.sensor_data.date = str(datetime.now())
+        self.sensor_publisher.publish(self.sensor_data)
 
         while not is_frame_ok:
 
