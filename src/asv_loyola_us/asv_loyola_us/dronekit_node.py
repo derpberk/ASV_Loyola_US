@@ -201,10 +201,10 @@ class Dronekit_node(Node):
         Args:
             goal_loc: Reference position (dronekit.LocationGlobal).
         Returns:
-            'True' if the ASV distance respecto to the target Waypoint is less than 1.5 meters.
+            'True' if the ASV distance respecto to the target Waypoint is less than 0.5 meters.
         """
 
-        return self.calculate_distance(goal_loc) < 1.5
+        return self.calculate_distance(goal_loc) < 0.5
 
     def calculate_distance(self, goal_loc):
         """
@@ -276,8 +276,9 @@ class Dronekit_node(Node):
         goal_handle.execute() #execute goto_execute_callback
 
     def goto_cancel(self, goal_handle):
-        #someone asked to cancel the action
-        return CancelResponse.REJECT #for the time being we wont allow cancel
+        """Accept or reject a client request to cancel an action."""
+        self.get_logger().info('Received cancel request')
+        return CancelResponse.ACCEPT
 
 
     def goto_execute_callback(self, goal_handle):
@@ -289,16 +290,21 @@ class Dronekit_node(Node):
         time.sleep(2)
         self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
         while rclpy.ok() and not self.reached_position(goal_handle.request.samplepoint):
-            """if self.goto_goal_handle.is_cancel_requested:
-                self.get_logger().info('Goal canceled')
+            if goal_handle.is_cancel_requested:
+                #make it loiter around actual position
+                goal_handle.canceled()
+                self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
                 self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
-            if self.goto_goal_handle.is_active:
+            """if self.goto_goal_handle.is_active:
                 self.get_logger().info('Goal aborted')
                 self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()"""
             if not self.status.armed:
-                self.get_logger().info('Goal aborted')
+                self.get_logger().info('vehicle was forced to disconnect Goal aborted')
+                #make it loiter around actual position
+                self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
+                self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
             feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
             goal_handle.publish_feedback(feedback_msg)
@@ -309,7 +315,7 @@ class Dronekit_node(Node):
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
         value=self.call_service(self.take_sample_client, Takesample.Request())
-        self.get_logger().info(f'Sample value {value}')
+        self.get_logger().debug(f'Sample value {value}')
         result=Goto.Result()
         result.success = True
         return result

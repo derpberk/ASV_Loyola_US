@@ -1,3 +1,4 @@
+float64 smart_water_battery -1.0
 float64 ph -1.0
 float64 ph_volt -1.0
 float64 ph_temp -1.0

@@ -241,8 +241,9 @@ class Dronekit_node(Node):
         goal_handle.execute() #execute goto_execute_callback
 
     def goto_cancel(self, goal_handle):
-        #someone asked to cancel the action
-        return CancelResponse.REJECT #for the time being we wont allow cancel
+        """Accept or reject a client request to cancel an action."""
+        self.get_logger().info('Received cancel request')
+        return CancelResponse.ACCEPT
 
 
     def goto_execute_callback(self, goal_handle):
@@ -251,11 +252,13 @@ class Dronekit_node(Node):
         time.sleep(2)
         counter = 0.0
         while rclpy.ok() and counter <10:
-            """if self.goto_goal_handle.is_cancel_requested:
-                self.get_logger().info('Goal canceled')
-                self.vehicle.mode = VehicleMode("LOITER")
+            if goal_handle.is_cancel_requested:
+                #make it loiter around actual position
+                goal_handle.canceled()
+                #self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
+                self.mode = VehicleMode("LOITER")
                 return Goto.Result()
-            if self.goto_goal_handle.is_active:
+            """if self.goto_goal_handle.is_active:
                 self.get_logger().info('Goal aborted')
                 self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()"""

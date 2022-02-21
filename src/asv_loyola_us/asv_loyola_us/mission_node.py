@@ -11,8 +11,8 @@ import traceback #for code errors
 from time import sleep #delay
 
 #custom interfaces
-from asv_interfaces.srv import Newpoint, ASVmode, CommandBool
-from asv_interfaces.msg import Status, Nodeupdate, String
+from asv_interfaces.srv import Newpoint, ASVmode, CommandBool, LoadMission
+from asv_interfaces.msg import Status, Nodeupdate, String, Location
 from asv_interfaces.action import Goto
 
 from action_msgs.msg import GoalStatus
@@ -35,7 +35,9 @@ class Mission_node(Node):
         self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
-        self.load_mission_service = self.create_service(CommandBool, 'load_mission', self.load_mission_callback)
+        self.load_mission_service = self.create_service(LoadMission, 'load_mission', self.load_mission_callback)
+        self.cancel_movement_service = self.create_service(CommandBool, 'cancel_movement', self.cancel_movement_callback)
+
         #client
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
@@ -47,6 +49,8 @@ class Mission_node(Node):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_publisher = self.create_publisher(String, 'mission_mode', 10)
         self.mission_mode_publisher_timer = self.create_timer(1, self.mission_mode_publish)
+        self.destination_publisher = self.create_publisher(Location, 'destination', 10)
+
 
     def declare_actions(self):
         self.goto_action_client = ActionClient(self, Goto, 'goto')
@@ -87,7 +91,7 @@ class Mission_node(Node):
         self.mission_mode = 0  # el modo del ASV deseado
         self.current_mission_mode = -1  # el modo del ASV actual
 
-        self.mission_mode_strs = ["REST", "STANDBY", "PRELOADED_MISSION", "MANUAL", "SIMPLE POINT", "RTL"]  # Strings para modos
+        self.mission_mode_strs = ["LAND", "STANDBY", "PRELOADED_MISSION", "MANUAL", "SIMPLE POINT", "RTL"]  # Strings para modos
 
         self.mqtt_waypoint = None #store waypoint from Server
         self.status = Status() #Status of the robot
@@ -123,7 +127,7 @@ class Mission_node(Node):
     we MUST avoid spin_until_future_complete
     """
     def main(self):
-        if self.mission_mode == 0:  # Rest
+        if self.mission_mode == 0:  # LAND
             if self.change_current_mission_mode(self.mission_mode):
                 self.get_logger().info("vehicle resting.")
                 self.arm_vehicle(False)
@@ -289,17 +293,20 @@ class Mission_node(Node):
 
 
     def load_mission_callback(self, request, response):
-        if len(request.file_name == 0): #if string is empty load mission
+        self.get_logger().info(f"asked to load mission {request.file_name}")
+        if request.file_name == "": #if string is empty load last mission
             self.samplepoints = self.mg.get_samplepoints()
             response.success = True
         else: #load indicated mission
             try:
-                self.mission_filepath = os.path.expanduser("~/ASV_Loyola_US/"+request.file_name)
+                self.mission_filepath = os.path.expanduser("~/ASV_Loyola_US/MisionesLoyola_dron_"+request.file_name+".kml")
                 self.mg = KMLMissionGenerator(self.mission_filepath)
                 self.samplepoints = self.mg.get_samplepoints()
                 response.success = True
+                self.get_logger().info(f"mission: MisionesLoyola_dron_"+request.file_name+".kml"+" was loaded successfully")
             except:
                 response.success = False
+                self.get_logger().info(f"mission: MisionesLoyola_dron_{request.file_name}.kml doesn't exist in database")
         return response
 
     def change_ASV_mode(self, mode):
@@ -317,6 +324,7 @@ class Mission_node(Node):
 
     def go_to(self, location):
         self.get_logger().info(f"going to {location}")
+        self.destination_publisher.publish(location)
         self.goto_action_client.wait_for_server()
         self.waiting_for_action=True
         goal_msg = Goto.Goal()
@@ -330,14 +338,14 @@ class Mission_node(Node):
         self.get_logger().info(f"distance={distance}")
 
     def go_to_response(self, future):
-        goal_handle = future.result()
-        if not goal_handle.accepted:
+        self.goal_handle = future.result()
+        if not self.goal_handle.accepted:
             self.get_logger().info('Goal rejected :(')
             self.waiting_for_action=False
             #TODO: decide what to do if goal is rejected, in other words, action busy
             return
         self.get_logger().info('Goal accepted :)')
-        self._get_result_future = goal_handle.get_result_async()
+        self._get_result_future = self.goal_handle.get_result_async()
         self._get_result_future.add_done_callback(self.go_to_finished)
 
     def go_to_finished(self, future):
@@ -358,6 +366,21 @@ class Mission_node(Node):
             self.mission_mode_publisher.publish(msg)
         except:
             pass
+
+    def cancel_movement_callback(self, request, response):
+        self.get_logger().info("asked to stop the vehicle, changing mode to STANDBY")
+        self.mission_mode = 1 #change mode to Standby
+        if self.waiting_for_action: #if the action was active
+            self.get_logger().info("the submarine was moving, canceling movement")
+            self.goal_handle.cancel_goal_async()
+            if self.current_mission_mode==2: #we were doing a mission
+                self.samplepoints=[] #we empty the mission
+                self.get_logger().info("mission emptied")
+        response.success=True
+        return response
+            
+
+
 
 
 def main(args=None):

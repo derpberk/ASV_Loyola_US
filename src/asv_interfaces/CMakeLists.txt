@@ -31,6 +31,7 @@ set(srv_files
   "srv/CommandBool.srv"
   "srv/Newrelativepoint.srv"
   "srv/Takesample.srv"
+  "srv/LoadMission.srv"
   #"srv/Service2.srv"
    # etc
   )
