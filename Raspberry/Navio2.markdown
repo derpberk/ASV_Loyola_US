@@ -11,7 +11,7 @@ The first step is to connect the navio to the raspberry pi. this must be done by
 
 Once connected, if the raspberry/navio is powered the led of the navio must light.
 
-you can check a general placement of all the components used in this [image](../assets/box.jpeg)
+you can check a general placement of all the components used in this [image](../assets/box.jpg)
 
 The configuration of the navio must be carried in this order
 

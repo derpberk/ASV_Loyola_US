@@ -19,10 +19,9 @@ title: Quickstart
    `rosdep install -i --from-path src --rosdistro foxy -y`
 6. Build the package
 
-   `colcon build`
-
+   `colcon build --symlink-install`
 
 
 - (optional)
-  - add the aliases to your `~/.bashrc` for commodity
-  - indicate a specific `ROS_DOMAIN_ID` if you want to work with multiple drones separately
+  - add the [aliases](./aliases.html) to your `~/.bashrc` for commodity
+  - indicate a specific `ROS_DOMAIN_ID` if you want to work with multiple drones separately in the same network

@@ -6,7 +6,7 @@ categories: jekyll update
 ---
 After fixing the GPS issues at home, we parted to make a second test with the ASV and the code designed in ROS2
 
-the code used can be found in this [commit](https://github.com/AloePacci/ASV_Loyola_US/commit/e07321b5255257a44fb60bf2b4dc7d0f75155345).
+the code used can be found in this [commit](https://github.com/AloePacci/ASV_Loyola_US/tree/e07321b5255257a44fb60bf2b4dc7d0f75155345).
 
 
 

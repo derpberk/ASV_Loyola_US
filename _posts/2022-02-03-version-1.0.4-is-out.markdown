@@ -1,0 +1,17 @@
+---
+layout: post
+title:  "version 1.0.4 is out!"
+date:   2022-02-22 13:45:56 +0100
+categories: jekyll update
+---
+
+The version 1.4 of our drone is ready and will be tested at test 4 the 23/02/2022 in Loyola's Lake.
+
+This version includes the following:
+- Robot is able to follow points indicated from server
+- Robot is able to follow preloaded missions
+- Robot indicates where its going to go
+- Robot indicates its own position
+- Robot indicates logs of whats happening
+- Robot is able to cancel movement if indicated from server
+- Robot activates pump and reads from smartwater module, storing data in the server's database

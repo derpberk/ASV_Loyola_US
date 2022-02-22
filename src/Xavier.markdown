@@ -15,3 +15,6 @@ To accomplish the requirements we have created 3 packages.
 - [ASV_interfaces](./asv_interfaces/asv_interfaces.html) holds all the interfaces for topics, services and actions that our robot uses
 - [ASV_Loyola_US](./asv_loyola_us/asv_loyola_us.html) holds the code that governs the ASV behaviour
 - [Simulator](./simulator/visualizer.html) emulates some sensors for debug procedures
+
+
+First Stop would be to config the Xavier for a good start, you can check the [quick start](../quickstart.html)
