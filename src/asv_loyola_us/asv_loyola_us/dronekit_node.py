@@ -294,7 +294,6 @@ class Dronekit_node(Node):
                 #make it loiter around actual position
                 goal_handle.canceled()
                 self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
-                self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
             """if self.goto_goal_handle.is_active:
                 self.get_logger().info('Goal aborted')
@@ -304,7 +303,6 @@ class Dronekit_node(Node):
                 self.get_logger().info('vehicle was forced to disconnect Goal aborted')
                 #make it loiter around actual position
                 self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
-                self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
             feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
             goal_handle.publish_feedback(feedback_msg)

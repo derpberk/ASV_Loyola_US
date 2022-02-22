@@ -9,6 +9,7 @@ from asv_interfaces.srv import Takesample
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 import Jetson.GPIO as GPIO
 from datetime import datetime
+from .submodulos.call_service import call_service #to call services
 import traceback
 
 class Sensor_node(Node):
@@ -59,6 +60,7 @@ class Sensor_node(Node):
             self.get_logger().error("Failed to connect to SmartWater module, either it is off or disconnected")
             self.get_logger().fatal("Sensor module is dead")
             self.destroy_node()
+        self.get_logger().info("sensor node initialized")
         #declare the services
 
     def get_sample_callback(self, request, response):
@@ -108,64 +110,64 @@ class Sensor_node(Node):
 
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
 
-            #if self.serial.inWaiting() < 27:  # If the frame has a lenght inferior to the minimum of the Header
-            #    continue
+            if self.DEBUG == False and self.serial.inWaiting() < 27:  # If the frame has a lenght inferior to the minimum of the Header
+                continue
 
-            #else:
+            else:
 
-            try:
-                if self.DEBUG:
-                    bytes = "<=>#5C3F1CE819623CBF#SW3#7#BAT:98#WT:15.42#PH:-5.46#DO:8.0#COND:0.6#ORP:0.545#"
-                else:
-                    bytes = self.serial.read_all()  # Read all the buffer 
-                    bytes = bytes.decode('ascii', 'ignore')  # Convert to ASCII and ignore non readible characters
-
-                self.get_logger().debug(f"read: {bytes}")
-                frames = bytes.split('<=>')  # Frame separator
-
-                last_frame = frames[-1].split('#')[
-                :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
-                self.get_logger().info(f"sensor read: {last_frame}")
-
-                for field in last_frame:  # Iterate over the frame fields
-
-                    data = field.split(':')
-                    if len(data) < 2:
-                        # This is not a data field #
-                        pass
+                try:
+                    if self.DEBUG:
+                        bytes = "<=>#5C3F1CE819623CBF#SW3#7#BAT:98#WT:15.42#PH:-5.46#DO:8.0#COND:0.6#ORP:0.545#"
                     else:
-                        # This is a data field #
-                        sensor_str = data[0]
-                        sensor_val = float(data[1])
+                        bytes = self.serial.read_all()  # Read all the buffer 
+                        bytes = bytes.decode('ascii', 'ignore')  # Convert to ASCII and ignore non readible characters
 
-                        if sensor_str == "SAMPLE_NUM":
-                            self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
-                        if sensor_str == "BAT":
-                            self.get_logger().debug(f"Found Battery {sensor_val}")
-                            self.sensor_data.smart_water_battery = sensor_val
-                        if sensor_str == "WT":
-                            self.get_logger().debug(f"Found temperature {sensor_val}")
-                            self.sensor_data.temperature = sensor_val
-                        if sensor_str == "PH":
-                            self.get_logger().debug(f"Found ph value {sensor_val}")
-                            self.sensor_data.ph = sensor_val
-                        if sensor_str == "DO":
-                            self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
-                            self.sensor_data.o2 = sensor_val
-                        if sensor_str == "COND":
-                            self.get_logger().debug(f"Found Conductivity {sensor_val}")
-                            self.sensor_data.conductivity = sensor_val
-                        if sensor_str == "ORP":
-                            self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
-                            self.sensor_data.oxidation_reduction_potential = sensor_val
+                    self.get_logger().debug(f"read: {bytes}")
+                    frames = bytes.split('<=>')  # Frame separator
 
-                is_frame_ok = True
-                self.sensor_publisher.publish(self.sensor_data) #send data to MQTT to store in server
-            except Exception as E:
+                    last_frame = frames[-1].split('#')[
+                    :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
+                    self.get_logger().info(f"sensor read: {last_frame}")
 
-                print("ERROR READING THE SENSOR. THIS IS NO GOOD!")
-                print("The cause of the exception: " + E)
-                #self.serial.reset_input_buffer()
+                    for field in last_frame:  # Iterate over the frame fields
+
+                        data = field.split(':')
+                        if len(data) < 2:
+                            # This is not a data field #
+                            pass
+                        else:
+                            # This is a data field #
+                            sensor_str = data[0]
+                            sensor_val = float(data[1])
+
+                            if sensor_str == "SAMPLE_NUM":
+                                self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
+                            if sensor_str == "BAT":
+                                self.get_logger().debug(f"Found Battery {sensor_val}")
+                                self.sensor_data.smart_water_battery = sensor_val
+                            if sensor_str == "WT":
+                                self.get_logger().debug(f"Found temperature {sensor_val}")
+                                self.sensor_data.temperature = sensor_val
+                            if sensor_str == "PH":
+                                self.get_logger().debug(f"Found ph value {sensor_val}")
+                                self.sensor_data.ph = sensor_val
+                            if sensor_str == "DO":
+                                self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
+                                self.sensor_data.o2 = sensor_val
+                            if sensor_str == "COND":
+                                self.get_logger().debug(f"Found Conductivity {sensor_val}")
+                                self.sensor_data.conductivity = sensor_val
+                            if sensor_str == "ORP":
+                                self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
+                                self.sensor_data.oxidation_reduction_potential = sensor_val
+
+                    is_frame_ok = True
+                    self.sensor_publisher.publish(self.sensor_data) #send data to MQTT to store in server
+                except Exception as E:
+
+                    print("ERROR READING THE SENSOR. THIS IS NO GOOD!")
+                    print("The cause of the exception: " + E)
+                    #self.serial.reset_input_buffer()
 
     """deprecated
     def read_frame_string(self):
