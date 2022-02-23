@@ -133,7 +133,7 @@ class Dronekit_node(Node):
             self.status.yaw= 500.0
         #Treat batery apart, as it uses to fail
         try:
-            self.status.battery = float(self.vehicle.battery.level)
+            self.status.battery = float(self.vehicle.battery.voltage)
         except:
             self.status.battery=-1.0
         #finally if one of these values fails, dont send the message, this values are always reported
