@@ -3,7 +3,7 @@ layout: page
 ---
 
 
-Raw sensor reads of the [test4](/jekyll/update/2022/02/23/test-4-at-loyola.html) at Loyola's Lake
+Raw sensor reads of the [test4](../jekyll/update/2022/02/23/test-4-at-loyola.html) at Loyola's Lake
 
 
 

@@ -3,25 +3,26 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: page
-title: Behaviour
+#title: Behaviour
 ---
 
+The ASV behaviour is composed of x stages
 
-
-The ASV is a vehicle that sails over the water equiped with few sensors
-
-
-1. Drone set to Standby, motors disarmed waiting for orders
-2. Indicate one or several samplepoints to collect
-3. The drone will change mission mode to:
+1. The communication with the autopilot controlling the drone is established
+2. Wait for all the nodes to initialize
+3. Drone set to Standby, motors disarmed waiting for message
+4. Indicate one or several samplepoints to follow
+5. The drone will change mission mode to:
   - "1" Stored mission
   - "3" Communicated Mission
-4. The drone will change to "GUIDED" mode to follow the samplepoints and take one measure at each samplepoint
-5. Once mission is finished it will return to Standby mode
+6. The drone will change to "GUIDED" mode to follow the waypoints
+7. Once mission is finished it will return to Standby mode
 
 <pre>
 Future updates
+- Node must collect samples once a samplepoint is reached
 - A planificator mode such as <a href="./code/Astar.html">A star</a> or Lazy Theta
+- Check <a href="./TODO.html">List of TODO</a> for more information
 </pre>
 
 

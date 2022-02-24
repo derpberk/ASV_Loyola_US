@@ -3,7 +3,7 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: page
-title: Quickstart
+#title: Quickstart
 ---
 
 1. Install [ROS2](https://docs.ros.org/en/foxy/Installation.html) (recomended Ubuntu 20.4 [$] binaries, but also works on windows[%]) and configure it in bash
