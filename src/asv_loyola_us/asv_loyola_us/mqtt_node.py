@@ -262,7 +262,7 @@ class MQTT_node(Node):
         
         message = json.dumps(z)
         self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
-        self.get_logger().info('sensor data sent to database')
+        self.get_logger().info(f'sensor data sent to database{message}')
 
 
 def main():

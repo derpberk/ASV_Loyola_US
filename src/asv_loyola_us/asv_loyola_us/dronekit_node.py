@@ -313,7 +313,7 @@ class Dronekit_node(Node):
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
         value=self.call_service(self.take_sample_client, Takesample.Request())
-        self.get_logger().debug(f'Sample value {value}')
+        #self.get_logger().debug(f'Sample value {value}')
         result=Goto.Result()
         result.success = True
         return result

@@ -16,20 +16,15 @@ class Sensor_node(Node):
 
     #his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('database_name', 'LOCAL_DATABASE.db')
-        self.database_name = self.get_parameter('database_name').get_parameter_value().string_value
-        self.declare_parameter('USB_string', "/dev/ttyUSB0")
-        self.USB_string = self.get_parameter('USB_string').get_parameter_value().string_value
-        self.declare_parameter('pump_channel', 7)
-        self.pump_channel = self.get_parameter('pump_channel').get_parameter_value().integer_value
-        self.declare_parameter('timeout', 6)
-        self.timeout = self.get_parameter('timeout').get_parameter_value().integer_value
-        self.declare_parameter('baudrate', 115200)
-        self.baudrate = self.get_parameter('baudrate').get_parameter_value().integer_value
-        self.declare_parameter('pump_parameters', None)
-        self.pump_parameters = self.get_parameter('pump_parameters').get_parameter_value()
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+        self.declare_parameter('pump', False)
+        self.pump_installed = self.get_parameter('pump').get_parameter_value().bool_value
+        self.declare_parameter('pump_channel', 7)
+        self.pump_channel = self.get_parameter('pump_channel').get_parameter_value().integer_value
+        self.declare_parameter('num_samples', 4)
+        self.num_samples = self.get_parameter('num_samples').get_parameter_value().integer_value
+
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
@@ -79,12 +74,17 @@ class Sensor_node(Node):
             response.conductivity_res = 4+  random.random()*10
             response.oxidation_reduction_potential =  4+  random.random()*10
         else:
-            GPIO.output(self.pump_channel, GPIO.HIGH) #start filling the tank
-            self.get_logger().info("activando bomba")
-            time.sleep(10.0)                          #wait 10 seconds
-            self.read_sensor()                        #read smart water
-            GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
-            self.get_logger().info("deteniendo bomba")
+            if self.pump_installed:
+                GPIO.output(self.pump_channel, GPIO.HIGH)  # start filling the tank
+                self.get_logger().info("activando bomba")
+                time.sleep(10.0)                          #wait 10 seconds
+            else:
+                time.sleep(1.0)
+            for i in range(1,self.num_samples):
+                self.read_sensor()                        #read smart water
+            if self.pump_installed:
+                GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
+                self.get_logger().info("deteniendo bomba")
             response.sensor.date=self.sensor_data.date       #return values
             response.sensor.smart_water_battery = self.sensor_data.smart_water_battery
             response.sensor.ph_volt = self.sensor_data.ph_volt
@@ -110,7 +110,7 @@ class Sensor_node(Node):
 
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
 
-            if self.DEBUG == False and self.serial.inWaiting() < 27:  # If the frame has a lenght inferior to the minimum of the Header
+            if self.DEBUG == False and self.serial.inWaiting() < 27:  # If theGPIO.output(self.pump_channel, GPIO.HIGH) #start filling the tank frame has a lenght inferior to the minimum of the Header
                 continue
 
             else:
