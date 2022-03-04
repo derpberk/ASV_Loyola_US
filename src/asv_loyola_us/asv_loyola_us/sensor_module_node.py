@@ -24,6 +24,12 @@ class Sensor_node(Node):
         self.pump_channel = self.get_parameter('pump_channel').get_parameter_value().integer_value
         self.declare_parameter('num_samples', 4)
         self.num_samples = self.get_parameter('num_samples').get_parameter_value().integer_value
+        self.declare_parameter('USB_string', "/dev/ttyUSB0")
+        self.USB_string = self.get_parameter('USB_string').get_parameter_value().string_value
+        self.declare_parameter('baudrate', 115200)
+        self.baudrate = self.get_parameter('baudrate').get_parameter_value().integer_value
+        self.declare_parameter('timeout', 6)
+        self.timeout = self.get_parameter('timeout').get_parameter_value().integer_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -51,8 +57,21 @@ class Sensor_node(Node):
             if self.DEBUG == False:
                 self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
             self.declare_services()
+        except ConnectionRefusedError:
+            self.get_logger().error(f"Failed to connect to SmartWater module, connection refused")
+            self.get_logger().fatal("Sensor module is dead")
+            self.destroy_node()
+        except OSError:
+            self.get_logger().error(f"Failed to connect to SmartWater module, Is it off or disconnected?")
+            self.get_logger().fatal("Sensor module is dead")
+            self.destroy_node()
+        except TimeoutError:
+            self.get_logger().error(f"Failed to connect to SmartWater module, timeout")
+            self.get_logger().fatal("Sensor module is dead")
+            self.destroy_node()
         except:
-            self.get_logger().error("Failed to connect to SmartWater module, either it is off or disconnected")
+            error = traceback.format_exc()
+            self.get_logger().error(f"Connection to SmartWater could not be made, unknown error:\n {error}")
             self.get_logger().fatal("Sensor module is dead")
             self.destroy_node()
         self.get_logger().info("sensor node initialized")
