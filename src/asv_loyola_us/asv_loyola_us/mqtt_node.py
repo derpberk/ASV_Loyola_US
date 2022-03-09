@@ -35,7 +35,7 @@ class MQTT_node(Node):
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
         self.destination_subscriber = self.create_subscription(Location, 'destination', self.destination_subscriber_callback, 10)
-        create_subscription = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
+        self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
 
     #def declare_actions(self):
 
@@ -123,6 +123,8 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
+
+
     def status_suscriber_callback(self, msg):
         self.status = msg
 

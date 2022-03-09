@@ -25,6 +25,15 @@ modes_str = []
 
 class Dronekit_node(Node):
 
+
+    #TODO define a wildcard_caldback for dronekit criticals
+    """
+       def wildcard_callback(self, attr_name, value):
+           self.get_logger().fatal(f"dronekit error {attr_name}\n value: {value}")
+       self.vehicle.add_attribute_listener('*', wildcard_callback)
+    """
+
+
     #his functions defines and assigns value to the parameters
     def parameters(self):
         self.declare_parameter('vehicle_ip', 'tcp:navio.local:5678')
@@ -91,7 +100,6 @@ class Dronekit_node(Node):
             self.get_logger().error(f"Connection to navio2 could not be made, unknown error:\n {error}")
             self.get_logger().fatal("Drone module is dead")
             self.destroy_node()
-            print(str(E))
 
             #TODO: manage error of timeout
             #      manage error of connection refused
@@ -204,7 +212,7 @@ class Dronekit_node(Node):
             'True' if the ASV distance respecto to the target Waypoint is less than 0.5 meters.
         """
 
-        return self.calculate_distance(goal_loc) < 0.5
+        return self.calculate_distance(goal_loc) < 1.5
 
     def calculate_distance(self, goal_loc):
         """
@@ -304,6 +312,16 @@ class Dronekit_node(Node):
                 #make it loiter around actual position
                 self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
                 return Goto.Result()
+            if self.vehicle.mode != VehicleMode("GUIDED"):
+                self.get_logger().error("asv_mode was changed externally, possible EKF fail")
+                self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
+                if self.vehicle.ekf_ok:
+                    self.get_logger().info("system seems normal, retrying")
+                    self.vehicle.mode = VehicleMode("GUIDED")
+                    self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+                    time.sleep(1)
+                    self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
+                    #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
             feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
             goal_handle.publish_feedback(feedback_msg)
             time.sleep(1)

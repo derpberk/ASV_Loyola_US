@@ -278,8 +278,8 @@ class Mission_node(Node):
         if self.current_mission_mode == 2:
             nextwp = self.samplepoints.pop(0)
         else:
-            self.get_logger().fatal(f"Current ASV Mode should be 2: {self.mission_mode_strs[1]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
-            raise ValueError(f"Current ASV Mode should be 1: {self.mission_mode_strs[1]} or 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
+            self.get_logger().fatal(f"Current ASV Mode should be 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
+            raise ValueError(f"Current ASV Mode should be 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
         self.get_logger().info(f"Next waypoint is {nextwp}" )
         return nextwp
 
