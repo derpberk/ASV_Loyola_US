@@ -1,8 +1,0 @@
-changed state 1, 3 and 4
-changed error topic to invisible
-added mission node service "load_mission"
-servicio go to
-
-creado paquete server
-
-

@@ -123,7 +123,6 @@ class Sensor_node(Node):
         is_frame_ok = False  # While a frame hasnt been correctly read #
         #self.serial.reset_input_buffer()  # Erase the input buffer to start listening
 
-        self.sensor_data.date = str(datetime.now())
 
         while not is_frame_ok:
 
@@ -181,6 +180,7 @@ class Sensor_node(Node):
                                 self.sensor_data.oxidation_reduction_potential = sensor_val
 
                     is_frame_ok = True
+                    self.sensor_data.date = str(datetime.now())
                     self.sensor_publisher.publish(self.sensor_data) #send data to MQTT to store in server
                 except Exception as E:
 
