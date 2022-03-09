@@ -1,5 +1,4 @@
 from time import sleep
-from submodulos.call_service import call_service
 from submodulos.MQTT import MQTT, ping_google, check_ssh_tunelling, start_ssh_tunneling
 import json, traceback
 from datetime import datetime

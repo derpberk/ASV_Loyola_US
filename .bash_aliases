@@ -10,6 +10,8 @@ alias hearall='ros2 topic echo -f '
 alias status='ros2 topic echo /ASV/status'
 
 alias mqttssh='ssh -i ~/AzureDronesKey.pem -fN -L 1883:127.0.0.1:1883 azuredrones@dronesloyolaus.eastus.cloudapp.azure.com'
+alias nodered='ssh -i ~/AzureDronesKey.pem -fN -L 1880:127.0.0.1:1880 azuredrones@dronesloyolaus.eastus.cloudapp.azure.com'
+
 alias check_ssh_running='ps -aux | grep "ssh -i"'
 
 buall()

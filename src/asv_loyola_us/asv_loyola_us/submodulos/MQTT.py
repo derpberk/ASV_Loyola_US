@@ -27,6 +27,16 @@ def check_ssh_tunelling():
             pass
     return False;
 
+def kill_ssh_tunelling():
+    for proc in psutil.process_iter():
+        try:
+            # Check if process name contains the given name string.
+            pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
+            if "ssh" == pinfo['name'].lower():
+                proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
 def start_ssh_tunneling():
     #arg i to understand aliases
     #stdout and stderr to do not print bash messages
