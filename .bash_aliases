@@ -1,17 +1,32 @@
-alias pycharm='nohup pycharm.sh &'
-
-start_vehicle()
-{
-ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool  "value: true">
-}
-
-stop_vehicle()
-{
-ros2 service call /mavros/cmd/arming mavros_msgs/srv/CommandBool  "value: false>
-}
-
+alias alone='kill $(pgrep bash)'
+alias falone='kill -9 $(pgrep bash)'
 
 alias cbuild='colcon build --packages-select '  
 
 alias roscd='cd ~/ASV_Loyola_US'
+alias s='source ~/ASV_Loyola_US/install/setup.bash'
 
+alias hearall='ros2 topic echo -f '
+alias status='ros2 topic echo /ASV/status'
+
+alias mqttssh='ssh -i ~/AzureDronesKey.pem -fN -L 1883:127.0.0.1:1883 azuredrones@dronesloyolaus.eastus.cloudapp.azure.com'
+alias check_ssh_running='ps -aux | grep "ssh -i"'
+
+buall()
+{
+roscd;
+colcon build --symlink-install;
+}
+
+sbuall()
+{
+buall;
+s;
+}
+
+
+function roslaunch()
+{
+sudo -S <<< "xavier" chmod 666 /dev/ttyUSB0;
+ros2 launch asv_loyola_us system.launch.py;
+}
