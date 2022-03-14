@@ -17,7 +17,6 @@ This node is in charge of the communication with the Raspberry pi
 <pre>
 Services
 /<a href="./services/arm_vehicle.html">arm_vehicle</a>  <a href="#arm_vehicle_callback" style="float:right;text-align:right;">arm_vehicle_callback</a>
-/<a href="./services/go_to_point_command.html">go_to_point_command</a> <a href="#go_to_point_callback" style="float:right;text-align:right;">go_to_point_callback</a>
 /<a href="./services/change_asv_mode.html">change_asv_mode</a> <a href="#change_asv_mode_callback" style="float:right;text-align:right;">change_asv_mode_callback</a>
 </pre>
 
@@ -28,17 +27,18 @@ Topics
 
 <pre>
 Actions
-/
+/<a href="./actions/go_to.html">go_to_point_command</a> <a href="#go_to_point_callback" style="float:right;text-align:right;">go_to_point_callback</a>
 </pre>
 
 <pre>
 functions
 <a href="#arm_vehicle_callback">arm_vehicle_callback(request, response)</a>
 <a href="#change_asv_mode_callback">change_asv_mode_callback(request, response)</a>
+<a href="#calculate_distance">calculate_distance(goal_loc)</a>
 <a href="#condition_yaw">condition_yaw(heading, relative=false)</a>
 <a href="#dictionary">dictionary(dictionary)</a>
-<a href="#get_bearing">get_bearing(location1, location2)</a>
-<a href="#go_to_point_callback">go_to_point_callback(request, response)</a>
+<a href="#get_bearing">get_bearing(location2)</a>
+<a href="#go_to">go_to(goal_handle)</a>
 <a href="#reached_position">reached_position(current_loc, goal_loc)</a>
 <a href="#status_publish">status_publish()</a>
 </pre>

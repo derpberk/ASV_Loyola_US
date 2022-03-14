@@ -7,20 +7,16 @@ layout: page
 <H1>Sensor module Node</H1> 
 
 
-This is the planner node of the ASV. 
+This is the sensor node of the ASV. 
 
 
 <pre>
 Services
-/<a href="./services/close_asv.html">close_asv</a>  <a href="#" style="float:right;text-align:right;">close_asv_callback</a>
-/<a href="./services/load_mission.html">load_mission</a> <a href="#load_mission" style="float:right;text-align:right;">load_mission_callback</a>
-/<a href="./services/change_mission_mode.html">change_mission_mode</a> <a href="#new_mission_mode" style="float:right;text-align:right;">change_mission_mode_callback</a>
-/<a href="./services/new_samplepoint.html">new_samplepoint</a> <a href="#new_samplepoint_callback" style="float:right;text-align:right;">new_samplepoint_callback</a>
-
+/<a href="./services/get_sample.html">get_sample</a>  <a href="#get_sample_callback" style="float:right;text-align:right;">get_sample_callback</a>
 </pre>
 <pre>
 Topics
-/
+/<a href="./services/sensors.html">sensors</a>
 </pre>
 <pre>
 Actions
@@ -29,31 +25,59 @@ Actions
 
 <pre>
 functions
-<a href="#arm_vehicle">arm_vehicle(value)</a>
-<a href="#change_ASV_mode">change_ASV_mode(mode)</a>
-<a href="#change_current_mission_mode">change_current_mission_mode(desired_mode)</a>
-<a href="#close_asv_callback">close_asv_callback(request, response)</a>
-<a href="#get_next_wp">get_next_wp()</a>
-<a href="#load_mission_callback">load_mission_callback(request, response)</a>
-<a href="#main">main()</a>
-<a href="#new_mission_mode">new_mission_mode(request, response)</a>
-<a href="#new_samplepoint_callback">new_samplepoint_callback(request, response)</a>
-<a href="#startup">startup()</a>
+<a href="#get_sample_callback">get_sample_callback(request, response)</a>
+<a href="#read_sensor">read_sensor()</a>
 <a href="#status_suscriber_callback">status_suscriber_callback(msg)</a>
-<a href="#watchdog_callback">watchdog_callback(exception)</a>
 </pre>
 
 
 <pre>
 variables
-<a id="self.mission_mode">mission_mode</a>
+<a id="self.is_frame_ok">is_frame_ok</a>
 <a id="self.samplepoints">samplepoints</a>
 </pre>
 
 <pre>
 Parameters
-<a href="./parameters/mission_filepath.html">mission_filepath</a>
+<a href="./parameters/baudrate.html">baudrate</a>
 <a href="./parameters/debug.html">debug</a>
+<a href="./parameters/num_samples.html">num_samples</a>
+<a href="./parameters/pump.html">pump</a>
+<a href="./parameters/pump_channel.html">pump_channel</a>
+<a href="./parameters/timeout.html">timeout</a>
+<a href="./parameters/USB_string.html">USB_string</a>
 </pre>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%% START OF FUNCTION DEFINITIONS AREA %%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GET SAMPLE CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>get_sample_callback() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L80" style="float:right;text-align:right;">code</a></H3>
+<a id="get_sample_callback"></a>
+
+This function is a callback from the service <a href="./services/get_sample.html">/get_sample</a>. It takes the number of samples specified in the <a href="./parameters/num_samples.html">num_samples</a> parameter. 
+
+- params
+  - request
+    - debug:
+     - True — Take a debug value
+     - False — Take a real sample from the Smart Water
+- output
+  - response
+    - sensor: <a href="./services/get_sample.html">Sensor</a> data type indicating sensor reads
+
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ SENSOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>read_sensor() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L120" style="float:right;text-align:right;">code</a></H3>
+<a id="read_sensor"></a>
+
+This function Reads from the serial port of the Smart Water and parses the message into variables.
+
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STATUS SUBSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>status_suscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L310" style="float:right;text-align:right;">code</a></H3>
+<a id="status_suscriber_callback"></a>
+
+This function is a suscriber of /<a href="./topics/status.html">status</a> topic, it stores the variables indicating the status of the drone

@@ -23,4 +23,10 @@ You can check the relationship between the nodes in the following [diagram](http
 For more information about the configuration of the package visit [setup](./setup)
 
 
+<img src="../../miscelaneous/mission1.png" alt="drawing" width="45%" style="vertical-align:middle"/>
+<img src="../../miscelaneous/mission2.png" alt="drawing" width="45%"/>
+<img src="../../miscelaneous/mission3.png" alt="drawing" width="45%" style="vertical-align:middle"/>
+<img src="../../miscelaneous/mission4.png" alt="drawing" width="45%"/>
+
+
 
