@@ -15,8 +15,20 @@ class startup:
         while not ping_google(): #ping google has an internal delay
             print("There is no internet connection, retrying...")
         try:
-            print(f"MQTT connecting to dronesloyolaus.eastus.cloudapp.azure.com")
-            self.mqtt = MQTT(str(vehicle_id), addr="dronesloyolaus.eastus.cloudapp.azure.com", topics2suscribe=[f"veh{vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
+            if not check_ssh_tunelling(): #ssh tunelling is not running
+                if not start_ssh_tunneling(): #ssh tunelling could not be made
+                    print("ssh tunneling failed, there is no connection to server")
+                else:
+                    print("ssg tunneling started")
+            else:
+                print("ssg tunneling was running")
+        except:
+            error = traceback.format_exc()
+            print(f"Tunelling connection failed, unknown error:\n {error}")
+
+        try:
+            print(f"MQTT connecting to 127.0.0.1")
+            self.mqtt = MQTT(str(vehicle_id), addr="127.0.0.1", topics2suscribe=[f"veh{vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
         except ConnectionRefusedError:
             print(f"Connection to MQTT server was refused")
         except OSError:
@@ -32,18 +44,19 @@ class startup:
             "veh_num": vehicle_id,
             "origin node": "startup",
             "time": str(datetime.now()),
-            "msg": "Drone 2 turned on"
+            "msg": "Drone turned on"
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
-        while self.asv_offline:
-            msg = json.dumps({
-                "veh_num": vehicle_id,
-                "armed": False,
-                "mission_mode": "Waiting for server",
-                "asv_mode": "OFFLINE"
-            })  # Must be a JSON format file.
-            #TODO: transformar el topic con la informacion a formato JSON
-            self.mqtt.send_new_msg(msg)  # Send the MQTT message
+        while True:
+            while self.asv_offline:
+                msg = json.dumps({
+                    "veh_num": vehicle_id,
+                    "armed": False,
+                    "mission_mode": "Waiting for server",
+                    "asv_mode": "OFFLINE"
+                })  # Must be a JSON format file.
+                #TODO: transformar el topic con la informacion a formato JSON
+                self.mqtt.send_new_msg(msg)  # Send the MQTT message
             sleep(1)
 
 

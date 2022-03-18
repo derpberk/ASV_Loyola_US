@@ -18,20 +18,29 @@ def generate_launch_description():
         package='asv_loyola_us',
         executable='drone',
         name='drone_node',
+        emulate_tty=True,
+        output='screen',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
     planner = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='planner',
+        emulate_tty=True,
+        output='screen',
         name='mission_node',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
     watchdog = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='watchdog',
+        emulate_tty=True,
+        output='screen',
         name='watchdog_node',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
@@ -39,20 +48,29 @@ def generate_launch_description():
         package='asv_loyola_us',
         executable='mission',
         name='mission_node',
+        emulate_tty=True,
+        output='screen',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
     mqtt = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='mqtt',
+        emulate_tty=True,
         name='mqtt_node',
+        output='screen',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
     sensors = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='sensors',
+        emulate_tty=True,
+        output='screen',
         name='sensors_node',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 
@@ -60,6 +78,7 @@ def generate_launch_description():
         package='simulator',
         executable='dummy_publisher',
         name='dummy_drone_node',
+        prefix=['stdbuf -o L'],
         parameters = [config]
     )
 

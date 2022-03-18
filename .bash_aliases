@@ -25,10 +25,12 @@ sbuall()
 buall;
 s;
 }
+sudo -S <<< "xavier" chmod 666 /dev/ttyUSB0; #this is not an alias, it will be executed in bashrc
 
-
-function roslaunch()
-{
-sudo -S <<< "xavier" chmod 666 /dev/ttyUSB0;
+function roslaunch(){}
 ros2 launch asv_loyola_us system.launch.py;
 }
+
+#function roslaunch(){
+#ros2 launch simulator dummy_system.launch.py;
+#}

@@ -4,48 +4,6 @@ import subprocess  # For executing a shell command
 import os
 import signal
 import psutil
-def ping_google():
-    host="www.google.es"
-    command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds
-
-    return subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0 #this returns 0 if ping is successfull
-def ping_mqtt():
-    host="127.0.0.1"
-    command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds
-
-    return subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0 #this returns 0 if ping is successfull
-    
-def check_ssh_tunelling():
-
-    for proc in psutil.process_iter():
-        try:
-            # Check if process name contains the given name string.
-            pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
-            if "ssh" == pinfo['name'].lower():
-                return True
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-    return False;
-
-def kill_ssh_tunelling():
-    for proc in psutil.process_iter():
-        try:
-            # Check if process name contains the given name string.
-            pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
-            if "ssh" == pinfo['name'].lower():
-                proc.kill()
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
-
-def start_ssh_tunneling():
-    #arg i to understand aliases
-    #stdout and stderr to do not print bash messages
-    #preexec_fn so that we can close the command executed in bash and it doesnt keep running
-    if subprocess.run(args=['/bin/bash', '-i', '-c', "mqttssh"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, preexec_fn=os.setsid).returncode == 0:
-        return True
-    return False
-
-    #TODO: observar que valores se devuelven cuando hay error de ssh, se desconoce si lo que devuelve cuando ssh falla
 
 class MQTT(object):
     def __init__(self, name, addr='127.0.0.1', port=1883, timeout=60, topics2suscribe=None, on_message=None, on_disconnect=None):
@@ -60,7 +18,6 @@ class MQTT(object):
             self.onmessage = self.on_message
         else:
             self.onmessage = on_message
-
         if on_disconnect is None:
             self.on_disconnect = self.on_disconnect
         else:
@@ -95,3 +52,7 @@ class MQTT(object):
         #while not self.client.is_connected():
             #continue
         self.client.publish(topic, msg)
+
+    def close(self):
+        self.client.loop_stop()
+        self.client.disconnect()

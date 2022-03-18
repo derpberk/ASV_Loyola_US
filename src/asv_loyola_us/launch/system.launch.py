@@ -8,6 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
                                 OnProcessIO, OnProcessStart, OnShutdown)
+from .asv_loyola_us.submodulos.terminal_handler import restart
 
 
 def generate_launch_description():
@@ -39,7 +40,9 @@ def generate_launch_description():
                 on_shutdown=[LogInfo(
                     msg=['Launch was asked to shutdown: ',
                          LocalSubstitution('event.reason')]
-                )]
+                    ),
+                    restart()
+                ]
             )
         ),
     ])

@@ -10,7 +10,8 @@ from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
-from .submodulos.MQTT import MQTT, ping_google, check_ssh_tunelling, start_ssh_tunneling
+from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2
+from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
 
@@ -50,25 +51,24 @@ class MQTT_node(Node):
         while not ping_google(): #ping google has an internal delay
             self.get_logger.error("There is no internet connection, retrying...") 
 
-
+        """
         #check if ssh tunelling is running
         try:
             if not check_ssh_tunelling(): #ssh tunelling is not running
                 if not start_ssh_tunneling(): #ssh tunelling could not be made
-                    self.get_logger.fatal("ssh tunneling failed, there is no connection to server")
+                    self.get_logger().fatal("ssh tunneling failed, there is no connection to server")
                     self.get_logger().fatal("MQTT module is dead")
                     self.destroy_node()
                 else:
-                    self.get_logger.info("ssg tunneling started")
+                    self.get_logger().info("ssg tunneling started")
             else:
-                self.get_logger.info("ssg tunneling was running")
+                self.get_logger().info("ssg tunneling was running")
         except:
             error = traceback.format_exc()
             self.get_logger().fatal(f"something went wrong with ssh tunelling, unknown error:\n {error}")
             self.get_logger().fatal("MQTT module is dead")
             self.destroy_node()
-
-            
+        """
         #start MQTT Connection
         try:
             self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
@@ -198,7 +198,8 @@ class MQTT_node(Node):
 
 
 
-    def on_disconnect(client, ___, __, _):
+    def on_disconnect(self,  client,  __, _):
+        sleep(1)
         self.get_logger().error("connection to server was lost")
         if not ping_google():
             while not ping_google():
@@ -206,27 +207,6 @@ class MQTT_node(Node):
             self.get_logger().info("Internet connection regained")
         else:
             self.get_logger().error("there is internet, unknown reason, retrying to connect to MQTT")
-        try:
-        self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
-        self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
-        except ConnectionRefusedError:
-            self.get_logger().error(f"Connection to MQTT server was refused")
-            self.get_logger().fatal("MQTT module is dead")
-            self.destroy_node()
-        except OSError:
-            self.get_logger().error(f"MQTT server was not found")
-            self.get_logger().fatal("MQTT module is dead")
-            self.destroy_node()
-        except TimeoutError:
-            self.get_logger().error(f"MQTT was busy, timeout error")
-            self.get_logger().fatal("MQTT module is dead")
-            self.destroy_node()
-        except:
-            error = traceback.format_exc()
-            self.get_logger().fatal(f"MQTT connection failed, unknown error:\n {error}")
-            self.get_logger().fatal("MQTT module is dead")
-            self.destroy_node()
-
 
 
     def sendinfo_callback(self, request, response):
