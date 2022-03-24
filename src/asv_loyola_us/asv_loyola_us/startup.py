@@ -6,9 +6,16 @@ from datetime import datetime
 import os
 import subprocess  # For executing a shell command
 
-vehicle_id=2
+def vehicle_id():
+    with open('../config/config.yaml', 'r') as f:
+        for line in f:
+            line=line.strip().replace(" ", "").split(":")
+            if line[0]=="vehicle_id":
+                return int(line[1])
+
 class startup:
     def __init__(self):
+        vehicle_id=vehicle_id()
         kill_ros2() #if this program is called from a crash, close last ros2 session
         self.asv_offline=True #we start offline
         kill_ssh_tunelling()
