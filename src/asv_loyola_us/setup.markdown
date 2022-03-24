@@ -17,7 +17,7 @@ This package is already configured to:
 - make nodes able to use user libraries placed in folder `submodulos`
 
 notes:
-- if you build using `colcon build --symlink-install` you don't have to build again when modification a python file for it to take effect
+- if you build using `colcon build --symlink-install` you don't have to build again for the changes to take effect
 - you must build the package before sourcing it
 
 you may also want to see [package used interfaces](../../interfaces.html)
