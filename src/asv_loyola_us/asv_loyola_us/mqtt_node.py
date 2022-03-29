@@ -10,10 +10,11 @@ from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
-from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2
+from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, restart_asv
 from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
+import threading
 
 class MQTT_node(Node):
 
@@ -49,26 +50,8 @@ class MQTT_node(Node):
 
         #check if there is internet connection
         while not ping_google(): #ping google has an internal delay
-            self.get_logger.error("There is no internet connection, retrying...") 
+            self.get_logger().error("There is no internet connection, retrying...") 
 
-        """
-        #check if ssh tunelling is running
-        try:
-            if not check_ssh_tunelling(): #ssh tunelling is not running
-                if not start_ssh_tunneling(): #ssh tunelling could not be made
-                    self.get_logger().fatal("ssh tunneling failed, there is no connection to server")
-                    self.get_logger().fatal("MQTT module is dead")
-                    self.destroy_node()
-                else:
-                    self.get_logger().info("ssg tunneling started")
-            else:
-                self.get_logger().info("ssg tunneling was running")
-        except:
-            error = traceback.format_exc()
-            self.get_logger().fatal(f"something went wrong with ssh tunelling, unknown error:\n {error}")
-            self.get_logger().fatal("MQTT module is dead")
-            self.destroy_node()
-        """
         #start MQTT Connection
         try:
             self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
@@ -100,13 +83,21 @@ class MQTT_node(Node):
         self.mqtt_point= None
         self.load_mission = -1
         self.cancel_movement = -1
+        self.shutdown = False
+        self.planned_mqtt_point = None
         #call services
         self.declare_services()
 
         #call actions
         #self.declare_actions()
-
-        #create a timer for connection check
+        sleep(1)
+        message = json.dumps({
+            "veh_num": self.vehicle_id,
+            "mission_mode": "STARTUP",
+            "asv_mode": "Trying to connect"
+        })  # Must be a JSON format file.
+        self.mqtt.send_new_msg(message)  # Send the MQTT message
+        
 
 
 
@@ -114,6 +105,7 @@ class MQTT_node(Node):
         while rclpy.ok():
             rclpy.spin_once(self)
             if self.processing == True: #we have something to do
+                sleep(0.01) # wait in case something needs to be done in another thread
                 if self.cancel_movement != -1: #we need to load a mission
                     call_service(self, self.cancel_movement_client, self.cancel_movement)
                     self.cancel_movement = -1
@@ -127,7 +119,12 @@ class MQTT_node(Node):
                         call_service(self, self.new_samplepoint_client, self.mqtt_point)
                         self.get_logger().info(f"point sent")
                         self.mqtt_point = None
-                
+                if self.planned_mqtt_point is not None: #we need to add a new mqtt point
+                        call_service(self, self.new_samplepoint_client, self.planned_mqtt_point)
+                        self.get_logger().info(f"planned point sent")
+                        self.planned_mqtt_point = None
+                if self.shutdown:
+                    self.get_logger().warning("Drone was asked to shutdown, changing into LAND mode")
                 self.processing = False
             sleep(0.1)
 
@@ -186,6 +183,19 @@ class MQTT_node(Node):
                     self.mqtt_point.new_point.lon = message["lon"]
                 elif message["mission_type"] == "RTL":
                     self.call_msg.asv_mode = 5
+                elif message["mission_type"] == "PLANNEDPOINT":
+                    self.call_msg.asv_mode = 4
+                    self.planned_mqtt_point = Newpoint.Request()
+                    self.planned_mqtt_point.new_point.lat = message["lat"]
+                    self.planned_mqtt_point.new_point.lon = message["lon"]
+                elif message["mission_type"] == "SHUTDOWN":
+                    #rclpy.shutdown()
+                    #TODO: rclpy.shutdown() is still developing and is not able to close nodes or processes with multithread
+                    # so we will forcekill the processes for the time being
+                    self.shutdown = True #tell ros2 we are shutting down
+                    self.shutdown_thread = threading.Thread(target=self.shutdown_asv) #we will manage shutdown in a new thread
+                    #so that MQTT can finish things while we shut down
+                    self.shutdown_thread.start()
                 else:
                     mission_type=message["mission_type"]
                     self.get_logger().warning(f"unknown mission_type call: {mission_type}")
@@ -195,7 +205,6 @@ class MQTT_node(Node):
             if "cancel_movement" in message:
                 self.cancel_movement = CommandBool.Request()
                 self.cancel_movement.value = True
-
 
 
     def on_disconnect(self,  client,  __, _):
@@ -280,27 +289,30 @@ class MQTT_node(Node):
         if msg.oxidation_reduction_potential != -1:
             y = {"oxidation_reduction_potential": msg.oxidation_reduction_potential}
             z.update(y)
-
-
-        """These messages are deprecated as they are not used in the actual code, but they can be implemented
-        if msg.ph_volt != -1:
-            y= {"ph_volt":msg.ph_volt,
-                "ph_temp":msg.ph_temp}
-            z.update(y)
-        if msg.salinity != -1:
-            y = {"salinity": msg.salinity}
-            z.update(y)
-        if msg.o2_percentage != -1:
-            y = {"o2_percentage": msg.o2_percentage}
-            z.update(y)
-        if msg.conductivity_res != -1:
-            y = {"conductivity_res": msg.conductivity_res}
-            z.update(y)
-        """
-        
         message = json.dumps(z)
         self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
         self.get_logger().info(f'sensor data sent to database{message}')
+
+    def shutdown_asv(self):
+        self.mqtt_timer.destroy() #stop updating drone status
+        self.call_msg.asv_mode = 0 #change to land mode to put vehicle in a safe spot        
+        for i in range(4):
+            msg = json.dumps({
+                "veh_num": self.vehicle_id,
+                "armed": self.status.armed,
+                "mission_mode": "Shutting Down ROS2",
+                "asv_mode": self.status.asv_mode
+            })  # Must be a JSON format file.
+            self.mqtt.send_new_msg(msg)  # Send the MQTT message
+            sleep(0.5) #wait for things to finish
+        message = json.dumps({
+            "veh_num": self.vehicle_id,
+            "origin node": "MQTT_node",
+            "time": str(datetime.now()),
+            "msg": "executing Restart"
+        })  # Must be a JSON format file.
+        self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
+        restart_asv() #restart ASV
 
 
 def main():
@@ -325,7 +337,6 @@ def main():
                 sleep(0.01) #we wait
             publisher.publish(msg) #we send the message
             x.destroy_node() #we destroy node and finish
-        rclpy.shutdown()
 
 
 if __name__ == '__main__':

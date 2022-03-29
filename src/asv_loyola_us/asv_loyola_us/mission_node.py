@@ -145,6 +145,7 @@ class Mission_node(Node):
         if self.mission_mode == 0:
             if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
                 self.get_logger().info("vehicle resting.")
+                self.change_ASV_mode("MANUAL")
                 self.arm_vehicle(False)
             if self.status.armed:
                 self.get_logger().warning("Vehicle was armed externally! .", once=True)
@@ -480,6 +481,7 @@ def main(args=None):
     #start a class that servers the services
     try:
         mission_node = Mission_node()
+        mission_node.destroy_node()
     except:
         """
         There has been an error with the program, so we will send the error log to the watchdog

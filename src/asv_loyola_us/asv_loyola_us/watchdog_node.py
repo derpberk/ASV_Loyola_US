@@ -98,6 +98,7 @@ def main(args=None):
     # loop the node
     rclpy.spin(watchdog_node)
     # after close connection shut down ROS2
+    watchdog_node.destroy_node()
     rclpy.shutdown()
 
 

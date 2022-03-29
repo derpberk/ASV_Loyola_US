@@ -69,5 +69,5 @@ def kill_ros2():
             pass
 
 
-def restart():
-    dummy=0;
+def restart_asv():
+    subprocess.run(args=['/bin/bash', '-i', '-c', "restart_asv"], preexec_fn=os.setsid)

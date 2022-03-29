@@ -4,11 +4,11 @@ from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDesc
 from launch.substitutions import TextSubstitution, LaunchConfiguration, LocalSubstitution
 from launch_ros.actions import Node, PushRosNamespace
 import os
+import subprocess  # For executing a shell command
 from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
                                 OnProcessIO, OnProcessStart, OnShutdown)
-
 
 def generate_launch_description():
 
@@ -39,7 +39,8 @@ def generate_launch_description():
                 on_shutdown=[LogInfo(
                     msg=['Launch was asked to shutdown: ',
                          LocalSubstitution('event.reason')]
-                )]
+                    ),
+                ]
             )
         ),
     ])

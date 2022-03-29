@@ -372,6 +372,9 @@ def main(args=None):
         dronekit_node = Dronekit_node()
         #loop the node
         rclpy.spin(dronekit_node, executor=MultiThreadedExecutor())
+
+        dronekit_node.destroy_node()
+
     except:
         """
         There has been an error with the program, so we will send the error log to the watchdog

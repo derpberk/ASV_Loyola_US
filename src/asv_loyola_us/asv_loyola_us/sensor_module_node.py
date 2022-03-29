@@ -319,6 +319,7 @@ def main(args=None):
         sensor_node = Sensor_node()
         # loop the services
         rclpy.spin(sensor_node)
+        sensor_node.destroy_node()
     except:
         """
         There has been an error with the program, so we will send the error log to the watchdog
