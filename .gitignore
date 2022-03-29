@@ -65,3 +65,5 @@ src/python_example
 src/simulator/COLCON_IGNORE
 
 
+src/asv_loyola_us/config/config.yaml
+temp/

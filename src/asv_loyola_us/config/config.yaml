@@ -4,7 +4,7 @@
     vehicle_ip: "tcp:navio.local:5678"
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
-    vehicle_id: 2
+    vehicle_id: 3
     mqtt_addr: "dronesloyolaus.eastus.cloudapp.azure.com"
     pump: false
     num_samples: 4
