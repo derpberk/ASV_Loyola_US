@@ -64,4 +64,5 @@ def generate_launch_description():
         comunication,
         mqtt,
         sensors,
+        planner,
     ])

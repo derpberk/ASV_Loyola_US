@@ -118,14 +118,14 @@ class MQTT_node(Node):
                 if self.mqtt_point is not None: #we need to add a new mqtt point
                         #aux=CommandBool.Request()
                         #aux.value=False
-                        #call_service(self, self.planner_mode_client, self.aux)
+                        #call_service(self, self.enable_planning_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.mqtt_point)
                         self.get_logger().info(f"point sent")
                         self.mqtt_point = None
                 if self.planned_mqtt_point is not None: #we need to add a new mqtt point
                         #aux=CommandBool.Request()
                         #aux.value=True
-                        #call_service(self, self.planner_mode_client, self.aux)
+                        #call_service(self, self.enable_planning_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.planned_mqtt_point)
                         self.get_logger().info(f"planned point sent")
                         self.planned_mqtt_point = None
