@@ -261,6 +261,27 @@ class Dronekit_node(Node):
         #TODO: add other responses
 
 
+    def change_asv_mode_callback(self, request, response):
+        #string takes preference before int
+        if len(request.asv_mode_str) != 0:
+            if request.asv_mode_str in self.mode_type.values():
+                mode=request.asv_mode_str
+            else:
+                self.get_logger().info(f"{request.asv_mode_str} is not a valid mode")
+                response.success=False
+                return response
+        else:
+            if request.asv_mode in self.mode_type:
+                mode=self.mode_type[str(request.asv_mode)]
+            else:
+                self.get_logger().info(f"{request.asv_mode} is not a valid mode")
+                response.success = False
+                return response
+        self.vehicle.mode = VehicleMode(mode)
+        response.success=True
+        return response
+        #TODO: add other responses
+
     ######################################### ACTION GOTO DESCRIPTION ############################################
 
     def goto_accept(self, goal_request):
@@ -315,7 +336,6 @@ class Dronekit_node(Node):
             if self.vehicle.mode != VehicleMode("GUIDED"):
                 self.get_logger().error("asv_mode was changed externally, possible EKF fail")
                 self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
-                time.sleep(1)
                 if self.vehicle.ekf_ok:
                     self.get_logger().info("system seems normal, retrying")
                     self.vehicle.mode = VehicleMode("GUIDED")
