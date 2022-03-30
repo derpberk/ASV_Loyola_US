@@ -136,23 +136,21 @@ class Dronekit_node(Node):
             self.status.lon = self.vehicle.location.global_relative_frame.lon
             self.status.yaw = self.vehicle.attitude.yaw
         except:
-            self.status.lat = 0.0
-            self.status.lon = 0.0
-            self.status.yaw= 500.0
+            pass
         #Treat batery apart, as it uses to fail
         try:
             self.status.battery = float(self.vehicle.battery.voltage)
         except:
-            self.status.battery=-1.0
+            pass
         #finally if one of these values fails, dont send the message, this values are always reported
         try:
             self.status.armed = self.vehicle.armed
             self.status.vehicle_id = self.vehicle_id
             asv_mode= str(self.vehicle.mode)
             self.status.asv_mode=asv_mode[12:]
+            self.status.ekf_ok = bool(self.vehicle.ekf_ok)
         except:
-            #do not publish this time
-            return
+            pass
         self.status_publisher.publish(self.status)
 
 
@@ -271,8 +269,10 @@ class Dronekit_node(Node):
         if self.goto_goal_handle is not None and self.goto_goal_handle.is_active:
             self.get_logger().error(f'Action is busy')
             return GoalResponse.REJECT
-        if not self.vehicle.armed and self.vehicle.mode != VehicleMode("LOITER"):
-            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}. \nSetting mission mode to Stand-by')
+        if not self.vehicle.armed or self.vehicle.mode != VehicleMode("LOITER"):
+            self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}.')
+            if not self.vehicle.ekf_ok:
+                self.get_logger().error(f"EKF seems to be the main issue, GPS status is {self.vehicle.gps_0}")
             return GoalResponse.REJECT #To move we must be armed and in loiter
         self.get_logger().info(f'Action accepted')
         return GoalResponse.ACCEPT
@@ -301,7 +301,7 @@ class Dronekit_node(Node):
             if goal_handle.is_cancel_requested:
                 #make it loiter around actual position
                 goal_handle.canceled()
-                self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
+                self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
             """if self.goto_goal_handle.is_active:
                 self.get_logger().info('Goal aborted')
@@ -310,16 +310,16 @@ class Dronekit_node(Node):
             if not self.status.armed:
                 self.get_logger().info('vehicle was forced to disconnect Goal aborted')
                 #make it loiter around actual position
-                self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
+                self.vehicle.mode = VehicleMode("LOITER")
                 return Goto.Result()
             if self.vehicle.mode != VehicleMode("GUIDED"):
                 self.get_logger().error("asv_mode was changed externally, possible EKF fail")
                 self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
+                time.sleep(1)
                 if self.vehicle.ekf_ok:
                     self.get_logger().info("system seems normal, retrying")
                     self.vehicle.mode = VehicleMode("GUIDED")
                     self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
-                    time.sleep(1)
                     self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
                     #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
             feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)

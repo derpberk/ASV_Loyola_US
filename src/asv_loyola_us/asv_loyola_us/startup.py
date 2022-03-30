@@ -34,12 +34,15 @@ class startup:
             error = traceback.format_exc()
             print(f"MQTT connection failed, unknown error:\n {error}")
 
+        print(f"Drone {self.vehicle_id} started")
+
         sleep(2) #wait for connection
+        name="Drone "+str(self.vehicle_id)+" turned on"
         message = json.dumps({
             "veh_num": self.vehicle_id,
             "origin node": "startup",
             "time": str(datetime.now()),
-            "msg": "Drone 2 turned on"
+            "msg": str(name)
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
         while self.asv_offline:
@@ -59,11 +62,12 @@ class startup:
             "mission_mode": "Starting ROS2",
             "asv_mode": "OFFLINE"
         })  # Must be a JSON format file.
+        name="Drone "+str(self.vehicle_id)+" starting ROS2"
         message = json.dumps({
             "veh_num": self.vehicle_id,
             "origin node": "startup",
             "time": str(datetime.now()),
-            "msg": "Drone 2 starting ROS2"
+            "msg": str(name)
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
         sleep(0.1)

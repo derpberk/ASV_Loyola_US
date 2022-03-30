@@ -116,10 +116,16 @@ class MQTT_node(Node):
                     call_service(self, self.asv_mission_mode_client, self.call_msg)
                     self.call_msg.asv_mode = -1
                 if self.mqtt_point is not None: #we need to add a new mqtt point
+                        #aux=CommandBool.Request()
+                        #aux.value=False
+                        #call_service(self, self.planner_mode_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.mqtt_point)
                         self.get_logger().info(f"point sent")
                         self.mqtt_point = None
                 if self.planned_mqtt_point is not None: #we need to add a new mqtt point
+                        #aux=CommandBool.Request()
+                        #aux.value=True
+                        #call_service(self, self.planner_mode_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.planned_mqtt_point)
                         self.get_logger().info(f"planned point sent")
                         self.planned_mqtt_point = None
@@ -133,6 +139,8 @@ class MQTT_node(Node):
         """
              A function that sends the ASV information to the coordinator in the MQTT Broker every 0.5 seconds.
         """
+        if self.status.asv_mode == "Offline":
+            return #if there is no connection to drone, dont update status
 
         msg = json.dumps({
             "Latitude": self.status.lat,
@@ -142,7 +150,8 @@ class MQTT_node(Node):
             "battery": self.status.battery,
             "armed": self.status.armed,
             "mission_mode": self.mission_mode,
-            "asv_mode": self.status.asv_mode
+            "asv_mode": self.status.asv_mode,
+            "EKF": self.status.ekf_ok
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
@@ -163,7 +172,7 @@ class MQTT_node(Node):
         #TODO: if message are spammed it may crash
         if self.processing==True:
             return
-        if msg.topic == f"veh{self.status.vehicle_id}":
+        if msg.topic == f"veh{self.vehicle_id}":
             self.processing=True
             message = json.loads(msg.payload.decode('utf-8'))  # Decode the msg into UTF-8
             self.get_logger().info(f"Received {message} on topic {msg.topic}")
@@ -249,7 +258,7 @@ class MQTT_node(Node):
         time= datetime.utcfromtimestamp(timestamp+3600).strftime('%Y-%m-%d %H:%M:%S') #add +3600 for Spains Clocktime
 
         message = json.dumps({
-            "veh_num": self.status.vehicle_id,
+            "veh_num": self.vehicle_id,
             "origin node": name,
             "time": time,
             "msg": log
@@ -258,7 +267,7 @@ class MQTT_node(Node):
 
     def destination_subscriber_callback(self, msg):
         message = json.dumps({
-            "veh_num": self.status.vehicle_id,
+            "veh_num": self.vehicle_id,
             "Latitude": msg.lat,
             "Longitude": msg.lon,
         })  # Must be a JSON format file.
@@ -266,7 +275,7 @@ class MQTT_node(Node):
 
     def sensors_subscriber_callback(self, msg):
 
-        z = { "veh_num":self.status.vehicle_id,
+        z = { "veh_num": self.vehicle_id,
             "date": msg.date,
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,

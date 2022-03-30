@@ -403,6 +403,7 @@ class Mission_node(Node):
         self.destination_publisher.publish(location)
         self.goto_action_client.wait_for_server()
         self.waiting_for_action=True
+        self.point_backup=location
         goal_msg = Goto.Goal()
         goal_msg.samplepoint = location
         self.get_logger().debug('Sending goal request...')
@@ -422,8 +423,15 @@ class Mission_node(Node):
     def go_to_response(self, future):
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
-            self.get_logger().info('Goal rejected :(')
-            self.waiting_for_action=False
+            self.get_logger().error('Goal rejected :(, something is not working')
+            #restore the point
+            goal_msg = Goto.Goal()
+            goal_msg.samplepoint = self.point_backup
+            if self.mission_mode == 2 or self.mission_mode == 4:
+                self.get_logger().info(f'asking again to go to {self.point_backup}')
+                sleep(2) #sleep to avoid spamming points
+                self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+                self._send_goal_future.add_done_callback(self.go_to_response)
             #TODO: decide what to do if goal is rejected, in other words, action busy
             return
         self.get_logger().info('Goal accepted :)')

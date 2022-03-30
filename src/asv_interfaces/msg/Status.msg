@@ -1,7 +1,8 @@
-float64 lat
-float64 lon
-float64 yaw
-int32 vehicle_id
-float64 battery
-bool armed
-string asv_mode
+float64 lat 0
+float64 lon 0
+float64 yaw 500
+int32 vehicle_id -1
+float64 battery -1
+bool armed false
+string asv_mode "Offline"
+bool ekf_ok false
