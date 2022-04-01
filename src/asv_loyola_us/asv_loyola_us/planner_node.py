@@ -89,7 +89,11 @@ class Planner_node(Node):
         if not self.use_planner:
             response.point_list=[request.new_point]
             return response
-
+        #check if we are inside the map
+        if (not self.planner.between_limits(([self.status.lat,self.status.lon])) or (not self.planner.between_limits(([request.new_point.lat,request.new_point.lon])):
+            self.get_logger().error("We are outside the map")
+            response.success=False
+            return response
         #check if drone is inside a wall (non reachable point)
         aux=self.planner.calculate_cell([self.status.lat,self.status.lon])
         if self.planner.map[aux[0]][aux[1]]:
@@ -98,7 +102,7 @@ class Planner_node(Node):
         #check if destination is insida a wall
         aux=self.planner.calculate_cell([request.new_point.lat,request.new_point.lon])
         if self.planner.map[aux[0]][aux[1]]:
-            self.get_logger().error("Drone is inside a wall, cannot calculate path")
+            self.get_logger().error("Destination is inside a wall, cannot calculate path")
             return response
         
         #save starttime

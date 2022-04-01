@@ -227,6 +227,12 @@ class A_star:
         self.gps_path=[]
         for i in self.path:
             self.gps_path.append(self.calculate_gps(i))
+    def between_limits(self, coordinate):
+        NW=self.calculate_gps([0,0])
+        SE=self.calculate_gps([self.height,self.width]) #TODO: use abs values to use the whole world
+        if (coordinate[0]>SE[0]) or (coordinate[0]<NW[0]) or (coordinate[1]>SE[1]) or (coordinate[1]<NW[1]):
+            return False
+        return True
                 
             
 def main():

@@ -222,7 +222,8 @@ class Sensor_node(Node):
         response.use_pump = request.use_pump
         return response
 
-
+    def status_suscriber_callback(self, msg):
+        self.status = msg
 
 
 def main(args=None):

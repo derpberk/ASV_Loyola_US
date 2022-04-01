@@ -365,10 +365,10 @@ class MQTT_node(Node):
         msg = json.dumps({
                 "veh_num": self.vehicle_id,
                 "planner_status": self.enable_planner,
-                "pump_status": self.sensor_params.use_pump,
-                "number_of_samples": self.sensor_params.number_of_samples,
-                "pump_channel": self.sensor_params.pump_channel,
-                "time_between_samples": self.sensor_params.time_between_samples,
+                "pump_status": self.sensor_read.use_pump,
+                "number_of_samples": self.sensor_read.number_of_samples,
+                "pump_channel": self.sensor_read.pump_channel,
+                "time_between_samples": self.sensor_read.time_between_samples,
             })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="parameters")  # Send the MQTT message
 

@@ -322,7 +322,8 @@ class Dronekit_node(Node):
         if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
             path=[goal_handle.request.samplepoint]
-
+        #extract path
+        path=path.point_list
         self.get_logger().info(
         f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
         self.vehicle.mode = VehicleMode("GUIDED")
