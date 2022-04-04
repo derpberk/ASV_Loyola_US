@@ -52,6 +52,7 @@ class Dronekit_node(Node):
         #client
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
         self.take_sample_client = self.create_client(Takesample, 'get_sample')
+        self.calculate_path_client = self.create_client(Newpoint, 'get_sample')
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
@@ -312,41 +313,57 @@ class Dronekit_node(Node):
 
     def goto_execute_callback(self, goal_handle):
         feedback_msg = Goto.Feedback()
+        counter=0 #counter to avoid excesive logs
+        #Calculate Path
+        destination=Newpoint.Request()
+        destionation.new_point=goal_handle.request.samplepoint
+        path=self.call_service(self.calculate_path_client,destination)
+        #if there is no path, go directly to destination
+        if path=False or path.success=False:
+            self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
+            path=[goal_handle.request.samplepoint]
+
         self.get_logger().info(
-        f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint)} N")
+        f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
         self.vehicle.mode = VehicleMode("GUIDED")
         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
-        time.sleep(2)
-        self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
-        while rclpy.ok() and not self.reached_position(goal_handle.request.samplepoint):
-            if goal_handle.is_cancel_requested:
-                #make it loiter around actual position
-                goal_handle.canceled()
-                self.vehicle.mode = VehicleMode("LOITER")
-                return Goto.Result()
-            """if self.goto_goal_handle.is_active:
-                self.get_logger().info('Goal aborted')
-                self.vehicle.mode = VehicleMode("LOITER")
-                return Goto.Result()"""
-            if not self.status.armed:
-                self.get_logger().info('vehicle was forced to disconnect Goal aborted')
-                #make it loiter around actual position
-                self.vehicle.mode = VehicleMode("LOITER")
-                return Goto.Result()
-            if self.vehicle.mode != VehicleMode("GUIDED"):
-                self.get_logger().error("asv_mode was changed externally, possible EKF fail")
-                self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
-                if self.vehicle.ekf_ok:
-                    self.get_logger().info("system seems normal, retrying")
-                    self.vehicle.mode = VehicleMode("GUIDED")
-                    self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
-                    self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
-                    #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
-            feedback_msg.distance = self.calculate_distance(goal_handle.request.samplepoint)
-            goal_handle.publish_feedback(feedback_msg)
-            time.sleep(1)
-        # after reaching
-
+        time.sleep(1)
+        while (rclpy.ok()) and (len(path)>0):
+            self.vehicle.simple_goto(LocationGlobal(path[0].lat, path[0].lon, 0.0))
+            while rclpy.ok() and not self.reached_position(path[0]):
+                if goal_handle.is_cancel_requested:
+                    #make it loiter around actual position
+                    goal_handle.canceled()
+                    self.vehicle.mode = VehicleMode("LOITER")
+                    return Goto.Result()
+                """if self.goto_goal_handle.is_active:
+                    self.get_logger().info('Goal aborted')
+                    self.vehicle.mode = VehicleMode("LOITER")
+                    return Goto.Result()"""
+                if not self.status.armed:
+                    self.get_logger().info('vehicle was forced to disconnect Goal aborted')
+                    #make it loiter around actual position
+                    self.vehicle.mode = VehicleMode("LOITER")
+                    return Goto.Result()
+                if self.vehicle.mode != VehicleMode("GUIDED"):
+                    self.get_logger().error("asv_mode was changed externally, possible EKF fail")
+                    self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
+                    if self.vehicle.ekf_ok:
+                        self.get_logger().info("system seems normal, retrying")
+                        self.vehicle.mode = VehicleMode("GUIDED")
+                        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+                        self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
+                        #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
+                if counter>30:
+                    feedback_msg.distance = self.calculate_distance(path[0])
+                    goal_handle.publish_feedback(feedback_msg)
+                    counter=0
+                else:
+                    counter+=1
+                time.sleep(0.1)
+            #waypoint reached so go to next one
+            path.pop(0)    
+        # after reaching samplepoint
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
@@ -364,8 +381,9 @@ class Dronekit_node(Node):
 
     def call_service(self, client,  msg):
         # TODO: raise error to avoid infinite wait if service is not up, after all means a module is not active $$ watchdog will be in charge
-        while not client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info(f'service {client.srv_name} not available, waiting again...', once=True)
+        if not client.wait_for_service(timeout_sec=10.0):
+            self.get_logger().info(f'service {client.srv_name} not available', once=True)
+            return False
         future = client.call_async(msg)
         while rclpy.ok():
             if future.done():

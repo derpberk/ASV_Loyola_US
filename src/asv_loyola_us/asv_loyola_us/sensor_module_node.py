@@ -99,8 +99,8 @@ class Sensor_node(Node):
                 time.sleep(10.0)                          #wait 10 seconds
             else:
                 time.sleep(1.0)
-            for i in range(1,self.num_samples):
-                self.read_sensor()                        #read smart water
+            for i in range(self.num_samples):
+                self.read_sensor(i, self.num_samples)                        #read smart water
             if self.pump_installed:
                 GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
                 self.get_logger().info("deteniendo bomba")
@@ -117,8 +117,8 @@ class Sensor_node(Node):
             response.sensor.oxidation_reduction_potential = self.sensor_data.oxidation_reduction_potential
         return response
 
-    def read_sensor(self):
-        self.get_logger().info(f"Taking sample")
+    def read_sensor(self, num, max_samples):
+        self.get_logger().info(f"Taking sample {num+1} of {max_samples}")
 
         is_frame_ok = False  # While a frame hasnt been correctly read #
         #self.serial.reset_input_buffer()  # Erase the input buffer to start listening

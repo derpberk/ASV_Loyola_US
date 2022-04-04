@@ -30,6 +30,7 @@ class MQTT_node(Node):
         self.new_samplepoint_client = self.create_client(Newpoint, 'new_samplepoint')
         self.load_mission_client = self.create_client(LoadMission, 'load_mission')
         self.cancel_movement_client = self.create_client(CommandBool, 'cancel_movement')
+        self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
 
 
     def declare_topics(self):
@@ -85,6 +86,7 @@ class MQTT_node(Node):
         self.cancel_movement = -1
         self.shutdown = False
         self.planned_mqtt_point = None
+        self.update_params=False
         #call services
         self.declare_services()
 
@@ -116,16 +118,16 @@ class MQTT_node(Node):
                     call_service(self, self.asv_mission_mode_client, self.call_msg)
                     self.call_msg.asv_mode = -1
                 if self.mqtt_point is not None: #we need to add a new mqtt point
-                        #aux=CommandBool.Request()
-                        #aux.value=False
-                        #call_service(self, self.enable_planning_client, self.aux)
+                        aux=CommandBool.Request()
+                        aux.value=False
+                        call_service(self, self.enable_planning_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.mqtt_point)
                         self.get_logger().info(f"point sent")
                         self.mqtt_point = None
                 if self.planned_mqtt_point is not None: #we need to add a new mqtt point
-                        #aux=CommandBool.Request()
-                        #aux.value=True
-                        #call_service(self, self.enable_planning_client, self.aux)
+                        aux=CommandBool.Request()
+                        aux.value=True
+                        call_service(self, self.enable_planning_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.planned_mqtt_point)
                         self.get_logger().info(f"planned point sent")
                         self.planned_mqtt_point = None
@@ -214,7 +216,12 @@ class MQTT_node(Node):
             if "cancel_movement" in message:
                 self.cancel_movement = CommandBool.Request()
                 self.cancel_movement.value = True
-
+            if "update_parameters" in message:
+                aux=message["num_samples"]
+                aux=message["pump_channel"]
+                aux=message["pump"]
+                aux=message["time_between_samples"]
+                self.update_params=True
 
     def on_disconnect(self,  client,  __, _):
         sleep(1)

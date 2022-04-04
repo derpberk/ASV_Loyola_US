@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 import numpy as np
-import matplotlib.pyplot as plt
 from math import sqrt, pow, ceil, floor
-import random
-
-
 #TODO:
     #Use diagonals whenever possible
     #optimize using line of sight comparing last point with start point then next point till you can go directly
@@ -23,29 +19,39 @@ class Cell:  #for each cell we need some data
         self.position=position #the position of the cell given in a '[x, y]' value
         self.father=father # the cell we come from
         self.g=g # the distance from this cell to the goal
-        self.f=f # the distance travelled untill this cell
+        self.f=f # the distance travelled (cost) untill this cell
 
 class A_star:
 
-    def __init__(self, map, distance_mode):
+    def __init__(self, name, distance_mode=1, resolution=2, try_detailed=False):
         # Load map
-        self.map = np.genfromtxt(map,delimiter=' ')
+        mapa=str(name+"plantilla.csv")
+        gps=str(name+"grid.csv")
+        self.map = np.genfromtxt(mapa,delimiter=';')
+        self.read_gps(gps)
         self.height = self.map.shape[0]
         self.width = self.map.shape[1]
-        self.resolution = 1
+        self.resolution = resolution
         self.distance_mode=distance_mode
+        if try_detailed:
+            self.detailed_map=np.genfromtxt("pantilla.csv",delimiter=' ')
         
-        # Print map, uncomment to print map
-        #image = np.flipud(self.map)
-        #plt.figure()
-        #plt.imshow(image, cmap=plt.get_cmap('binary'))
-        #plt.show()
-        
+    def read_gps(self, gps):
+        self.locations=[]
+        with open(gps, 'r') as of:
+            for line in of:
+                row=[]
+                for coordinate in line.split(";"):
+                    if coordinate!='\n':
+                        aux=coordinate.split(",")
+                        coord=[float(aux[0]),float(aux[1])]
+                        row.append(coord)
+                self.locations.append(row)
+                    
         
     def collision(self, start_cell, end_cell):
         #there are better ways, but we will just take a roundabout here to make sure we do not crash
         
-        resolution = 1 #this 10 is the resolution, i think this value is fair enough
         
         #lets try if movement is linear to save calculation time
         if start_cell[0] == end_cell[0]:#movimiento vertical o el punto es el mismo
@@ -57,7 +63,7 @@ class A_star:
            
         #lets calculate points if movement is not linear
         else:
-            number_of_points=max(abs(start_cell[0]*resolution-end_cell[0]*resolution),abs(start_cell[1]*resolution-end_cell[1]*resolution))
+            number_of_points=max(abs(start_cell[0]*self.resolution-end_cell[0]*self.resolution),abs(start_cell[1]*self.resolution-end_cell[1]*self.resolution))
             x=[start_cell[0]]
             y=[start_cell[1]]
             for i in range(1,number_of_points-1):        #last point has already been checked, so no need to check it again
@@ -93,6 +99,7 @@ class A_star:
     def compute_path(self, start_cell, goal_cell):
         """Compute path."""
         check=False
+        self.path=None #first we asume we dont have a path
 
         #declarations of list
         self.openlist=[] # here we will store all the cells we have yet to visit
@@ -190,25 +197,46 @@ class A_star:
         
         self.path=path
         #print(path)
+        
+        
+    
+    def calculate_cell(self, coordinates):
+        for i in range(self.width):
+            if self.locations[0][i][1]>coordinates[1]:
+                startx=i
+                break;
+        for j in range(self.height):
+            if self.locations[j][0][0]<coordinates[0]:
+                starty=j
+                break;
+        return [starty,startx]
+    
+    def calculate_gps(self, cell):
+        lat=(self.locations[cell[0]][cell[1]][0]+self.locations[cell[0]+1][cell[1]][0])/2
+        lon=(self.locations[cell[0]][cell[1]][1]+self.locations[cell[0]][cell[1]+1][1])/2
+        return [lat,lon]
+    
+    def compute_gps_path(self,start,destination):
+        self.gps_path=[]
+        start_cell=self.calculate_cell(start)
+        goal_cell=self.calculate_cell(destination)
+        self.compute_path(start_cell, goal_cell)
+        self.pathlen=len(self.path)
+        self.shorten_path()
+        self.new_len=len(self.path)
+        self.gps_path=[]
+        for i in self.path:
+            self.gps_path.append(self.calculate_gps(i))
+                
+            
+def main():
+        
+
+    #read map
+    mapp= A_star("Loyola121x239")
+    start=[37.30756124092905, -5.940235027872745]
+    destination=[37.308586181428446, -5.939682210759604]
+    mapp.compute_gps_path(start, destination)
 
 
-if __name__ == '__main__':
-    #try:
-          #"'0' taxist mode" o '1' "euclidean mode"
-        x = Planner('./map.csv', 1)
-        """
-        while True:
-                start_pose_x = int(input("Set your x start: "))
-                start_pose_y = int(input("Set your y start: "))
-                if x.map[start_pose_y,start_pose_x] == 1:
-                    print("this cell is in a wall")
-                else:
-                    break
-        while True:
-                goal_pose_x = int(input("Set your x goal: "))
-                goal_pose_y = int(input("Set your y goal: ")) #TODO add una secuencia de volver a pedir si la posicion esta fuera del rango del mapa, indicando dimensiones
-                if x.map[goal_pose_y,goal_pose_x] == 1:
-                    print("this cell is in a wall")
-                else:
-                    break
-        """
+if __name__ == '__main__':  main()
