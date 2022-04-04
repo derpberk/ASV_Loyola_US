@@ -1,0 +1,1065 @@
+1648723997.5161948 [INFO] [launch]: All log files can be found below /home/xavier/.ros/log/2022-03-31-12-53-17-498229-xavier-desktop-9582
+1648723997.5169485 [INFO] [launch]: Default logging verbosity is set to INFO
+1648723998.2594783 [WARNING] [planner-6]: there are now at least 2 nodes with the name /ASV/mission_node created within this launch context
+1648723998.3106267 [INFO] [mission-1]: process started with pid [9585]
+1648723998.3132453 [INFO] [watchdog-2]: process started with pid [9586]
+1648723998.3173716 [INFO] [drone-3]: process started with pid [9587]
+1648723998.3289368 [INFO] [mqtt-4]: process started with pid [9588]
+1648723998.3301263 [INFO] [sensors-5]: process started with pid [9589]
+1648723998.3311465 [INFO] [planner-6]: process started with pid [9590]
+1648724000.7733216 [sensors-5] [INFO] [1648724000.771822867] [ASV.sensors_node]: sensor node initialized
+1648724001.6502597 [drone-3] [INFO] [1648724001.649245437] [ASV.drone_node]: Connecting to vehicle in tcp:navio.local:5678
+1648724001.7824352 [mqtt-4] [INFO] [1648724001.781398643] [ASV.mqtt_node]: MQTT connecting to dronesloyolaus.eastus.cloudapp.azure.com
+1648724001.7982371 [drone-3] WARNING:autopilot:Flight mode change failed
+1648724002.2543085 [mission-1] [INFO] [1648724002.253250332] [ASV.mission_node]: Starting mode:0 LAND.
+1648724002.2609658 [mission-1] [INFO] [1648724002.259943191] [ASV.mission_node]: All systems operative
+1648724002.2656436 [mission-1] [INFO] [1648724002.264764354] [ASV.mission_node]: mission_node is calling service MQTT_send_info
+1648724002.8659234 [mqtt-4] [INFO] [1648724002.864927006] [ASV.mqtt_node]: Requested to send MQTT
+1648724002.8689277 [mqtt-4] [INFO] [1648724002.868071738] [ASV.mqtt_node]: MQTT start sending
+1648724002.8741140 [mission-1] [INFO] [1648724002.873205415] [ASV.mission_node]: Changed current ASV mode to LAND.
+1648724002.8769505 [mission-1] [INFO] [1648724002.876072384] [ASV.mission_node]: vehicle resting.
+1648724002.8808944 [mission-1] [INFO] [1648724002.880029283] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648724002.8878868 [mission-1] [INFO] [1648724002.886236249] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648724002.8900309 [drone-3] [INFO] [1648724002.889224404] [ASV.drone_node]: Vehicle disarmed
+1648724003.7377393 [planner-6] [INFO] [1648724003.736101160] [ASV.mission_node]: Planner node initialized
+1648724006.5660474 [mqtt-4] [INFO] [1648724006.561879455] [ASV.mqtt_node]: Received {'mission_type': 'MANUAL', 'VehicleNum': 3} on topic veh3
+1648724006.5904505 [mqtt-4] [INFO] [1648724006.587485271] [ASV.mqtt_node]: mqtt_node is calling service change_mission_mode
+1648724006.5941093 [mission-1] [INFO] [1648724006.592385537] [ASV.mission_node]: Changed current ASV mode to MANUAL.
+1648724006.5979292 [mission-1] [INFO] [1648724006.597058568] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648724006.6027713 [mission-1] [INFO] [1648724006.601920721] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648724006.8077459 [drone-3] [INFO] [1648724006.806689650] [ASV.drone_node]: Vehicle armed
+1648724006.8158679 [mission-1] [INFO] [1648724006.812087968] [ASV.mission_node]: vehicle in 'MANUAL' mode
+1648724071.6714237 [mqtt-4] [INFO] [1648724071.668068832] [ASV.mqtt_node]: Received {'load_mission': 3, 'VehicleNum': 3} on topic veh3
+1648724071.6935372 [mqtt-4] [INFO] [1648724071.692110614] [ASV.mqtt_node]: mqtt_node is calling service load_mission
+1648724071.7826965 [mission-1] [INFO] [1648724071.779173844] [ASV.mission_node]: asked to load mission 3
+1648724071.7970793 [mission-1] [INFO] [1648724071.795788572] [ASV.mission_node]: mission: MisionesLoyola_dron_3.kml was loaded successfully
+1648724075.7770617 [mqtt-4] [INFO] [1648724075.775949327] [ASV.mqtt_node]: Received {'mission_type': 'PREMISSION', 'VehicleNum': 3} on topic veh3
+1648724075.8029630 [mqtt-4] [INFO] [1648724075.800773513] [ASV.mqtt_node]: mqtt_node is calling service change_mission_mode
+1648724075.8076675 [mission-1] [INFO] [1648724075.806941935] [ASV.mission_node]: Changed current ASV mode to PRELOADED_MISSION.
+1648724075.8109717 [mission-1] [INFO] [1648724075.810272419] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648724075.8155253 [mission-1] [INFO] [1648724075.814823648] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648724075.8183045 [drone-3] [INFO] [1648724075.817665073] [ASV.drone_node]: Vehicle armed
+1648724075.8225186 [mission-1] [INFO] [1648724075.821851691] [ASV.mission_node]: Starting Pre-loaded Mission /home/xavier/ASV_Loyola_US/MisionesLoyola_dron_3.kml
+1648724075.9351795 [mission-1] [INFO] [1648724075.929506309] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940157211651672, lat=37.30767880496103)
+1648724075.9367259 [mission-1] [INFO] [1648724075.933734463] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940157211651672, lat=37.30767880496103)
+1648724075.9453053 [drone-3] [INFO] [1648724075.944018655] [ASV.drone_node]: Action call received
+1648724075.9489341 [drone-3] [INFO] [1648724075.947959031] [ASV.drone_node]: Action accepted
+1648724075.9600236 [drone-3] [INFO] [1648724075.957983541] [ASV.drone_node]: Turning to : 41.06552388317053 N
+1648724076.1512280 [mission-1] [INFO] [1648724076.146803204] [ASV.mission_node]: Goal accepted :)
+1648724077.9778645 [mission-1] [INFO] [1648724077.976774660] [ASV.mission_node]: distance=26.7173561757318
+1648724078.9825325 [mission-1] [INFO] [1648724078.981394546] [ASV.mission_node]: distance=26.729402407552094
+1648724079.9881096 [mission-1] [INFO] [1648724079.987108960] [ASV.mission_node]: distance=26.289659960605988
+1648724080.9913785 [mission-1] [INFO] [1648724080.990339158] [ASV.mission_node]: distance=25.72256501142778
+1648724081.9990542 [mission-1] [INFO] [1648724081.995394289] [ASV.mission_node]: distance=25.018344216015002
+1648724083.0009677 [mission-1] [INFO] [1648724082.999842432] [ASV.mission_node]: distance=24.11525317483729
+1648724084.0054977 [mission-1] [INFO] [1648724084.004536553] [ASV.mission_node]: distance=23.13022390906696
+1648724085.0140805 [mission-1] [INFO] [1648724085.010136848] [ASV.mission_node]: distance=22.20454757418466
+1648724086.0150239 [mission-1] [INFO] [1648724086.014018853] [ASV.mission_node]: distance=21.300330878108074
+1648724087.0198243 [mission-1] [INFO] [1648724087.018784280] [ASV.mission_node]: distance=20.4024267886736
+1648724088.0295985 [mission-1] [INFO] [1648724088.025267666] [ASV.mission_node]: distance=19.563331821640382
+1648724089.0348380 [mission-1] [INFO] [1648724089.030296923] [ASV.mission_node]: distance=18.709274392207796
+1648724090.0367177 [mission-1] [INFO] [1648724090.034557944] [ASV.mission_node]: distance=17.790074304392995
+1648724091.0388539 [mission-1] [INFO] [1648724091.037199496] [ASV.mission_node]: distance=16.842131787145934
+1648724092.0433903 [mission-1] [INFO] [1648724092.041931804] [ASV.mission_node]: distance=15.896456191442107
+1648724093.0479498 [mission-1] [INFO] [1648724093.043699163] [ASV.mission_node]: distance=14.660623365107059
+1648724094.0447083 [mission-1] [INFO] [1648724094.043705516] [ASV.mission_node]: distance=13.69413678816929
+1648724095.0535443 [mission-1] [INFO] [1648724095.052494442] [ASV.mission_node]: distance=12.761521070560969
+1648724096.0530465 [mission-1] [INFO] [1648724096.051997421] [ASV.mission_node]: distance=11.845656603440162
+1648724097.0660610 [mission-1] [INFO] [1648724097.061897802] [ASV.mission_node]: distance=10.920277656843991
+1648724098.0671566 [mission-1] [INFO] [1648724098.064410611] [ASV.mission_node]: distance=9.991140444246286
+1648724099.0666363 [mission-1] [INFO] [1648724099.065609745] [ASV.mission_node]: distance=8.944372865626622
+1648724100.0735614 [mission-1] [INFO] [1648724100.069813405] [ASV.mission_node]: distance=7.945009265385808
+1648724101.0724690 [mission-1] [INFO] [1648724101.071317077] [ASV.mission_node]: distance=6.904869961855668
+1648724102.0834947 [mission-1] [INFO] [1648724102.080889178] [ASV.mission_node]: distance=5.930136277508
+1648724103.0850167 [mission-1] [INFO] [1648724103.083943924] [ASV.mission_node]: distance=5.013729910777123
+1648724104.0938506 [mission-1] [INFO] [1648724104.090179453] [ASV.mission_node]: distance=4.142964925503512
+1648724105.0988355 [mission-1] [INFO] [1648724105.093768883] [ASV.mission_node]: distance=3.2825779722692303
+1648724106.1029465 [mission-1] [INFO] [1648724106.097968520] [ASV.mission_node]: distance=2.344602615804572
+1648724107.1039498 [drone-3] [INFO] [1648724107.103016351] [ASV.drone_node]: Goal reached, waiting for sample
+1648724107.1095529 [sensors-5] [INFO] [1648724107.108866466] [ASV.sensors_node]: Sample requested
+1648724108.1146483 [sensors-5] [INFO] [1648724108.113684884] [ASV.sensors_node]: Taking sample
+1648724108.6185765 [sensors-5] [INFO] [1648724108.617612324] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '6', 'BAT:100', 'WT:18.45', 'PH:8.72', 'DO:86.3', 'COND:1.0', 'ORP:-0.020']
+1648724108.6217597 [sensors-5] [INFO] [1648724108.620940824] [ASV.sensors_node]: Taking sample
+1648724108.9313219 [mqtt-4] [INFO] [1648724108.930218168] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:55:08.618097", "Latitude": 37.3076756, "Longitude": -5.940157, "ph": 8.72, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.3, "temperature": 18.45, "conductivity": 1.0, "oxidation_reduction_potential": -0.02}
+1648724123.1452320 [sensors-5] [INFO] [1648724123.144194523] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '7', 'BAT:100', 'WT:18.58', 'PH:8.54', 'DO:87.0', 'COND:1.0', 'ORP:0.003']
+1648724123.1510196 [sensors-5] [INFO] [1648724123.150119518] [ASV.sensors_node]: Taking sample
+1648724123.4372945 [mqtt-4] [INFO] [1648724123.436273065] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:55:23.147070", "Latitude": 37.3076802, "Longitude": -5.9401587, "ph": 8.54, "smart_water_battery": 100.0, "Disolved_Oxygen": 87.0, "temperature": 18.58, "conductivity": 1.0, "oxidation_reduction_potential": 0.003}
+1648724138.6754441 [sensors-5] [INFO] [1648724138.674469717] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '8', 'BAT:100', 'WT:18.59', 'PH:8.69', 'DO:79.5', 'COND:1.0', 'ORP:-0.168']
+1648724138.7927995 [mqtt-4] [INFO] [1648724138.791734798] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:55:38.675529", "Latitude": 37.3076713, "Longitude": -5.9401709, "ph": 8.69, "smart_water_battery": 100.0, "Disolved_Oxygen": 79.5, "temperature": 18.59, "conductivity": 1.0, "oxidation_reduction_potential": -0.168}
+1648724138.8957791 [mission-1] [INFO] [1648724138.894754482] [ASV.mission_node]: Goal succeeded! Result: True
+1648724138.8988805 [mission-1] [INFO] [1648724138.897855268] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940225384807123, lat=37.30757368811373)
+1648724138.9016798 [mission-1] [INFO] [1648724138.900652373] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940225384807123, lat=37.30757368811373)
+1648724138.9194493 [drone-3] [INFO] [1648724138.916144497] [ASV.drone_node]: Action call received
+1648724138.9241595 [drone-3] [INFO] [1648724138.923528029] [ASV.drone_node]: Action accepted
+1648724138.9340398 [drone-3] [INFO] [1648724138.931378668] [ASV.drone_node]: Turning to : 209.0197901060712 N
+1648724139.2230790 [mission-1] [INFO] [1648724139.218555126] [ASV.mission_node]: Goal accepted :)
+1648724140.9502792 [mission-1] [INFO] [1648724140.945968842] [ASV.mission_node]: distance=11.712617003084347
+1648724141.9560184 [mission-1] [INFO] [1648724141.954809393] [ASV.mission_node]: distance=11.750713707483479
+1648724142.9558921 [mission-1] [INFO] [1648724142.954938404] [ASV.mission_node]: distance=11.900312546645026
+1648724143.9623444 [mission-1] [INFO] [1648724143.961356440] [ASV.mission_node]: distance=11.872470350753497
+1648724144.9688587 [mission-1] [INFO] [1648724144.967258666] [ASV.mission_node]: distance=11.50069383815267
+1648724145.9704666 [mission-1] [INFO] [1648724145.969458277] [ASV.mission_node]: distance=10.789729430893805
+1648724146.9801567 [mission-1] [INFO] [1648724146.978803115] [ASV.mission_node]: distance=9.78159519232543
+1648724147.9825046 [mission-1] [INFO] [1648724147.981485126] [ASV.mission_node]: distance=8.703853819478002
+1648724148.9909389 [mission-1] [INFO] [1648724148.987380531] [ASV.mission_node]: distance=7.708727889994905
+1648724149.9914236 [mission-1] [INFO] [1648724149.990292111] [ASV.mission_node]: distance=6.796666376448397
+1648724150.9990032 [mission-1] [INFO] [1648724150.996044892] [ASV.mission_node]: distance=5.90605567937189
+1648724152.0008426 [mission-1] [INFO] [1648724151.999680632] [ASV.mission_node]: distance=4.976663760863791
+1648724153.0073631 [mission-1] [INFO] [1648724153.003703351] [ASV.mission_node]: distance=4.058181835630166
+1648724154.0114980 [mission-1] [INFO] [1648724154.008271001] [ASV.mission_node]: distance=3.1362516176607214
+1648724155.0156209 [mission-1] [INFO] [1648724155.013283998] [ASV.mission_node]: distance=2.202632216197658
+1648724156.0188856 [drone-3] [INFO] [1648724156.017796255] [ASV.drone_node]: Goal reached, waiting for sample
+1648724156.0315759 [sensors-5] [INFO] [1648724156.030774892] [ASV.sensors_node]: Sample requested
+1648724157.0359993 [sensors-5] [INFO] [1648724157.035003176] [ASV.sensors_node]: Taking sample
+1648724157.5437520 [sensors-5] [INFO] [1648724157.540063608] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '9', 'BAT:100', 'WT:18.41', 'PH:8.66', 'DO:84.5', 'COND:1.0', 'ORP:-0.018']
+1648724157.5484045 [sensors-5] [INFO] [1648724157.547007873] [ASV.sensors_node]: Taking sample
+1648724157.7561576 [mqtt-4] [INFO] [1648724157.755275411] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:55:57.541835", "Latitude": 37.3075767, "Longitude": -5.9402272, "ph": 8.66, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.5, "temperature": 18.41, "conductivity": 1.0, "oxidation_reduction_potential": -0.018}
+1648724170.5739563 [sensors-5] [INFO] [1648724170.572920151] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '10', 'BAT:100', 'WT:18.75', 'PH:8.23', 'DO:84.2', 'COND:1.0', 'ORP:0.005']
+1648724170.5771503 [sensors-5] [INFO] [1648724170.576404267] [ASV.sensors_node]: Taking sample
+1648724170.6870201 [mqtt-4] [INFO] [1648724170.683880967] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:56:10.573658", "Latitude": 37.3075673, "Longitude": -5.940233, "ph": 8.23, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.2, "temperature": 18.75, "conductivity": 1.0, "oxidation_reduction_potential": 0.005}
+1648724186.6037652 [sensors-5] [INFO] [1648724186.602813279] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '11', 'BAT:100', 'WT:18.61', 'PH:8.62', 'DO:79.1', 'COND:1.0', 'ORP:0.010']
+1648724186.7393885 [mission-1] [INFO] [1648724186.738335265] [ASV.mission_node]: Goal succeeded! Result: True
+1648724186.7424159 [mission-1] [INFO] [1648724186.741696276] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940236348749886, lat=37.307495956363)
+1648724186.7449858 [mission-1] [INFO] [1648724186.744219459] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940236348749886, lat=37.307495956363)
+1648724186.7552464 [drone-3] [INFO] [1648724186.753334905] [ASV.drone_node]: Action call received
+1648724186.7617404 [drone-3] [INFO] [1648724186.760507140] [ASV.drone_node]: Action accepted
+1648724186.7724392 [drone-3] [INFO] [1648724186.769889723] [ASV.drone_node]: Turning to : 187.6767048005034 N
+1648724186.8228214 [mqtt-4] [INFO] [1648724186.821137802] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:56:26.603797", "Latitude": 37.3075757, "Longitude": -5.9402256, "ph": 8.62, "smart_water_battery": 100.0, "Disolved_Oxygen": 79.1, "temperature": 18.61, "conductivity": 1.0, "oxidation_reduction_potential": 0.01}
+1648724187.1717532 [mission-1] [INFO] [1648724187.167503690] [ASV.mission_node]: Goal accepted :)
+1648724188.7899032 [mission-1] [INFO] [1648724188.788836251] [ASV.mission_node]: distance=9.104594241804966
+1648724189.7906623 [mission-1] [INFO] [1648724189.789728536] [ASV.mission_node]: distance=9.221379696735209
+1648724190.7902756 [mission-1] [INFO] [1648724190.789206250] [ASV.mission_node]: distance=8.957280858783848
+1648724191.7922704 [mission-1] [INFO] [1648724191.791251499] [ASV.mission_node]: distance=8.403999807074255
+1648724192.7985303 [mission-1] [INFO] [1648724192.794233169] [ASV.mission_node]: distance=7.661076511991028
+1648724193.8001077 [mission-1] [INFO] [1648724193.795219531] [ASV.mission_node]: distance=6.800930809648543
+1648724194.8075492 [mission-1] [INFO] [1648724194.805009241] [ASV.mission_node]: distance=6.127809254417587
+1648724195.8085871 [mission-1] [INFO] [1648724195.804752876] [ASV.mission_node]: distance=5.064356093588357
+1648724196.8115416 [mission-1] [INFO] [1648724196.810477314] [ASV.mission_node]: distance=4.166990859497646
+1648724197.8165967 [mission-1] [INFO] [1648724197.815431635] [ASV.mission_node]: distance=3.270598737075938
+1648724198.8232319 [mission-1] [INFO] [1648724198.821445931] [ASV.mission_node]: distance=2.4114906780787204
+1648724199.8231525 [mission-1] [INFO] [1648724199.820966396] [ASV.mission_node]: distance=1.585639920634401
+1648724200.8284860 [drone-3] [INFO] [1648724200.827412855] [ASV.drone_node]: Goal reached, waiting for sample
+1648724200.8340201 [sensors-5] [INFO] [1648724200.833305114] [ASV.sensors_node]: Sample requested
+1648724201.8386657 [sensors-5] [INFO] [1648724201.837749800] [ASV.sensors_node]: Taking sample
+1648724202.8443394 [sensors-5] [INFO] [1648724202.843473086] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '12', 'BAT:100', 'WT:18.47', 'PH:8.62', 'DO:85.8', 'COND:1.0', 'ORP:0.013']
+1648724202.8475001 [sensors-5] [INFO] [1648724202.846782194] [ASV.sensors_node]: Taking sample
+1648724203.1544044 [mqtt-4] [INFO] [1648724203.153428550] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:56:42.844173", "Latitude": 37.3074931, "Longitude": -5.9402388, "ph": 8.62, "smart_water_battery": 100.0, "Disolved_Oxygen": 85.8, "temperature": 18.47, "conductivity": 1.0, "oxidation_reduction_potential": 0.013}
+1648724218.8741629 [sensors-5] [INFO] [1648724218.873304537] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '13', 'BAT:100', 'WT:18.69', 'PH:8.39', 'DO:79.4', 'COND:1.0', 'ORP:0.007']
+1648724218.8779662 [sensors-5] [INFO] [1648724218.877314097] [ASV.sensors_node]: Taking sample
+1648724219.0746119 [mqtt-4] [INFO] [1648724219.073813465] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:56:58.874196", "Latitude": 37.3074868, "Longitude": -5.940244, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 79.4, "temperature": 18.69, "conductivity": 1.0, "oxidation_reduction_potential": 0.007}
+1648724234.4023340 [sensors-5] [INFO] [1648724234.401385024] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '14', 'BAT:100', 'WT:18.91', 'PH:8.58', 'DO:70.7', 'COND:1.0', 'ORP:0.009']
+1648724234.5377276 [mission-1] [INFO] [1648724234.533945006] [ASV.mission_node]: Goal succeeded! Result: True
+1648724234.5401323 [mission-1] [INFO] [1648724234.539254030] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.94012091498489, lat=37.3074547842443)
+1648724234.5426626 [mission-1] [INFO] [1648724234.541996702] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.94012091498489, lat=37.3074547842443)
+1648724234.5556130 [drone-3] [INFO] [1648724234.551342133] [ASV.drone_node]: Action call received
+1648724234.5619452 [drone-3] [INFO] [1648724234.561121263] [ASV.drone_node]: Action accepted
+1648724234.5751345 [drone-3] [INFO] [1648724234.572532754] [ASV.drone_node]: Turning to : 106.34281426979982 N
+1648724234.5808811 [mqtt-4] [INFO] [1648724234.580131263] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:57:14.401906", "Latitude": 37.3074887, "Longitude": -5.9402378, "ph": 8.58, "smart_water_battery": 100.0, "Disolved_Oxygen": 70.7, "temperature": 18.91, "conductivity": 1.0, "oxidation_reduction_potential": 0.009}
+1648724234.9656413 [mission-1] [INFO] [1648724234.962005710] [ASV.mission_node]: Goal accepted :)
+1648724236.5910273 [mission-1] [INFO] [1648724236.590112283] [ASV.mission_node]: distance=10.975539142181708
+1648724237.5988383 [mission-1] [INFO] [1648724237.595738189] [ASV.mission_node]: distance=10.942757810652639
+1648724238.6025853 [mission-1] [INFO] [1648724238.597748105] [ASV.mission_node]: distance=10.580198626326414
+1648724239.6107199 [mission-1] [INFO] [1648724239.606887952] [ASV.mission_node]: distance=10.075838477843934
+1648724240.6100481 [mission-1] [INFO] [1648724240.606086716] [ASV.mission_node]: distance=9.588732228246913
+1648724241.6143255 [mission-1] [INFO] [1648724241.613344951] [ASV.mission_node]: distance=9.16718078908808
+1648724242.6199834 [mission-1] [INFO] [1648724242.618105380] [ASV.mission_node]: distance=8.636259442609166
+1648724243.6236455 [mission-1] [INFO] [1648724243.622585071] [ASV.mission_node]: distance=8.017625114248336
+1648724244.6310375 [mission-1] [INFO] [1648724244.628684547] [ASV.mission_node]: distance=7.302132819536711
+1648724245.6357722 [mission-1] [INFO] [1648724245.632673739] [ASV.mission_node]: distance=6.362974626970903
+1648724246.6400948 [mission-1] [INFO] [1648724246.638576607] [ASV.mission_node]: distance=5.19075177758275
+1648724247.6440532 [mission-1] [INFO] [1648724247.642565255] [ASV.mission_node]: distance=4.104500796501204
+1648724248.6507919 [mission-1] [INFO] [1648724248.648560763] [ASV.mission_node]: distance=3.205612666176433
+1648724249.6552787 [mission-1] [INFO] [1648724249.652547715] [ASV.mission_node]: distance=2.407337787459332
+1648724250.6569695 [mission-1] [INFO] [1648724250.655930727] [ASV.mission_node]: distance=1.5485273522280085
+1648724251.6629033 [drone-3] [INFO] [1648724251.661977884] [ASV.drone_node]: Goal reached, waiting for sample
+1648724251.6702716 [sensors-5] [INFO] [1648724251.668623587] [ASV.sensors_node]: Sample requested
+1648724252.6761231 [sensors-5] [INFO] [1648724252.675206906] [ASV.sensors_node]: Taking sample
+1648724253.1801116 [sensors-5] [INFO] [1648724253.178941369] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '15', 'BAT:100', 'WT:18.54', 'PH:8.57', 'DO:95.9', 'COND:1.0', 'ORP:-0.000']
+1648724253.1835132 [sensors-5] [INFO] [1648724253.182937648] [ASV.sensors_node]: Taking sample
+1648724253.4426122 [mqtt-4] [INFO] [1648724253.441638280] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:57:33.180233", "Latitude": 37.3074503, "Longitude": -5.9401168, "ph": 8.57, "smart_water_battery": 100.0, "Disolved_Oxygen": 95.9, "temperature": 18.54, "conductivity": 1.0, "oxidation_reduction_potential": -0.0}
+1648724265.7056839 [sensors-5] [INFO] [1648724265.704849601] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '16', 'BAT:100', 'WT:18.57', 'PH:8.45', 'DO:86.1', 'COND:1.0', 'ORP:0.006']
+1648724265.7096004 [sensors-5] [INFO] [1648724265.708950105] [ASV.sensors_node]: Taking sample
+1648724265.8826742 [mqtt-4] [INFO] [1648724265.881655669] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:57:45.705750", "Latitude": 37.3074422, "Longitude": -5.9401099, "ph": 8.45, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.1, "temperature": 18.57, "conductivity": 1.0, "oxidation_reduction_potential": 0.006}
+1648724281.7344005 [sensors-5] [INFO] [1648724281.733570387] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '17', 'BAT:100', 'WT:18.61', 'PH:8.55', 'DO:75.8', 'COND:1.0', 'ORP:0.010']
+1648724281.8909867 [mission-1] [INFO] [1648724281.887895394] [ASV.mission_node]: Goal succeeded! Result: True
+1648724281.8936512 [mqtt-4] [INFO] [1648724281.892791775] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:58:01.736097", "Latitude": 37.3074456, "Longitude": -5.940112, "ph": 8.55, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.8, "temperature": 18.61, "conductivity": 1.0, "oxidation_reduction_potential": 0.01}
+1648724281.8950360 [mission-1] [INFO] [1648724281.893192673] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.94003346278222, lat=37.3074623585849)
+1648724281.8968298 [mission-1] [INFO] [1648724281.895915090] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.94003346278222, lat=37.3074623585849)
+1648724281.9069431 [drone-3] [INFO] [1648724281.904008065] [ASV.drone_node]: Action call received
+1648724281.9150302 [drone-3] [INFO] [1648724281.914179293] [ASV.drone_node]: Action accepted
+1648724281.9256132 [drone-3] [INFO] [1648724281.924656443] [ASV.drone_node]: Turning to : 77.9397414610253 N
+1648724282.2191088 [mission-1] [INFO] [1648724282.216100532] [ASV.mission_node]: Goal accepted :)
+1648724283.9408720 [mission-1] [INFO] [1648724283.936723108] [ASV.mission_node]: distance=7.1201555285160225
+1648724284.9437883 [mission-1] [INFO] [1648724284.942719832] [ASV.mission_node]: distance=7.066398605129115
+1648724285.9458354 [mission-1] [INFO] [1648724285.942068420] [ASV.mission_node]: distance=6.777302204205126
+1648724286.9515705 [mission-1] [INFO] [1648724286.949556737] [ASV.mission_node]: distance=5.98702204393603
+1648724287.9557476 [mission-1] [INFO] [1648724287.952841637] [ASV.mission_node]: distance=5.135312762110644
+1648724288.9594822 [mission-1] [INFO] [1648724288.957303664] [ASV.mission_node]: distance=4.387161695013968
+1648724289.9634805 [mission-1] [INFO] [1648724289.961021110] [ASV.mission_node]: distance=3.704454540386866
+1648724290.9701874 [mission-1] [INFO] [1648724290.966324902] [ASV.mission_node]: distance=3.0071880027723443
+1648724291.9742181 [mission-1] [INFO] [1648724291.970088205] [ASV.mission_node]: distance=2.202278633743364
+1648724292.9759486 [drone-3] [INFO] [1648724292.975049723] [ASV.drone_node]: Goal reached, waiting for sample
+1648724292.9813006 [sensors-5] [INFO] [1648724292.980526939] [ASV.sensors_node]: Sample requested
+1648724293.9855504 [sensors-5] [INFO] [1648724293.984612868] [ASV.sensors_node]: Taking sample
+1648724296.9925439 [sensors-5] [INFO] [1648724296.991508350] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '18', 'BAT:100', 'WT:18.50', 'PH:8.63', 'DO:81.3', 'COND:1.0', 'ORP:0.007']
+1648724296.9957466 [sensors-5] [INFO] [1648724296.995134868] [ASV.sensors_node]: Taking sample
+1648724297.2007146 [mqtt-4] [INFO] [1648724297.199556779] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:58:16.992193", "Latitude": 37.3074566, "Longitude": -5.9400287, "ph": 8.63, "smart_water_battery": 100.0, "Disolved_Oxygen": 81.3, "temperature": 18.5, "conductivity": 1.0, "oxidation_reduction_potential": 0.007}
+1648724313.0200660 [sensors-5] [INFO] [1648724313.019145258] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '19', 'BAT:100', 'WT:18.70', 'PH:8.40', 'DO:86.5', 'COND:1.0', 'ORP:-0.172']
+1648724313.0254064 [sensors-5] [INFO] [1648724313.024565194] [ASV.sensors_node]: Taking sample
+1648724313.1291418 [mqtt-4] [INFO] [1648724313.128345423] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:58:33.021694", "Latitude": 37.307453, "Longitude": -5.9400185, "ph": 8.4, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.5, "temperature": 18.7, "conductivity": 1.0, "oxidation_reduction_potential": -0.172}
+1648724328.5492551 [sensors-5] [INFO] [1648724328.548384343] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '20', 'BAT:100', 'WT:18.58', 'PH:8.78', 'DO:77.7', 'COND:1.0', 'ORP:0.012']
+1648724328.6661797 [mqtt-4] [INFO] [1648724328.665254473] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:58:48.552669", "Latitude": 37.3074498, "Longitude": -5.9400224, "ph": 8.78, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.7, "temperature": 18.58, "conductivity": 1.0, "oxidation_reduction_potential": 0.012}
+1648724328.6831620 [mission-1] [INFO] [1648724328.682262990] [ASV.mission_node]: Goal succeeded! Result: True
+1648724328.6859434 [mission-1] [INFO] [1648724328.685270912] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939958972574978, lat=37.30752731255571)
+1648724328.6885588 [mission-1] [INFO] [1648724328.687906959] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939958972574978, lat=37.30752731255571)
+1648724328.6969769 [drone-3] [INFO] [1648724328.696115776] [ASV.drone_node]: Action call received
+1648724328.7007768 [drone-3] [INFO] [1648724328.700134711] [ASV.drone_node]: Action accepted
+1648724328.7081037 [drone-3] [INFO] [1648724328.707414370] [ASV.drone_node]: Turning to : 39.30902105347612 N
+1648724329.1144097 [mission-1] [INFO] [1648724329.110964913] [ASV.mission_node]: Goal accepted :)
+1648724330.7914789 [mission-1] [INFO] [1648724330.790420078] [ASV.mission_node]: distance=10.3892411616956
+1648724331.7951167 [mission-1] [INFO] [1648724331.791082402] [ASV.mission_node]: distance=10.379377888095112
+1648724332.7952836 [mission-1] [INFO] [1648724332.791607094] [ASV.mission_node]: distance=10.141903706106708
+1648724333.7956426 [mission-1] [INFO] [1648724333.793678802] [ASV.mission_node]: distance=9.685579035113786
+1648724334.7947187 [mission-1] [INFO] [1648724334.790725106] [ASV.mission_node]: distance=9.130064553740379
+1648724335.7954023 [mission-1] [INFO] [1648724335.792243595] [ASV.mission_node]: distance=8.66499494710192
+1648724336.7956138 [mission-1] [INFO] [1648724336.792213691] [ASV.mission_node]: distance=8.047230838733318
+1648724337.7958853 [mission-1] [INFO] [1648724337.792902864] [ASV.mission_node]: distance=7.352882736240909
+1648724338.7952673 [mission-1] [INFO] [1648724338.791533849] [ASV.mission_node]: distance=6.595080860766204
+1648724339.7948401 [mission-1] [INFO] [1648724339.790706564] [ASV.mission_node]: distance=5.6597061313593136
+1648724340.7955637 [mission-1] [INFO] [1648724340.793134339] [ASV.mission_node]: distance=4.579260169665654
+1648724341.7953990 [mission-1] [INFO] [1648724341.792143406] [ASV.mission_node]: distance=3.53747725532502
+1648724342.7956853 [mission-1] [INFO] [1648724342.793184645] [ASV.mission_node]: distance=2.642814730582835
+1648724343.7956834 [mission-1] [INFO] [1648724343.791701420] [ASV.mission_node]: distance=1.7413485411032141
+1648724344.7813478 [drone-3] [INFO] [1648724344.780251033] [ASV.drone_node]: Goal reached, waiting for sample
+1648724344.7857428 [sensors-5] [INFO] [1648724344.784848980] [ASV.sensors_node]: Sample requested
+1648724345.7901397 [sensors-5] [INFO] [1648724345.789117470] [ASV.sensors_node]: Taking sample
+1648724346.3121905 [sensors-5] [INFO] [1648724346.310987464] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '21', 'BAT:100', 'WT:18.47', 'PH:8.51', 'DO:80.6', 'COND:1.0', 'ORP:-0.008']
+1648724346.3151073 [sensors-5] [INFO] [1648724346.314292251] [ASV.sensors_node]: Taking sample
+1648724346.4386797 [mqtt-4] [INFO] [1648724346.437848181] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:59:06.311645", "Latitude": 37.3075277, "Longitude": -5.9399555, "ph": 8.51, "smart_water_battery": 100.0, "Disolved_Oxygen": 80.6, "temperature": 18.47, "conductivity": 1.0, "oxidation_reduction_potential": -0.008}
+1648724360.3375146 [sensors-5] [INFO] [1648724360.336569766] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '22', 'BAT:98', 'WT:18.81', 'PH:8.39', 'DO:83.6', 'COND:1.0', 'ORP:-0.006']
+1648724360.3415337 [sensors-5] [INFO] [1648724360.340782527] [ASV.sensors_node]: Taking sample
+1648724360.6566288 [mqtt-4] [INFO] [1648724360.652742833] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:59:20.337728", "Latitude": 37.307532, "Longitude": -5.9399431, "ph": 8.39, "smart_water_battery": 98.0, "Disolved_Oxygen": 83.6, "temperature": 18.81, "conductivity": 1.0, "oxidation_reduction_potential": -0.006}
+1648724376.3693669 [sensors-5] [INFO] [1648724376.368425931] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '23', 'BAT:100', 'WT:18.53', 'PH:8.32', 'DO:75.8', 'COND:1.0', 'ORP:-0.201']
+1648724376.4946811 [mission-1] [INFO] [1648724376.492185478] [ASV.mission_node]: Goal succeeded! Result: True
+1648724376.4981120 [mission-1] [INFO] [1648724376.497054531] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939887599789696, lat=37.30762692582498)
+1648724376.5010662 [mission-1] [INFO] [1648724376.500144661] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939887599789696, lat=37.30762692582498)
+1648724376.5108676 [drone-3] [INFO] [1648724376.510036143] [ASV.drone_node]: Action call received
+1648724376.5141404 [drone-3] [INFO] [1648724376.513481028] [ASV.drone_node]: Action accepted
+1648724376.5291619 [drone-3] [INFO] [1648724376.525796588] [ASV.drone_node]: Turning to : 30.299162123350435 N
+1648724376.5826311 [mqtt-4] [INFO] [1648724376.581690070] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:59:36.369358", "Latitude": 37.3075252, "Longitude": -5.9399471, "ph": 8.32, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.8, "temperature": 18.53, "conductivity": 1.0, "oxidation_reduction_potential": -0.201}
+1648724376.9300416 [mission-1] [INFO] [1648724376.924602399] [ASV.mission_node]: Goal accepted :)
+1648724378.5476069 [mission-1] [INFO] [1648724378.546502088] [ASV.mission_node]: distance=12.659614956187491
+1648724379.5558205 [mission-1] [INFO] [1648724379.552168858] [ASV.mission_node]: distance=12.726694464559639
+1648724380.5560100 [mission-1] [INFO] [1648724380.554900634] [ASV.mission_node]: distance=12.456716542588515
+1648724381.5638053 [mission-1] [INFO] [1648724381.560721965] [ASV.mission_node]: distance=11.812839824860419
+1648724382.5673597 [mission-1] [INFO] [1648724382.564275059] [ASV.mission_node]: distance=10.95591248483311
+1648724383.5744963 [mission-1] [INFO] [1648724383.569658499] [ASV.mission_node]: distance=10.166794282003648
+1648724384.5727890 [mission-1] [INFO] [1648724384.571642880] [ASV.mission_node]: distance=9.416169612364074
+1648724385.5820098 [mission-1] [INFO] [1648724385.577653076] [ASV.mission_node]: distance=8.649797180295785
+1648724386.5833061 [mission-1] [INFO] [1648724386.582061950] [ASV.mission_node]: distance=7.860404621031005
+1648724387.5842659 [mission-1] [INFO] [1648724387.583262422] [ASV.mission_node]: distance=6.963359512964747
+1648724388.5906568 [mission-1] [INFO] [1648724388.589524747] [ASV.mission_node]: distance=5.793323633615263
+1648724389.5942066 [mission-1] [INFO] [1648724389.593203794] [ASV.mission_node]: distance=4.855417273687169
+1648724390.5941045 [mission-1] [INFO] [1648724390.593064641] [ASV.mission_node]: distance=3.9074814055869354
+1648724391.5997932 [mission-1] [INFO] [1648724391.595776834] [ASV.mission_node]: distance=2.9594880631443066
+1648724392.6028118 [mission-1] [INFO] [1648724392.599246311] [ASV.mission_node]: distance=2.0219052933852395
+1648724393.6166434 [drone-3] [INFO] [1648724393.615506135] [ASV.drone_node]: Goal reached, waiting for sample
+1648724393.6239009 [sensors-5] [INFO] [1648724393.621639868] [ASV.sensors_node]: Sample requested
+1648724394.6272922 [sensors-5] [INFO] [1648724394.626363592] [ASV.sensors_node]: Taking sample
+1648724395.1311886 [sensors-5] [INFO] [1648724395.130278888] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '24', 'BAT:100', 'WT:18.52', 'PH:8.60', 'DO:84.1', 'COND:1.0', 'ORP:0.003']
+1648724395.1352034 [sensors-5] [INFO] [1648724395.134519169] [ASV.sensors_node]: Taking sample
+1648724395.4383194 [mqtt-4] [INFO] [1648724395.437371069] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 12:59:55.131244", "Latitude": 37.3076275, "Longitude": -5.939886, "ph": 8.6, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.1, "temperature": 18.52, "conductivity": 1.0, "oxidation_reduction_potential": 0.003}
+1648724408.1583114 [sensors-5] [INFO] [1648724408.157371327] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '25', 'BAT:100', 'WT:18.53', 'PH:8.55', 'DO:76.3', 'COND:1.0', 'ORP:0.004']
+1648724408.1622605 [sensors-5] [INFO] [1648724408.161546615] [ASV.sensors_node]: Taking sample
+1648724408.4368701 [mqtt-4] [INFO] [1648724408.435943723] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:00:08.158359", "Latitude": 37.307627, "Longitude": -5.9398853, "ph": 8.55, "smart_water_battery": 100.0, "Disolved_Oxygen": 76.3, "temperature": 18.53, "conductivity": 1.0, "oxidation_reduction_potential": 0.004}
+1648724423.6884191 [sensors-5] [INFO] [1648724423.687349904] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '26', 'BAT:100', 'WT:18.62', 'PH:8.49', 'DO:78.5', 'COND:1.0', 'ORP:-0.000']
+1648724423.8918386 [mission-1] [INFO] [1648724423.890791521] [ASV.mission_node]: Goal succeeded! Result: True
+1648724423.8946350 [mqtt-4] [INFO] [1648724423.893759923] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:00:23.688365", "Latitude": 37.30761, "Longitude": -5.9398979, "ph": 8.49, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.5, "temperature": 18.62, "conductivity": 1.0, "oxidation_reduction_potential": -0.0}
+1648724423.8959193 [mission-1] [INFO] [1648724423.893953204] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939789029140513, lat=37.30771502423506)
+1648724423.8973014 [mission-1] [INFO] [1648724423.896561635] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939789029140513, lat=37.30771502423506)
+1648724423.9052804 [drone-3] [INFO] [1648724423.904613843] [ASV.drone_node]: Action call received
+1648724423.9076846 [drone-3] [INFO] [1648724423.907116354] [ASV.drone_node]: Action accepted
+1648724423.9148817 [drone-3] [INFO] [1648724423.913589608] [ASV.drone_node]: Turning to : 46.027397505101796 N
+1648724424.2151730 [mission-1] [INFO] [1648724424.210391200] [ASV.mission_node]: Goal accepted :)
+1648724425.9333355 [mission-1] [INFO] [1648724425.929591528] [ASV.mission_node]: distance=15.434256437956405
+1648724426.9393926 [mission-1] [INFO] [1648724426.935653052] [ASV.mission_node]: distance=15.468621441496861
+1648724427.9412079 [mission-1] [INFO] [1648724427.940230131] [ASV.mission_node]: distance=15.05954129572622
+1648724428.9478095 [mission-1] [INFO] [1648724428.945783895] [ASV.mission_node]: distance=14.402816615750337
+1648724429.9550664 [mission-1] [INFO] [1648724429.951014888] [ASV.mission_node]: distance=13.604037743401596
+1648724430.9590986 [mission-1] [INFO] [1648724430.955600844] [ASV.mission_node]: distance=12.704045346656455
+1648724431.9634166 [mission-1] [INFO] [1648724431.960950901] [ASV.mission_node]: distance=11.77763727271113
+1648724432.9697857 [mission-1] [INFO] [1648724432.965741785] [ASV.mission_node]: distance=10.85969664676887
+1648724433.9738216 [mission-1] [INFO] [1648724433.970026243] [ASV.mission_node]: distance=9.965418105963213
+1648724434.9785383 [mission-1] [INFO] [1648724434.975735451] [ASV.mission_node]: distance=9.061146462318982
+1648724435.9829032 [mission-1] [INFO] [1648724435.979320363] [ASV.mission_node]: distance=8.151722768435707
+1648724436.9847102 [mission-1] [INFO] [1648724436.983269971] [ASV.mission_node]: distance=7.230907844732927
+1648724437.9921279 [mission-1] [INFO] [1648724437.989817860] [ASV.mission_node]: distance=6.295285193707864
+1648724438.9956932 [mission-1] [INFO] [1648724438.993491045] [ASV.mission_node]: distance=5.359679771905136
+1648724440.0029428 [mission-1] [INFO] [1648724439.998657403] [ASV.mission_node]: distance=4.421857458089712
+1648724441.0069058 [mission-1] [INFO] [1648724441.002825877] [ASV.mission_node]: distance=3.4755892115117692
+1648724442.0081990 [mission-1] [INFO] [1648724442.006890568] [ASV.mission_node]: distance=2.5351673503864602
+1648724443.0148675 [mission-1] [INFO] [1648724443.011305713] [ASV.mission_node]: distance=1.604910675745384
+1648724444.0183082 [drone-3] [INFO] [1648724444.017335043] [ASV.drone_node]: Goal reached, waiting for sample
+1648724444.0223138 [sensors-5] [INFO] [1648724444.021635605] [ASV.sensors_node]: Sample requested
+1648724445.0271921 [sensors-5] [INFO] [1648724445.026237592] [ASV.sensors_node]: Taking sample
+1648724445.5348854 [sensors-5] [INFO] [1648724445.533948446] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '27', 'BAT:100', 'WT:18.52', 'PH:8.67', 'DO:81.0', 'COND:1.0', 'ORP:0.010']
+1648724445.5386488 [sensors-5] [INFO] [1648724445.537739184] [ASV.sensors_node]: Taking sample
+1648724445.7464869 [mqtt-4] [INFO] [1648724445.745602465] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:00:45.534798", "Latitude": 37.3077172, "Longitude": -5.9397844, "ph": 8.67, "smart_water_battery": 100.0, "Disolved_Oxygen": 81.0, "temperature": 18.52, "conductivity": 1.0, "oxidation_reduction_potential": 0.01}
+1648724455.0574648 [sensors-5] [INFO] [1648724455.056514680] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '28', 'BAT:100', 'WT:18.43', 'PH:8.44', 'DO:78.8', 'COND:1.0', 'ORP:0.013']
+1648724455.0602498 [sensors-5] [INFO] [1648724455.059660436] [ASV.sensors_node]: Taking sample
+1648724455.3669059 [mqtt-4] [INFO] [1648724455.366003943] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:00:55.056990", "Latitude": 37.3077205, "Longitude": -5.9397753, "ph": 8.44, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.8, "temperature": 18.43, "conductivity": 1.0, "oxidation_reduction_potential": 0.013}
+1648724471.0874395 [sensors-5] [INFO] [1648724471.083689451] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '29', 'BAT:100', 'WT:18.60', 'PH:8.13', 'DO:81.7', 'COND:1.0', 'ORP:0.012']
+1648724471.2069533 [mqtt-4] [INFO] [1648724471.204037568] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:01:11.085749", "Latitude": 37.307715, "Longitude": -5.9397762, "ph": 8.13, "smart_water_battery": 100.0, "Disolved_Oxygen": 81.7, "temperature": 18.6, "conductivity": 1.0, "oxidation_reduction_potential": 0.012}
+1648724471.2327628 [mission-1] [INFO] [1648724471.229865923] [ASV.mission_node]: Goal succeeded! Result: True
+1648724471.2357914 [mission-1] [INFO] [1648724471.235018105] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.93977628747575, lat=37.30782946318421)
+1648724471.2383635 [mission-1] [INFO] [1648724471.237739533] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.93977628747575, lat=37.30782946318421)
+1648724471.2469621 [drone-3] [INFO] [1648724471.246204730] [ASV.drone_node]: Action call received
+1648724471.2507401 [drone-3] [INFO] [1648724471.249816866] [ASV.drone_node]: Action accepted
+1648724471.2634039 [drone-3] [INFO] [1648724471.262057117] [ASV.drone_node]: Turning to : 359.95628947512 N
+1648724471.7670472 [mission-1] [INFO] [1648724471.761783980] [ASV.mission_node]: Goal accepted :)
+1648724473.3397732 [mission-1] [INFO] [1648724473.338634011] [ASV.mission_node]: distance=12.7975689344194
+1648724474.3405740 [mission-1] [INFO] [1648724474.339497548] [ASV.mission_node]: distance=12.786483029299863
+1648724475.3471768 [mission-1] [INFO] [1648724475.342954638] [ASV.mission_node]: distance=12.493373143933328
+1648724476.3465600 [mission-1] [INFO] [1648724476.345525103] [ASV.mission_node]: distance=11.823211524301758
+1648724477.3408396 [mission-1] [INFO] [1648724477.339774750] [ASV.mission_node]: distance=10.78791821021166
+1648724478.3422410 [mission-1] [INFO] [1648724478.341218849] [ASV.mission_node]: distance=9.845375607576548
+1648724479.3428922 [mission-1] [INFO] [1648724479.341817017] [ASV.mission_node]: distance=9.023860108658052
+1648724480.3399959 [mission-1] [INFO] [1648724480.339012419] [ASV.mission_node]: distance=8.162927202050106
+1648724481.3391137 [mission-1] [INFO] [1648724481.338081886] [ASV.mission_node]: distance=7.270247467242921
+1648724482.3424096 [mission-1] [INFO] [1648724482.341407955] [ASV.mission_node]: distance=6.419006799085733
+1648724483.3428721 [mission-1] [INFO] [1648724483.341864668] [ASV.mission_node]: distance=5.5217106800213775
+1648724484.3480730 [mission-1] [INFO] [1648724484.346957577] [ASV.mission_node]: distance=4.556021435453368
+1648724485.3453832 [mission-1] [INFO] [1648724485.342097968] [ASV.mission_node]: distance=3.5958090004813874
+1648724486.3413501 [mission-1] [INFO] [1648724486.339817673] [ASV.mission_node]: distance=2.6470420448544054
+1648724487.3433259 [mission-1] [INFO] [1648724487.342378447] [ASV.mission_node]: distance=1.7112948411920075
+1648724488.3476946 [drone-3] [INFO] [1648724488.346612684] [ASV.drone_node]: Goal reached, waiting for sample
+1648724488.3530095 [sensors-5] [INFO] [1648724488.352249315] [ASV.sensors_node]: Sample requested
+1648724489.3573570 [sensors-5] [INFO] [1648724489.356234526] [ASV.sensors_node]: Taking sample
+1648724489.8645732 [sensors-5] [INFO] [1648724489.860862191] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '30', 'BAT:100', 'WT:18.42', 'PH:8.71', 'DO:84.6', 'COND:1.0', 'ORP:-0.012']
+1648724489.8702714 [sensors-5] [INFO] [1648724489.867010542] [ASV.sensors_node]: Taking sample
+1648724490.0753152 [mqtt-4] [INFO] [1648724490.074319165] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:01:29.862341", "Latitude": 37.3078338, "Longitude": -5.9397739, "ph": 8.71, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.6, "temperature": 18.42, "conductivity": 1.0, "oxidation_reduction_potential": -0.012}
+1648724502.8882143 [sensors-5] [INFO] [1648724502.887278408] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '31', 'BAT:100', 'WT:18.48', 'PH:8.48', 'DO:78.5', 'COND:1.0', 'ORP:0.059']
+1648724502.8920357 [sensors-5] [INFO] [1648724502.891301690] [ASV.sensors_node]: Taking sample
+1648724503.0746150 [mqtt-4] [INFO] [1648724503.073533166] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:01:42.888170", "Latitude": 37.3078362, "Longitude": -5.9397798, "ph": 8.48, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.5, "temperature": 18.48, "conductivity": 1.0, "oxidation_reduction_potential": 0.059}
+1648724518.9169934 [sensors-5] [INFO] [1648724518.916027178] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '32', 'BAT:100', 'WT:18.49', 'PH:8.56', 'DO:73.8', 'COND:1.0', 'ORP:0.004']
+1648724519.0421138 [mission-1] [INFO] [1648724519.038400395] [ASV.mission_node]: Goal succeeded! Result: True
+1648724519.0444906 [mission-1] [INFO] [1648724519.043142922] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939844782545726, lat=37.30789831671607)
+1648724519.0468452 [mission-1] [INFO] [1648724519.046153761] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939844782545726, lat=37.30789831671607)
+1648724519.0583911 [drone-3] [INFO] [1648724519.055493995] [ASV.drone_node]: Action call received
+1648724519.0647895 [drone-3] [INFO] [1648724519.064122580] [ASV.drone_node]: Action accepted
+1648724519.0712264 [drone-3] [INFO] [1648724519.070097830] [ASV.drone_node]: Turning to : 323.3490558027574 N
+1648724519.0829716 [mqtt-4] [INFO] [1648724519.079590978] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:01:58.916999", "Latitude": 37.307818, "Longitude": -5.9397848, "ph": 8.56, "smart_water_battery": 100.0, "Disolved_Oxygen": 73.8, "temperature": 18.49, "conductivity": 1.0, "oxidation_reduction_potential": 0.004}
+1648724519.5757742 [mission-1] [INFO] [1648724519.571985374] [ASV.mission_node]: Goal accepted :)
+1648724521.0874071 [mission-1] [INFO] [1648724521.083641808] [ASV.mission_node]: distance=10.706160794058679
+1648724522.0889957 [mission-1] [INFO] [1648724522.085002384] [ASV.mission_node]: distance=10.8115997974603
+1648724523.0952332 [mission-1] [INFO] [1648724523.091469923] [ASV.mission_node]: distance=10.591112477280372
+1648724524.0952559 [mission-1] [INFO] [1648724524.091002894] [ASV.mission_node]: distance=10.060701707781137
+1648724525.1020386 [mission-1] [INFO] [1648724525.094299371] [ASV.mission_node]: distance=9.240155900983442
+1648724526.0995023 [mission-1] [INFO] [1648724526.098469589] [ASV.mission_node]: distance=8.161630379276636
+1648724527.1040266 [mission-1] [INFO] [1648724527.103009618] [ASV.mission_node]: distance=7.416897506804563
+1648724528.1103959 [mission-1] [INFO] [1648724528.106221080] [ASV.mission_node]: distance=6.625797237512206
+1648724529.1126759 [mission-1] [INFO] [1648724529.107820944] [ASV.mission_node]: distance=5.827632531888095
+1648724530.1159782 [mission-1] [INFO] [1648724530.111682840] [ASV.mission_node]: distance=5.005671198092692
+1648724531.1224051 [mission-1] [INFO] [1648724531.118192587] [ASV.mission_node]: distance=4.126908289086052
+1648724532.1229942 [mission-1] [INFO] [1648724532.121941887] [ASV.mission_node]: distance=3.1732084804942953
+1648724533.1281059 [mission-1] [INFO] [1648724533.125697230] [ASV.mission_node]: distance=2.2260060410902893
+1648724534.1325982 [drone-3] [INFO] [1648724534.131611337] [ASV.drone_node]: Goal reached, waiting for sample
+1648724534.1373208 [sensors-5] [INFO] [1648724534.136208336] [ASV.sensors_node]: Sample requested
+1648724535.1407201 [sensors-5] [INFO] [1648724535.139585174] [ASV.sensors_node]: Taking sample
+1648724535.6481001 [sensors-5] [INFO] [1648724535.646933820] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '33', 'BAT:100', 'WT:18.54', 'PH:8.59', 'DO:85.9', 'COND:1.0', 'ORP:0.001']
+1648724535.6508565 [sensors-5] [INFO] [1648724535.650164876] [ASV.sensors_node]: Taking sample
+1648724535.9646723 [mqtt-4] [INFO] [1648724535.963612419] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:02:15.647651", "Latitude": 37.3078991, "Longitude": -5.9398427, "ph": 8.59, "smart_water_battery": 100.0, "Disolved_Oxygen": 85.9, "temperature": 18.54, "conductivity": 1.0, "oxidation_reduction_potential": 0.001}
+1648724550.6751926 [sensors-5] [INFO] [1648724550.674257964] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '34', 'BAT:100', 'WT:18.55', 'PH:8.41', 'DO:78.0', 'COND:1.0', 'ORP:-0.004']
+1648724550.6803613 [sensors-5] [INFO] [1648724550.679654609] [ASV.sensors_node]: Taking sample
+1648724551.0974653 [mqtt-4] [INFO] [1648724551.096523146] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:02:30.676592", "Latitude": 37.3078979, "Longitude": -5.9398434, "ph": 8.41, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.0, "temperature": 18.55, "conductivity": 1.0, "oxidation_reduction_potential": -0.004}
+1648724566.2068391 [sensors-5] [INFO] [1648724566.205825044] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '35', 'BAT:100', 'WT:18.36', 'PH:8.56', 'DO:76.7', 'COND:1.0', 'ORP:-0.003']
+1648724566.4511666 [mission-1] [INFO] [1648724566.447843439] [ASV.mission_node]: Goal succeeded! Result: True
+1648724566.4532261 [mqtt-4] [INFO] [1648724566.451335020] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:02:46.216016", "Latitude": 37.3078792, "Longitude": -5.9398296, "ph": 8.56, "smart_water_battery": 100.0, "Disolved_Oxygen": 76.7, "temperature": 18.36, "conductivity": 1.0, "oxidation_reduction_potential": -0.003}
+1648724566.4550323 [mission-1] [INFO] [1648724566.453336956] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939737663971455, lat=37.30792626704344)
+1648724566.4569395 [mission-1] [INFO] [1648724566.456034053] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939737663971455, lat=37.30792626704344)
+1648724566.4639368 [drone-3] [INFO] [1648724566.463144023] [ASV.drone_node]: Action call received
+1648724566.4685788 [drone-3] [INFO] [1648724566.467668570] [ASV.drone_node]: Action accepted
+1648724566.4822094 [drone-3] [INFO] [1648724566.481378459] [ASV.drone_node]: Turning to : 62.69085291163944 N
+1648724566.7799554 [mission-1] [INFO] [1648724566.777686168] [ASV.mission_node]: Goal accepted :)
+1648724568.4990418 [mission-1] [INFO] [1648724568.497950951] [ASV.mission_node]: distance=9.707927197665326
+1648724569.5038352 [mission-1] [INFO] [1648724569.502857746] [ASV.mission_node]: distance=9.689943186889359
+1648724570.5115602 [mission-1] [INFO] [1648724570.508617065] [ASV.mission_node]: distance=9.737989786158728
+1648724571.5157330 [mission-1] [INFO] [1648724571.513286960] [ASV.mission_node]: distance=9.296435399213541
+1648724572.5197999 [mission-1] [INFO] [1648724572.517764046] [ASV.mission_node]: distance=8.560788271423252
+1648724573.5238397 [mission-1] [INFO] [1648724573.521398881] [ASV.mission_node]: distance=7.664598354003357
+1648724574.5279403 [mission-1] [INFO] [1648724574.525613013] [ASV.mission_node]: distance=6.701185325363645
+1648724575.5319138 [mission-1] [INFO] [1648724575.529664233] [ASV.mission_node]: distance=5.782168676019296
+1648724576.5355902 [mission-1] [INFO] [1648724576.533046645] [ASV.mission_node]: distance=4.90631587077995
+1648724577.5398433 [mission-1] [INFO] [1648724577.537072875] [ASV.mission_node]: distance=3.991286393218295
+1648724578.5438757 [mission-1] [INFO] [1648724578.541583660] [ASV.mission_node]: distance=3.083143264695311
+1648724579.5499575 [mission-1] [INFO] [1648724579.545770015] [ASV.mission_node]: distance=2.1437980819226135
+1648724580.5515814 [drone-3] [INFO] [1648724580.550665288] [ASV.drone_node]: Goal reached, waiting for sample
+1648724580.5555799 [sensors-5] [INFO] [1648724580.554660639] [ASV.sensors_node]: Sample requested
+1648724581.5600524 [sensors-5] [INFO] [1648724581.558988668] [ASV.sensors_node]: Taking sample
+1648724582.0636320 [sensors-5] [INFO] [1648724582.062699958] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '36', 'BAT:100', 'WT:18.37', 'PH:8.57', 'DO:85.2', 'COND:1.0', 'ORP:-0.021']
+1648724582.0674434 [sensors-5] [INFO] [1648724582.066590325] [ASV.sensors_node]: Taking sample
+1648724582.3777497 [mqtt-4] [INFO] [1648724582.373073702] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:03:02.063642", "Latitude": 37.3079246, "Longitude": -5.9397371, "ph": 8.57, "smart_water_battery": 100.0, "Disolved_Oxygen": 85.2, "temperature": 18.37, "conductivity": 1.0, "oxidation_reduction_potential": -0.021}
+1648724598.0917544 [sensors-5] [INFO] [1648724598.090811233] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '37', 'BAT:100', 'WT:18.27', 'PH:8.33', 'DO:77.2', 'COND:1.0', 'ORP:0.005']
+1648724598.0955489 [sensors-5] [INFO] [1648724598.094809040] [ASV.sensors_node]: Taking sample
+1648724598.2013235 [mqtt-4] [INFO] [1648724598.200193867] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:03:18.091822", "Latitude": 37.3079291, "Longitude": -5.9397275, "ph": 8.33, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.2, "temperature": 18.27, "conductivity": 1.0, "oxidation_reduction_potential": 0.005}
+1648724613.6218972 [sensors-5] [INFO] [1648724613.620907736] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '38', 'BAT:100', 'WT:18.16', 'PH:8.50', 'DO:73.8', 'COND:1.0', 'ORP:0.001']
+1648724613.7462635 [mission-1] [INFO] [1648724613.745232024] [ASV.mission_node]: Goal succeeded! Result: True
+1648724613.7489564 [mission-1] [INFO] [1648724613.748166977] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939713988526071, lat=37.30811865705207)
+1648724613.7516274 [mission-1] [INFO] [1648724613.750888050] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939713988526071, lat=37.30811865705207)
+1648724613.7662659 [drone-3] [INFO] [1648724613.763259579] [ASV.drone_node]: Action call received
+1648724613.7701364 [drone-3] [INFO] [1648724613.769453951] [ASV.drone_node]: Action accepted
+1648724613.7796078 [drone-3] [INFO] [1648724613.777311328] [ASV.drone_node]: Turning to : 5.19100059993427 N
+1648724613.8484218 [mqtt-4] [INFO] [1648724613.847460635] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:03:33.630644", "Latitude": 37.3079215, "Longitude": -5.9397319, "ph": 8.5, "smart_water_battery": 100.0, "Disolved_Oxygen": 73.8, "temperature": 18.16, "conductivity": 1.0, "oxidation_reduction_potential": 0.001}
+1648724614.1710775 [mission-1] [INFO] [1648724614.170042978] [ASV.mission_node]: Goal accepted :)
+1648724615.7948627 [mission-1] [INFO] [1648724615.793529458] [ASV.mission_node]: distance=22.190019920297914
+1648724616.8002434 [mission-1] [INFO] [1648724616.799206801] [ASV.mission_node]: distance=22.25865262067342
+1648724617.8028927 [mission-1] [INFO] [1648724617.798865074] [ASV.mission_node]: distance=22.04306322544486
+1648724618.8051176 [mission-1] [INFO] [1648724618.800794534] [ASV.mission_node]: distance=21.293679697097506
+1648724619.8095133 [mission-1] [INFO] [1648724619.808199662] [ASV.mission_node]: distance=20.235239431908525
+1648724620.8183057 [mission-1] [INFO] [1648724620.814427660] [ASV.mission_node]: distance=19.422220409579328
+1648724621.8221781 [mission-1] [INFO] [1648724621.818129110] [ASV.mission_node]: distance=18.70921822370254
+1648724622.8239379 [mission-1] [INFO] [1648724622.822456200] [ASV.mission_node]: distance=17.961550971515365
+1648724623.8279071 [mission-1] [INFO] [1648724623.826847416] [ASV.mission_node]: distance=17.177628550967874
+1648724624.8316612 [mission-1] [INFO] [1648724624.830624955] [ASV.mission_node]: distance=16.286705790033245
+1648724625.8389564 [mission-1] [INFO] [1648724625.836057848] [ASV.mission_node]: distance=15.331474353308847
+1648724626.8432875 [mission-1] [INFO] [1648724626.840959998] [ASV.mission_node]: distance=14.418245766804487
+1648724627.8455546 [mission-1] [INFO] [1648724627.844559401] [ASV.mission_node]: distance=13.395761440148856
+1648724628.8518813 [mission-1] [INFO] [1648724628.849622414] [ASV.mission_node]: distance=11.11469989313249
+1648724629.8590529 [mission-1] [INFO] [1648724629.854627556] [ASV.mission_node]: distance=10.001110396117493
+1648724630.8520777 [mission-1] [INFO] [1648724630.851080614] [ASV.mission_node]: distance=12.120492061854113
+1648724631.8625078 [mission-1] [INFO] [1648724631.858594704] [ASV.mission_node]: distance=11.576011254356754
+1648724632.8647015 [mission-1] [INFO] [1648724632.859987111] [ASV.mission_node]: distance=10.272299397430382
+1648724633.8715446 [mission-1] [INFO] [1648724633.868970152] [ASV.mission_node]: distance=9.636219287143902
+1648724634.8744245 [mission-1] [INFO] [1648724634.873380278] [ASV.mission_node]: distance=8.809813005550433
+1648724635.8775237 [mission-1] [INFO] [1648724635.876540494] [ASV.mission_node]: distance=7.82150626948243
+1648724636.8831906 [mission-1] [INFO] [1648724636.881118957] [ASV.mission_node]: distance=6.275680591999602
+1648724637.8824513 [mission-1] [INFO] [1648724637.878698052] [ASV.mission_node]: distance=4.717511820436326
+1648724638.8882051 [mission-1] [INFO] [1648724638.887216037] [ASV.mission_node]: distance=3.9804687381139257
+1648724639.8949442 [mission-1] [INFO] [1648724639.892246679] [ASV.mission_node]: distance=3.193589844968882
+1648724640.8991418 [mission-1] [INFO] [1648724640.896891690] [ASV.mission_node]: distance=2.2738199255200704
+1648724641.9016635 [drone-3] [INFO] [1648724641.900768295] [ASV.drone_node]: Goal reached, waiting for sample
+1648724641.9085791 [sensors-5] [INFO] [1648724641.906917004] [ASV.sensors_node]: Sample requested
+1648724642.9134028 [sensors-5] [INFO] [1648724642.912464669] [ASV.sensors_node]: Taking sample
+1648724643.4171116 [sensors-5] [INFO] [1648724643.416094663] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '39', 'BAT:100', 'WT:18.13', 'PH:8.71', 'DO:82.9', 'COND:1.0', 'ORP:-0.008']
+1648724643.4200308 [sensors-5] [INFO] [1648724643.419302838] [ASV.sensors_node]: Taking sample
+1648724643.5780017 [mqtt-4] [INFO] [1648724643.577160480] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:04:03.416687", "Latitude": 37.3081148, "Longitude": -5.9397125, "ph": 8.71, "smart_water_battery": 100.0, "Disolved_Oxygen": 82.9, "temperature": 18.13, "conductivity": 1.0, "oxidation_reduction_potential": -0.008}
+1648724645.4258041 [sensors-5] [INFO] [1648724645.424854597] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '40', 'BAT:100', 'WT:17.89', 'PH:8.45', 'DO:84.5', 'COND:1.0', 'ORP:-0.135']
+1648724645.4311745 [sensors-5] [INFO] [1648724645.430530429] [ASV.sensors_node]: Taking sample
+1648724645.5740006 [mqtt-4] [INFO] [1648724645.573197832] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:04:05.427920", "Latitude": 37.3081239, "Longitude": -5.9397076, "ph": 8.45, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.5, "temperature": 17.89, "conductivity": 1.0, "oxidation_reduction_potential": -0.135}
+1648724660.9609225 [sensors-5] [INFO] [1648724660.957166346] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '41', 'BAT:100', 'WT:18.29', 'PH:8.52', 'DO:70.2', 'COND:1.0', 'ORP:-0.001']
+1648724661.0837402 [mqtt-4] [INFO] [1648724661.081401216] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:04:20.960443", "Latitude": 37.3081107, "Longitude": -5.9397101, "ph": 8.52, "smart_water_battery": 100.0, "Disolved_Oxygen": 70.2, "temperature": 18.29, "conductivity": 1.0, "oxidation_reduction_potential": -0.001}
+1648724661.0853918 [mission-1] [INFO] [1648724661.081394848] [ASV.mission_node]: Goal succeeded! Result: True
+1648724661.0914330 [mission-1] [INFO] [1648724661.086225344] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939833920248404, lat=37.30813655364375)
+1648724661.0958037 [mission-1] [INFO] [1648724661.090221787] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939833920248404, lat=37.30813655364375)
+1648724661.1023560 [drone-3] [INFO] [1648724661.101313002] [ASV.drone_node]: Action call received
+1648724661.1174278 [drone-3] [INFO] [1648724661.116344438] [ASV.drone_node]: Action accepted
+1648724661.1251879 [drone-3] [INFO] [1648724661.122980601] [ASV.drone_node]: Turning to : 282.14816109838074 N
+1648724661.6154604 [mission-1] [INFO] [1648724661.613772147] [ASV.mission_node]: Goal accepted :)
+1648724663.2434728 [mission-1] [INFO] [1648724663.241028053] [ASV.mission_node]: distance=11.41350807716923
+1648724664.2430992 [mission-1] [INFO] [1648724664.240183937] [ASV.mission_node]: distance=11.462346336199598
+1648724665.2437508 [mission-1] [INFO] [1648724665.242206579] [ASV.mission_node]: distance=11.44038283260314
+1648724666.2377741 [mission-1] [INFO] [1648724666.236825657] [ASV.mission_node]: distance=10.898048610018698
+1648724667.2433949 [mission-1] [INFO] [1648724667.240185312] [ASV.mission_node]: distance=10.302645246109899
+1648724668.2435780 [mission-1] [INFO] [1648724668.241382347] [ASV.mission_node]: distance=9.648589325951596
+1648724669.2396948 [mission-1] [INFO] [1648724669.237909324] [ASV.mission_node]: distance=8.850737297266837
+1648724670.2405238 [mission-1] [INFO] [1648724670.239144976] [ASV.mission_node]: distance=8.074343118247231
+1648724671.2402022 [mission-1] [INFO] [1648724671.239157908] [ASV.mission_node]: distance=7.240958039671858
+1648724672.2397900 [mission-1] [INFO] [1648724672.238151763] [ASV.mission_node]: distance=6.254383854102259
+1648724673.2435961 [mission-1] [INFO] [1648724673.241230280] [ASV.mission_node]: distance=5.224344832497776
+1648724674.2406299 [mission-1] [INFO] [1648724674.239457677] [ASV.mission_node]: distance=4.286310721475938
+1648724675.2430646 [mission-1] [INFO] [1648724675.239513257] [ASV.mission_node]: distance=3.3906560122709886
+1648724676.2438257 [mission-1] [INFO] [1648724676.241399617] [ASV.mission_node]: distance=2.51006681119998
+1648724677.2432680 [mission-1] [INFO] [1648724677.240735868] [ASV.mission_node]: distance=1.6165009384188214
+1648724678.2050462 [drone-3] [INFO] [1648724678.204102653] [ASV.drone_node]: Goal reached, waiting for sample
+1648724678.2112589 [sensors-5] [INFO] [1648724678.210411893] [ASV.sensors_node]: Sample requested
+1648724679.2153163 [sensors-5] [INFO] [1648724679.214430744] [ASV.sensors_node]: Taking sample
+1648724679.7189977 [sensors-5] [INFO] [1648724679.718166194] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '42', 'BAT:100', 'WT:18.09', 'PH:8.74', 'DO:83.4', 'COND:1.0', 'ORP:-0.013']
+1648724679.7247355 [sensors-5] [INFO] [1648724679.724008825] [ASV.sensors_node]: Taking sample
+1648724679.8929486 [mqtt-4] [INFO] [1648724679.891958998] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:04:39.721465", "Latitude": 37.3081373, "Longitude": -5.9398392, "ph": 8.74, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.4, "temperature": 18.09, "conductivity": 1.0, "oxidation_reduction_potential": -0.013}
+1648724692.7527611 [sensors-5] [INFO] [1648724692.750288032] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '43', 'BAT:100', 'WT:18.30', 'PH:8.43', 'DO:87.4', 'COND:1.0', 'ORP:0.019']
+1648724692.7638669 [sensors-5] [INFO] [1648724692.763042676] [ASV.sensors_node]: Taking sample
+1648724692.8920743 [mqtt-4] [INFO] [1648724692.891208415] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:04:52.760344", "Latitude": 37.308135, "Longitude": -5.9398426, "ph": 8.43, "smart_water_battery": 100.0, "Disolved_Oxygen": 87.4, "temperature": 18.3, "conductivity": 1.0, "oxidation_reduction_potential": 0.019}
+1648724708.7897949 [sensors-5] [INFO] [1648724708.788884508] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '44', 'BAT:100', 'WT:18.28', 'PH:8.53', 'DO:75.5', 'COND:1.0', 'ORP:0.002']
+1648724708.9068537 [mqtt-4] [INFO] [1648724708.903206411] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:05:08.789486", "Latitude": 37.3081215, "Longitude": -5.9398115, "ph": 8.53, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.5, "temperature": 18.28, "conductivity": 1.0, "oxidation_reduction_potential": 0.002}
+1648724708.9137759 [mission-1] [INFO] [1648724708.913017800] [ASV.mission_node]: Goal succeeded! Result: True
+1648724708.9192967 [mission-1] [INFO] [1648724708.917589106] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939659675478781, lat=37.30818977340023)
+1648724708.9232736 [mission-1] [INFO] [1648724708.921943171] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939659675478781, lat=37.30818977340023)
+1648724708.9338875 [drone-3] [INFO] [1648724708.931639492] [ASV.drone_node]: Action call received
+1648724708.9392750 [drone-3] [INFO] [1648724708.937649438] [ASV.drone_node]: Action accepted
+1648724708.9463444 [drone-3] [INFO] [1648724708.945687094] [ASV.drone_node]: Turning to : 65.88473855628664 N
+1648724709.3501356 [mission-1] [INFO] [1648724709.344177359] [ASV.mission_node]: Goal accepted :)
+1648724710.9625530 [mission-1] [INFO] [1648724710.961599875] [ASV.mission_node]: distance=15.208855271171407
+1648724711.9683666 [mission-1] [INFO] [1648724711.967323713] [ASV.mission_node]: distance=15.13700400621447
+1648724712.9731321 [mission-1] [INFO] [1648724712.972150406] [ASV.mission_node]: distance=15.130047072530182
+1648724713.9786451 [mission-1] [INFO] [1648724713.977497572] [ASV.mission_node]: distance=14.825848020902312
+1648724714.9837303 [mission-1] [INFO] [1648724714.981795661] [ASV.mission_node]: distance=14.16183094831941
+1648724715.9895880 [mission-1] [INFO] [1648724715.985594096] [ASV.mission_node]: distance=13.314585189165765
+1648724716.9918072 [mission-1] [INFO] [1648724716.990039715] [ASV.mission_node]: distance=12.313058471776465
+1648724717.9909427 [mission-1] [INFO] [1648724717.986985587] [ASV.mission_node]: distance=11.340129242525725
+1648724718.9995117 [mission-1] [INFO] [1648724718.995481202] [ASV.mission_node]: distance=10.466400899926368
+1648724720.0035946 [mission-1] [INFO] [1648724720.000730275] [ASV.mission_node]: distance=9.570136545440509
+1648724721.0070407 [mission-1] [INFO] [1648724721.004033753] [ASV.mission_node]: distance=8.675757106843676
+1648724722.0115144 [mission-1] [INFO] [1648724722.009022591] [ASV.mission_node]: distance=7.758877680713779
+1648724723.0193057 [mission-1] [INFO] [1648724723.015090854] [ASV.mission_node]: distance=6.789514510985011
+1648724724.0215485 [mission-1] [INFO] [1648724724.019488366] [ASV.mission_node]: distance=5.794579842093137
+1648724725.0253274 [mission-1] [INFO] [1648724725.024313101] [ASV.mission_node]: distance=4.810185409259376
+1648724726.0315566 [mission-1] [INFO] [1648724726.028996787] [ASV.mission_node]: distance=3.8162131375881034
+1648724727.0357606 [mission-1] [INFO] [1648724727.033146351] [ASV.mission_node]: distance=2.8508467436254175
+1648724728.0400405 [mission-1] [INFO] [1648724728.037516778] [ASV.mission_node]: distance=1.8981208656184367
+1648724729.0424261 [drone-3] [INFO] [1648724729.041506326] [ASV.drone_node]: Goal reached, waiting for sample
+1648724729.0461464 [sensors-5] [INFO] [1648724729.045467639] [ASV.sensors_node]: Sample requested
+1648724730.0547814 [sensors-5] [INFO] [1648724730.052054419] [ASV.sensors_node]: Taking sample
+1648724730.5583944 [sensors-5] [INFO] [1648724730.557353330] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '45', 'BAT:100', 'WT:18.12', 'PH:8.65', 'DO:83.0', 'COND:1.0', 'ORP:-0.002']
+1648724730.5632956 [sensors-5] [INFO] [1648724730.562416272] [ASV.sensors_node]: Taking sample
+1648724730.7663920 [mqtt-4] [INFO] [1648724730.765571329] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:05:30.558308", "Latitude": 37.3081889, "Longitude": -5.9396568, "ph": 8.65, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.0, "temperature": 18.12, "conductivity": 1.0, "oxidation_reduction_potential": -0.002}
+1648724740.5794518 [sensors-5] [INFO] [1648724740.578446075] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '46', 'BAT:100', 'WT:18.41', 'PH:8.47', 'DO:86.2', 'COND:1.0', 'ORP:0.004']
+1648724740.5830100 [sensors-5] [INFO] [1648724740.582300225] [ASV.sensors_node]: Taking sample
+1648724740.8887842 [mqtt-4] [INFO] [1648724740.887858857] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:05:40.579285", "Latitude": 37.3081924, "Longitude": -5.9396516, "ph": 8.47, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.2, "temperature": 18.41, "conductivity": 1.0, "oxidation_reduction_potential": 0.004}
+1648724756.1116414 [sensors-5] [INFO] [1648724756.109499911] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '47', 'BAT:100', 'WT:18.41', 'PH:8.39', 'DO:86.4', 'COND:1.0', 'ORP:0.002']
+1648724756.2276413 [mqtt-4] [INFO] [1648724756.226402822] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:05:56.111022", "Latitude": 37.308182, "Longitude": -5.9396577, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.4, "temperature": 18.41, "conductivity": 1.0, "oxidation_reduction_potential": 0.002}
+1648724756.2294095 [mission-1] [INFO] [1648724756.228358217] [ASV.mission_node]: Goal succeeded! Result: True
+1648724756.2321224 [mission-1] [INFO] [1648724756.231508263] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939625700755596, lat=37.30830072169612)
+1648724756.2349215 [mission-1] [INFO] [1648724756.234320015] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939625700755596, lat=37.30830072169612)
+1648724756.2477245 [drone-3] [INFO] [1648724756.245131614] [ASV.drone_node]: Action call received
+1648724756.2527268 [drone-3] [INFO] [1648724756.251476856] [ASV.drone_node]: Action accepted
+1648724756.2594988 [drone-3] [INFO] [1648724756.258806131] [ASV.drone_node]: Turning to : 15.093146080378332 N
+1648724756.7650449 [mission-1] [INFO] [1648724756.760243630] [ASV.mission_node]: Goal accepted :)
+1648724758.3475471 [mission-1] [INFO] [1648724758.343385719] [ASV.mission_node]: distance=13.674203816464546
+1648724759.3475473 [mission-1] [INFO] [1648724759.345040408] [ASV.mission_node]: distance=13.67590683299225
+1648724760.3451552 [mission-1] [INFO] [1648724760.343556183] [ASV.mission_node]: distance=13.418001152151325
+1648724761.3512659 [mission-1] [INFO] [1648724761.347647526] [ASV.mission_node]: distance=12.706299147845526
+1648724762.3477087 [mission-1] [INFO] [1648724762.345505873] [ASV.mission_node]: distance=11.609580998918108
+1648724763.3466618 [mission-1] [INFO] [1648724763.342631311] [ASV.mission_node]: distance=10.717678236406375
+1648724764.3476367 [mission-1] [INFO] [1648724764.345407897] [ASV.mission_node]: distance=9.928991986945196
+1648724765.3457694 [mission-1] [INFO] [1648724765.342241272] [ASV.mission_node]: distance=9.081719690795671
+1648724766.3461874 [mission-1] [INFO] [1648724766.342299885] [ASV.mission_node]: distance=8.248224561184529
+1648724767.3478439 [mission-1] [INFO] [1648724767.344736339] [ASV.mission_node]: distance=7.380348109951007
+1648724768.3475044 [mission-1] [INFO] [1648724768.344264397] [ASV.mission_node]: distance=6.44014205142977
+1648724769.3472869 [mission-1] [INFO] [1648724769.344063352] [ASV.mission_node]: distance=5.466840550321997
+1648724770.3443842 [mission-1] [INFO] [1648724770.342252400] [ASV.mission_node]: distance=4.503948107443977
+1648724771.3480079 [mission-1] [INFO] [1648724771.345563331] [ASV.mission_node]: distance=3.5636373235219687
+1648724772.3477349 [mission-1] [INFO] [1648724772.345571670] [ASV.mission_node]: distance=2.635515885421241
+1648724773.3495524 [mission-1] [INFO] [1648724773.343939382] [ASV.mission_node]: distance=1.719457530439096
+1648724774.3541222 [drone-3] [INFO] [1648724774.352906122] [ASV.drone_node]: Goal reached, waiting for sample
+1648724774.3633788 [sensors-5] [INFO] [1648724774.362400710] [ASV.sensors_node]: Sample requested
+1648724775.3678818 [sensors-5] [INFO] [1648724775.366949468] [ASV.sensors_node]: Taking sample
+1648724775.8719859 [sensors-5] [INFO] [1648724775.870958088] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '48', 'BAT:100', 'WT:18.25', 'PH:8.55', 'DO:84.6', 'COND:1.0', 'ORP:-0.017']
+1648724775.8759990 [sensors-5] [INFO] [1648724775.875269636] [ASV.sensors_node]: Taking sample
+1648724776.0738657 [mqtt-4] [INFO] [1648724776.073074316] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:06:15.871583", "Latitude": 37.3083047, "Longitude": -5.9396232, "ph": 8.55, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.6, "temperature": 18.25, "conductivity": 1.0, "oxidation_reduction_potential": -0.017}
+1648724787.3986599 [sensors-5] [INFO] [1648724787.397714716] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '49', 'BAT:100', 'WT:18.25', 'PH:8.61', 'DO:78.5', 'COND:1.0', 'ORP:0.002']
+1648724787.4016736 [sensors-5] [INFO] [1648724787.400934042] [ASV.sensors_node]: Taking sample
+1648724787.5775585 [mqtt-4] [INFO] [1648724787.576540605] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:06:27.398321", "Latitude": 37.3083071, "Longitude": -5.9396219, "ph": 8.61, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.5, "temperature": 18.25, "conductivity": 1.0, "oxidation_reduction_potential": 0.002}
+1648724803.4318440 [sensors-5] [INFO] [1648724803.426923901] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '50', 'BAT:100', 'WT:18.48', 'PH:8.60', 'DO:74.0', 'COND:1.0', 'ORP:-0.002']
+1648724803.5653744 [mission-1] [INFO] [1648724803.561380785] [ASV.mission_node]: Goal succeeded! Result: True
+1648724803.5687687 [mission-1] [INFO] [1648724803.566966569] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939604954087024, lat=37.30840176834808)
+1648724803.5703409 [mission-1] [INFO] [1648724803.569606233] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939604954087024, lat=37.30840176834808)
+1648724803.5777862 [drone-3] [INFO] [1648724803.576858175] [ASV.drone_node]: Action call received
+1648724803.5810428 [mqtt-4] [INFO] [1648724803.580370966] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:06:43.428866", "Latitude": 37.308295, "Longitude": -5.9396187, "ph": 8.6, "smart_water_battery": 100.0, "Disolved_Oxygen": 74.0, "temperature": 18.48, "conductivity": 1.0, "oxidation_reduction_potential": -0.002}
+1648724803.5823274 [drone-3] [INFO] [1648724803.581007426] [ASV.drone_node]: Action accepted
+1648724803.5904462 [drone-3] [INFO] [1648724803.588438019] [ASV.drone_node]: Turning to : 7.368507928146755 N
+1648724803.9989412 [mission-1] [INFO] [1648724803.995232183] [ASV.mission_node]: Goal accepted :)
+1648724805.6095276 [mission-1] [INFO] [1648724805.608519256] [ASV.mission_node]: distance=12.228851747995796
+1648724806.6155355 [mission-1] [INFO] [1648724806.614486395] [ASV.mission_node]: distance=12.29620022335689
+1648724807.6207590 [mission-1] [INFO] [1648724807.619624008] [ASV.mission_node]: distance=11.922001306952048
+1648724808.6229205 [mission-1] [INFO] [1648724808.621979677] [ASV.mission_node]: distance=11.061701836623664
+1648724809.6233280 [mission-1] [INFO] [1648724809.622379328] [ASV.mission_node]: distance=10.234577923832925
+1648724810.6258564 [mission-1] [INFO] [1648724810.624541028] [ASV.mission_node]: distance=9.36063996128067
+1648724811.6344831 [mission-1] [INFO] [1648724811.631127925] [ASV.mission_node]: distance=8.481003790368984
+1648724812.6349576 [mission-1] [INFO] [1648724812.632241821] [ASV.mission_node]: distance=7.574292328256693
+1648724813.6426163 [mission-1] [INFO] [1648724813.640242698] [ASV.mission_node]: distance=6.660087176800699
+1648724814.6425054 [mission-1] [INFO] [1648724814.641563761] [ASV.mission_node]: distance=5.727232306660237
+1648724815.6509593 [mission-1] [INFO] [1648724815.647401412] [ASV.mission_node]: distance=4.7724478450120245
+1648724816.6548066 [mission-1] [INFO] [1648724816.651672855] [ASV.mission_node]: distance=3.8077061333169833
+1648724817.6588581 [mission-1] [INFO] [1648724817.656040152] [ASV.mission_node]: distance=2.8433663749061435
+1648724818.6633179 [mission-1] [INFO] [1648724818.660945403] [ASV.mission_node]: distance=1.8926523086351963
+1648724819.6674685 [drone-3] [INFO] [1648724819.666532349] [ASV.drone_node]: Goal reached, waiting for sample
+1648724819.6714149 [sensors-5] [INFO] [1648724819.670629059] [ASV.sensors_node]: Sample requested
+1648724820.6808205 [sensors-5] [INFO] [1648724820.679826413] [ASV.sensors_node]: Taking sample
+1648724821.1842542 [sensors-5] [INFO] [1648724821.183328904] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '51', 'BAT:100', 'WT:18.18', 'PH:8.67', 'DO:83.7', 'COND:1.0', 'ORP:0.005']
+1648724821.1944070 [sensors-5] [INFO] [1648724821.189612941] [ASV.sensors_node]: Taking sample
+1648724821.4473453 [mqtt-4] [INFO] [1648724821.444178970] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:07:01.183904", "Latitude": 37.3084046, "Longitude": -5.939604, "ph": 8.67, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.7, "temperature": 18.18, "conductivity": 1.0, "oxidation_reduction_potential": 0.005}
+1648724834.7114277 [sensors-5] [INFO] [1648724834.710512698] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '52', 'BAT:100', 'WT:18.36', 'PH:8.58', 'DO:71.9', 'COND:1.0', 'ORP:-0.005']
+1648724834.7148566 [sensors-5] [INFO] [1648724834.714177133] [ASV.sensors_node]: Taking sample
+1648724834.8895969 [mqtt-4] [INFO] [1648724834.888614095] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:07:14.711438", "Latitude": 37.3084051, "Longitude": -5.9396033, "ph": 8.58, "smart_water_battery": 100.0, "Disolved_Oxygen": 71.9, "temperature": 18.36, "conductivity": 1.0, "oxidation_reduction_potential": -0.005}
+1648724850.7446637 [sensors-5] [INFO] [1648724850.743621779] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '53', 'BAT:100', 'WT:18.54', 'PH:8.54', 'DO:75.5', 'COND:1.0', 'ORP:0.005']
+1648724850.8944697 [mission-1] [INFO] [1648724850.890486373] [ASV.mission_node]: Goal succeeded! Result: True
+1648724850.8961515 [mqtt-4] [INFO] [1648724850.894286581] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:07:30.744143", "Latitude": 37.3083809, "Longitude": -5.9396052, "ph": 8.54, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.5, "temperature": 18.54, "conductivity": 1.0, "oxidation_reduction_potential": 0.005}
+1648724850.8984778 [mission-1] [INFO] [1648724850.895983844] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939604742130871, lat=37.30851748252572)
+1648724850.9003563 [mission-1] [INFO] [1648724850.898854672] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939604742130871, lat=37.30851748252572)
+1648724850.9076710 [drone-3] [INFO] [1648724850.906965346] [ASV.drone_node]: Action call received
+1648724850.9114864 [drone-3] [INFO] [1648724850.910412893] [ASV.drone_node]: Action accepted
+1648724850.9228053 [drone-3] [INFO] [1648724850.920696848] [ASV.drone_node]: Turning to : 0.1913728521716962 N
+1648724851.2241282 [mission-1] [INFO] [1648724851.221195281] [ASV.mission_node]: Goal accepted :)
+1648724852.9410069 [mission-1] [INFO] [1648724852.939936170] [ASV.mission_node]: distance=15.64971420491417
+1648724853.9505980 [mission-1] [INFO] [1648724853.946731422] [ASV.mission_node]: distance=15.783249780029603
+1648724854.9548700 [mission-1] [INFO] [1648724854.950734868] [ASV.mission_node]: distance=15.404632675444454
+1648724855.9554594 [mission-1] [INFO] [1648724855.954454013] [ASV.mission_node]: distance=14.760041167959479
+1648724856.9629736 [mission-1] [INFO] [1648724856.959545164] [ASV.mission_node]: distance=13.948906926707526
+1648724857.9641218 [mission-1] [INFO] [1648724857.963059638] [ASV.mission_node]: distance=13.068981122355058
+1648724858.9710989 [mission-1] [INFO] [1648724858.968040515] [ASV.mission_node]: distance=12.16570167123074
+1648724859.9753239 [mission-1] [INFO] [1648724859.972687557] [ASV.mission_node]: distance=11.241331232836933
+1648724860.9790781 [mission-1] [INFO] [1648724860.976431953] [ASV.mission_node]: distance=10.295749942594485
+1648724861.9833457 [mission-1] [INFO] [1648724861.980205063] [ASV.mission_node]: distance=9.36085967677048
+1648724862.9876153 [mission-1] [INFO] [1648724862.984974284] [ASV.mission_node]: distance=8.414027046635496
+1648724863.9916255 [mission-1] [INFO] [1648724863.988963094] [ASV.mission_node]: distance=7.44528644985751
+1648724864.9959867 [mission-1] [INFO] [1648724864.993005962] [ASV.mission_node]: distance=6.47688240445071
+1648724865.9974794 [mission-1] [INFO] [1648724865.996503513] [ASV.mission_node]: distance=5.508476715490728
+1648724867.0022810 [mission-1] [INFO] [1648724867.001136758] [ASV.mission_node]: distance=4.573612712780313
+1648724868.0111883 [mission-1] [INFO] [1648724868.006040246] [ASV.mission_node]: distance=3.6162358368408176
+1648724869.0110340 [mission-1] [INFO] [1648724869.009961535] [ASV.mission_node]: distance=2.6587477569861933
+1648724870.0199978 [mission-1] [INFO] [1648724870.018359760] [ASV.mission_node]: distance=1.712499195893847
+1648724871.0219204 [drone-3] [INFO] [1648724871.020952633] [ASV.drone_node]: Goal reached, waiting for sample
+1648724871.0273087 [sensors-5] [INFO] [1648724871.026457754] [ASV.sensors_node]: Sample requested
+1648724872.0318453 [sensors-5] [INFO] [1648724872.030787068] [ASV.sensors_node]: Taking sample
+1648724872.5399714 [sensors-5] [INFO] [1648724872.538064062] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '54', 'BAT:100', 'WT:18.19', 'PH:8.65', 'DO:83.9', 'COND:1.0', 'ORP:-0.008']
+1648724872.5460107 [sensors-5] [INFO] [1648724872.545243854] [ASV.sensors_node]: Taking sample
+1648724872.7518528 [mqtt-4] [INFO] [1648724872.750918078] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:07:52.542485", "Latitude": 37.308521, "Longitude": -5.939604, "ph": 8.65, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.9, "temperature": 18.19, "conductivity": 1.0, "oxidation_reduction_potential": -0.008}
+1648724883.0635796 [sensors-5] [INFO] [1648724883.062543397] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '55', 'BAT:100', 'WT:18.31', 'PH:8.49', 'DO:77.3', 'COND:1.0', 'ORP:0.001']
+1648724883.0674846 [sensors-5] [INFO] [1648724883.066798538] [ASV.sensors_node]: Taking sample
+1648724883.3736904 [mqtt-4] [INFO] [1648724883.372641222] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:08:03.063591", "Latitude": 37.308531, "Longitude": -5.9396001, "ph": 8.49, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.3, "temperature": 18.31, "conductivity": 1.0, "oxidation_reduction_potential": 0.001}
+1648724898.5909238 [sensors-5] [INFO] [1648724898.589931481] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '56', 'BAT:100', 'WT:18.36', 'PH:8.40', 'DO:75.7', 'COND:1.0', 'ORP:-0.001']
+1648724898.7132533 [mission-1] [INFO] [1648724898.709311026] [ASV.mission_node]: Goal succeeded! Result: True
+1648724898.7157617 [mission-1] [INFO] [1648724898.715092428] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939726311370475, lat=37.30856623619813)
+1648724898.7185814 [mission-1] [INFO] [1648724898.717924634] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939726311370475, lat=37.30856623619813)
+1648724898.7262051 [drone-3] [INFO] [1648724898.725565663] [ASV.drone_node]: Action call received
+1648724898.7287838 [drone-3] [INFO] [1648724898.728236786] [ASV.drone_node]: Action accepted
+1648724898.7409432 [drone-3] [INFO] [1648724898.738728580] [ASV.drone_node]: Turning to : 290.77510566498205 N
+1648724898.8066208 [mqtt-4] [INFO] [1648724898.803006093] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:08:18.590512", "Latitude": 37.3085146, "Longitude": -5.9395902, "ph": 8.4, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.7, "temperature": 18.36, "conductivity": 1.0, "oxidation_reduction_potential": -0.001}
+1648724899.1464913 [mission-1] [INFO] [1648724899.143168702] [ASV.mission_node]: Goal accepted :)
+1648724900.7905846 [mission-1] [INFO] [1648724900.789530943] [ASV.mission_node]: distance=13.562484958792751
+1648724901.7875662 [mission-1] [INFO] [1648724901.786497932] [ASV.mission_node]: distance=13.688282165916391
+1648724902.7884634 [mission-1] [INFO] [1648724902.787367633] [ASV.mission_node]: distance=13.668896472853582
+1648724903.7957520 [mission-1] [INFO] [1648724903.793221874] [ASV.mission_node]: distance=13.15158153745359
+1648724904.7902594 [mission-1] [INFO] [1648724904.789307507] [ASV.mission_node]: distance=12.517414198804092
+1648724905.7902145 [mission-1] [INFO] [1648724905.786546653] [ASV.mission_node]: distance=11.94437935401531
+1648724906.7917891 [mission-1] [INFO] [1648724906.788682372] [ASV.mission_node]: distance=11.121093427425995
+1648724907.7922266 [mission-1] [INFO] [1648724907.788479988] [ASV.mission_node]: distance=10.428010551893035
+1648724908.7920022 [mission-1] [INFO] [1648724908.786968661] [ASV.mission_node]: distance=9.658981434624023
+1648724909.7942541 [mission-1] [INFO] [1648724909.789847872] [ASV.mission_node]: distance=8.778600289476536
+1648724910.7899909 [mission-1] [INFO] [1648724910.788969182] [ASV.mission_node]: distance=7.871028760571744
+1648724911.7995305 [mission-1] [INFO] [1648724911.798520700] [ASV.mission_node]: distance=6.964277836747571
+1648724912.8068428 [mission-1] [INFO] [1648724912.803641954] [ASV.mission_node]: distance=6.043719232658544
+1648724913.8067839 [mission-1] [INFO] [1648724913.805705222] [ASV.mission_node]: distance=5.14560046401861
+1648724914.8167734 [mission-1] [INFO] [1648724914.815584565] [ASV.mission_node]: distance=4.253761131834111
+1648724915.8192372 [mission-1] [INFO] [1648724915.817031485] [ASV.mission_node]: distance=3.3428228442262404
+1648724916.8234813 [mission-1] [INFO] [1648724916.822524218] [ASV.mission_node]: distance=2.4510322457978466
+1648724917.8284211 [mission-1] [INFO] [1648724917.827207861] [ASV.mission_node]: distance=1.550297440830073
+1648724918.8350596 [drone-3] [INFO] [1648724918.834050074] [ASV.drone_node]: Goal reached, waiting for sample
+1648724918.8420448 [sensors-5] [INFO] [1648724918.841345065] [ASV.sensors_node]: Sample requested
+1648724919.8473790 [sensors-5] [INFO] [1648724919.846374125] [ASV.sensors_node]: Taking sample
+1648724920.3514817 [sensors-5] [INFO] [1648724920.350542323] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '57', 'BAT:100', 'WT:18.20', 'PH:8.61', 'DO:83.6', 'COND:1.0', 'ORP:-0.016']
+1648724920.3566723 [sensors-5] [INFO] [1648724920.355848027] [ASV.sensors_node]: Taking sample
+1648724920.6662645 [mqtt-4] [INFO] [1648724920.665402134] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:08:40.353085", "Latitude": 37.3085691, "Longitude": -5.9397303, "ph": 8.61, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.6, "temperature": 18.2, "conductivity": 1.0, "oxidation_reduction_potential": -0.016}
+1648724930.8752279 [sensors-5] [INFO] [1648724930.874406387] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '58', 'BAT:100', 'WT:18.24', 'PH:8.67', 'DO:80.6', 'COND:1.0', 'ORP:0.005']
+1648724930.8790219 [sensors-5] [INFO] [1648724930.878365794] [ASV.sensors_node]: Taking sample
+1648724931.0775540 [mqtt-4] [INFO] [1648724931.074051103] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:08:50.875258", "Latitude": 37.3085711, "Longitude": -5.9397382, "ph": 8.67, "smart_water_battery": 100.0, "Disolved_Oxygen": 80.6, "temperature": 18.24, "conductivity": 1.0, "oxidation_reduction_potential": 0.005}
+1648724946.4104502 [sensors-5] [INFO] [1648724946.408917044] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '59', 'BAT:100', 'WT:18.51', 'PH:8.42', 'DO:80.3', 'COND:1.0', 'ORP:-0.011']
+1648724946.5257969 [mission-1] [INFO] [1648724946.524776414] [ASV.mission_node]: Goal succeeded! Result: True
+1648724946.5287721 [mission-1] [INFO] [1648724946.527732682] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939889477629779, lat=37.30854089763658)
+1648724946.5315707 [mission-1] [INFO] [1648724946.530684950] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939889477629779, lat=37.30854089763658)
+1648724946.5395987 [drone-3] [INFO] [1648724946.538898797] [ASV.drone_node]: Action call received
+1648724946.5447533 [drone-3] [INFO] [1648724946.542812894] [ASV.drone_node]: Action accepted
+1648724946.5572886 [drone-3] [INFO] [1648724946.556710868] [ASV.drone_node]: Turning to : 263.99646222827926 N
+1648724946.5867548 [mqtt-4] [INFO] [1648724946.585616928] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:09:06.409970", "Latitude": 37.3085593, "Longitude": -5.939721, "ph": 8.42, "smart_water_battery": 100.0, "Disolved_Oxygen": 80.3, "temperature": 18.51, "conductivity": 1.0, "oxidation_reduction_potential": -0.011}
+1648724946.9611578 [mission-1] [INFO] [1648724946.954956341] [ASV.mission_node]: Goal accepted :)
+1648724948.5746412 [mission-1] [INFO] [1648724948.573626513] [ASV.mission_node]: distance=15.337219738352871
+1648724949.5810161 [mission-1] [INFO] [1648724949.580001892] [ASV.mission_node]: distance=15.413495188099017
+1648724950.5857711 [mission-1] [INFO] [1648724950.584712364] [ASV.mission_node]: distance=14.951486199303538
+1648724951.5905225 [mission-1] [INFO] [1648724951.589570872] [ASV.mission_node]: distance=14.305758769741205
+1648724952.5990832 [mission-1] [INFO] [1648724952.595654342] [ASV.mission_node]: distance=13.581508825072456
+1648724953.6028163 [mission-1] [INFO] [1648724953.599821616] [ASV.mission_node]: distance=12.750672780357798
+1648724954.6073854 [mission-1] [INFO] [1648724954.604218363] [ASV.mission_node]: distance=11.879751674766025
+1648724955.6110063 [mission-1] [INFO] [1648724955.607822626] [ASV.mission_node]: distance=10.97239819370581
+1648724956.6154702 [mission-1] [INFO] [1648724956.612230904] [ASV.mission_node]: distance=10.044871957503528
+1648724957.6195881 [mission-1] [INFO] [1648724957.617265730] [ASV.mission_node]: distance=9.108552599783964
+1648724958.6237717 [mission-1] [INFO] [1648724958.621411211] [ASV.mission_node]: distance=8.148467808106478
+1648724959.6275930 [mission-1] [INFO] [1648724959.625332834] [ASV.mission_node]: distance=7.190659329939818
+1648724960.6335595 [mission-1] [INFO] [1648724960.630291104] [ASV.mission_node]: distance=6.245550361962931
+1648724961.6387970 [mission-1] [INFO] [1648724961.634744084] [ASV.mission_node]: distance=5.301717928660141
+1648724962.6427402 [mission-1] [INFO] [1648724962.639836826] [ASV.mission_node]: distance=4.368013855403775
+1648724963.6472445 [mission-1] [INFO] [1648724963.644838313] [ASV.mission_node]: distance=3.4270832730811835
+1648724964.6516509 [mission-1] [INFO] [1648724964.649170319] [ASV.mission_node]: distance=2.4820676390206984
+1648724965.6585293 [mission-1] [INFO] [1648724965.654276999] [ASV.mission_node]: distance=1.5318189771911581
+1648724966.6662107 [drone-3] [INFO] [1648724966.662515722] [ASV.drone_node]: Goal reached, waiting for sample
+1648724966.6745148 [sensors-5] [INFO] [1648724966.673471605] [ASV.sensors_node]: Sample requested
+1648724967.6787372 [sensors-5] [INFO] [1648724967.677775790] [ASV.sensors_node]: Taking sample
+1648724968.1823552 [sensors-5] [INFO] [1648724968.181525440] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '60', 'BAT:100', 'WT:18.24', 'PH:8.57', 'DO:86.3', 'COND:1.0', 'ORP:0.010']
+1648724968.1868639 [sensors-5] [INFO] [1648724968.186124062] [ASV.sensors_node]: Taking sample
+1648724968.4419429 [mqtt-4] [INFO] [1648724968.440854215] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:09:28.183210", "Latitude": 37.3085399, "Longitude": -5.9398962, "ph": 8.57, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.3, "temperature": 18.24, "conductivity": 1.0, "oxidation_reduction_potential": 0.01}
+1648724977.7052977 [sensors-5] [INFO] [1648724977.704470308] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '61', 'BAT:100', 'WT:18.60', 'PH:8.59', 'DO:73.8', 'COND:1.0', 'ORP:0.004']
+1648724977.7118366 [sensors-5] [INFO] [1648724977.711100041] [ASV.sensors_node]: Taking sample
+1648724977.8869371 [mqtt-4] [INFO] [1648724977.886077126] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:09:37.708394", "Latitude": 37.3085349, "Longitude": -5.9399032, "ph": 8.59, "smart_water_battery": 100.0, "Disolved_Oxygen": 73.8, "temperature": 18.6, "conductivity": 1.0, "oxidation_reduction_potential": 0.004}
+1648724994.2417772 [sensors-5] [INFO] [1648724994.240825540] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '62', 'BAT:100', 'WT:18.48', 'PH:8.46', 'DO:85.9', 'COND:1.0', 'ORP:0.022']
+1648724994.4470699 [mission-1] [INFO] [1648724994.443922297] [ASV.mission_node]: Goal succeeded! Result: True
+1648724994.4486165 [mqtt-4] [INFO] [1648724994.446983587] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:09:54.241448", "Latitude": 37.3085308, "Longitude": -5.9398912, "ph": 8.46, "smart_water_battery": 100.0, "Disolved_Oxygen": 85.9, "temperature": 18.48, "conductivity": 1.0, "oxidation_reduction_potential": 0.022}
+1648724994.4514844 [mission-1] [INFO] [1648724994.450391107] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939954524760891, lat=37.30843640914158)
+1648724994.4549079 [mission-1] [INFO] [1648724994.453469069] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939954524760891, lat=37.30843640914158)
+1648724994.4746096 [drone-3] [INFO] [1648724994.473604247] [ASV.drone_node]: Action call received
+1648724994.4776039 [drone-3] [INFO] [1648724994.477005271] [ASV.drone_node]: Action accepted
+1648724994.4844227 [drone-3] [INFO] [1648724994.483684156] [ASV.drone_node]: Turning to : 213.9821915142105 N
+1648724994.7779715 [mission-1] [INFO] [1648724994.774280758] [ASV.mission_node]: Goal accepted :)
+1648724996.4995029 [mission-1] [INFO] [1648724996.495236373] [ASV.mission_node]: distance=12.052284805092855
+1648724997.5051126 [mission-1] [INFO] [1648724997.503974628] [ASV.mission_node]: distance=12.123705283305085
+1648724998.5075355 [mission-1] [INFO] [1648724998.506534183] [ASV.mission_node]: distance=11.692847085386429
+1648724999.5136399 [mission-1] [INFO] [1648724999.509291465] [ASV.mission_node]: distance=10.950951886850321
+1648725000.5199180 [mission-1] [INFO] [1648725000.515282997] [ASV.mission_node]: distance=10.252144273564175
+1648725001.5229127 [mission-1] [INFO] [1648725001.520075461] [ASV.mission_node]: distance=9.482058329186986
+1648725002.5211112 [mission-1] [INFO] [1648725002.518250004] [ASV.mission_node]: distance=8.711852548258772
+1648725003.5270448 [mission-1] [INFO] [1648725003.523210279] [ASV.mission_node]: distance=7.847097476234197
+1648725004.5267091 [mission-1] [INFO] [1648725004.525627366] [ASV.mission_node]: distance=6.876161972488806
+1648725005.5335231 [mission-1] [INFO] [1648725005.532476558] [ASV.mission_node]: distance=5.817363725607862
+1648725006.5392778 [mission-1] [INFO] [1648725006.536581801] [ASV.mission_node]: distance=4.766522090760604
+1648725007.5471725 [mission-1] [INFO] [1648725007.543516280] [ASV.mission_node]: distance=3.7931528580139724
+1648725008.5514071 [mission-1] [INFO] [1648725008.548540832] [ASV.mission_node]: distance=2.8503413828704405
+1648725009.5554781 [mission-1] [INFO] [1648725009.552928606] [ASV.mission_node]: distance=1.9496523145043039
+1648725010.5575726 [drone-3] [INFO] [1648725010.556040420] [ASV.drone_node]: Goal reached, waiting for sample
+1648725010.5629895 [sensors-5] [INFO] [1648725010.562301940] [ASV.sensors_node]: Sample requested
+1648725011.5675163 [sensors-5] [INFO] [1648725011.566536894] [ASV.sensors_node]: Taking sample
+1648725012.0735705 [sensors-5] [INFO] [1648725012.072663860] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '63', 'BAT:100', 'WT:18.33', 'PH:8.73', 'DO:80.7', 'COND:1.0', 'ORP:-0.017']
+1648725012.0767989 [sensors-5] [INFO] [1648725012.075601025] [ASV.sensors_node]: Taking sample
+1648725012.1833911 [mqtt-4] [INFO] [1648725012.182425455] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:10:12.073134", "Latitude": 37.3084389, "Longitude": -5.9399554, "ph": 8.73, "smart_water_battery": 100.0, "Disolved_Oxygen": 80.7, "temperature": 18.33, "conductivity": 1.0, "oxidation_reduction_potential": -0.017}
+1648725025.5974379 [sensors-5] [INFO] [1648725025.596625827] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '64', 'BAT:100', 'WT:18.34', 'PH:8.66', 'DO:69.1', 'COND:1.0', 'ORP:-0.159']
+1648725025.6041589 [sensors-5] [INFO] [1648725025.603415493] [ASV.sensors_node]: Taking sample
+1648725025.9104793 [mqtt-4] [INFO] [1648725025.909566959] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:10:25.600688", "Latitude": 37.3084374, "Longitude": -5.9399619, "ph": 8.66, "smart_water_battery": 100.0, "Disolved_Oxygen": 69.1, "temperature": 18.34, "conductivity": 1.0, "oxidation_reduction_potential": -0.159}
+1648725041.1352928 [sensors-5] [INFO] [1648725041.132088325] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '65', 'BAT:100', 'WT:18.62', 'PH:8.39', 'DO:75.4', 'COND:1.0', 'ORP:0.012']
+1648725041.4462821 [mission-1] [INFO] [1648725041.442302030] [ASV.mission_node]: Goal succeeded! Result: True
+1648725041.4490101 [mission-1] [INFO] [1648725041.447816340] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939988158053412, lat=37.30831255965887)
+1648725041.4512117 [mqtt-4] [INFO] [1648725041.449805661] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:10:41.134018", "Latitude": 37.3084454, "Longitude": -5.9399561, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.4, "temperature": 18.62, "conductivity": 1.0, "oxidation_reduction_potential": 0.012}
+1648725041.4526052 [mission-1] [INFO] [1648725041.450638438] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939988158053412, lat=37.30831255965887)
+1648725041.4609137 [drone-3] [INFO] [1648725041.459593867] [ASV.drone_node]: Action call received
+1648725041.4691284 [drone-3] [INFO] [1648725041.466908479] [ASV.drone_node]: Action accepted
+1648725041.4797361 [drone-3] [INFO] [1648725041.477372411] [ASV.drone_node]: Turning to : 193.6083904640926 N
+1648725041.7774270 [mission-1] [INFO] [1648725041.774714636] [ASV.mission_node]: Goal accepted :)
+1648725043.4987392 [mission-1] [INFO] [1648725043.494524600] [ASV.mission_node]: distance=15.143489056023745
+1648725044.5032461 [mission-1] [INFO] [1648725044.499316454] [ASV.mission_node]: distance=15.141769825407373
+1648725045.5073540 [mission-1] [INFO] [1648725045.505022941] [ASV.mission_node]: distance=14.64402479048911
+1648725046.5097458 [mission-1] [INFO] [1648725046.505840509] [ASV.mission_node]: distance=13.958778985996128
+1648725047.5145090 [mission-1] [INFO] [1648725047.512899476] [ASV.mission_node]: distance=13.223762350057301
+1648725048.5229228 [mission-1] [INFO] [1648725048.519335807] [ASV.mission_node]: distance=12.459795628648656
+1648725049.5278387 [mission-1] [INFO] [1648725049.524539374] [ASV.mission_node]: distance=11.643621505339496
+1648725050.5315759 [mission-1] [INFO] [1648725050.529078067] [ASV.mission_node]: distance=10.719644911877054
+1648725051.5383072 [mission-1] [INFO] [1648725051.534106733] [ASV.mission_node]: distance=9.716062777641202
+1648725052.5303125 [mission-1] [INFO] [1648725052.529264606] [ASV.mission_node]: distance=8.709561029849281
+1648725053.5395904 [mission-1] [INFO] [1648725053.538484011] [ASV.mission_node]: distance=7.720325870480565
+1648725054.5420899 [mission-1] [INFO] [1648725054.541094290] [ASV.mission_node]: distance=6.756405401118391
+1648725055.5487418 [mission-1] [INFO] [1648725055.547570799] [ASV.mission_node]: distance=5.822306111892503
+1648725056.5555599 [mission-1] [INFO] [1648725056.553213287] [ASV.mission_node]: distance=4.881547358864529
+1648725057.5625584 [mission-1] [INFO] [1648725057.558118424] [ASV.mission_node]: distance=3.935769546239062
+1648725058.5637214 [mission-1] [INFO] [1648725058.561455029] [ASV.mission_node]: distance=2.9857280230836496
+1648725059.5657814 [mission-1] [INFO] [1648725059.564361921] [ASV.mission_node]: distance=2.0182076719786664
+1648725060.5694349 [drone-3] [INFO] [1648725060.568210999] [ASV.drone_node]: Goal reached, waiting for sample
+1648725060.5733416 [sensors-5] [INFO] [1648725060.572664443] [ASV.sensors_node]: Sample requested
+1648725061.5776436 [sensors-5] [INFO] [1648725061.576699085] [ASV.sensors_node]: Taking sample
+1648725062.0812423 [sensors-5] [INFO] [1648725062.080368376] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '66', 'BAT:100', 'WT:18.39', 'PH:8.58', 'DO:83.9', 'COND:1.0', 'ORP:-0.008']
+1648725062.0841072 [sensors-5] [INFO] [1648725062.083447234] [ASV.sensors_node]: Taking sample
+1648725062.1913483 [mqtt-4] [INFO] [1648725062.190305568] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:11:02.080870", "Latitude": 37.3083143, "Longitude": -5.9399878, "ph": 8.58, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.9, "temperature": 18.39, "conductivity": 1.0, "oxidation_reduction_potential": -0.008}
+1648725072.6016951 [sensors-5] [INFO] [1648725072.600771030] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '67', 'BAT:100', 'WT:18.62', 'PH:8.59', 'DO:77.6', 'COND:1.0', 'ORP:0.001']
+1648725072.6052625 [sensors-5] [INFO] [1648725072.604544781] [ASV.sensors_node]: Taking sample
+1648725072.7116380 [mqtt-4] [INFO] [1648725072.710778879] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:11:12.601296", "Latitude": 37.3083058, "Longitude": -5.9399922, "ph": 8.59, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.6, "temperature": 18.62, "conductivity": 1.0, "oxidation_reduction_potential": 0.001}
+1648725088.6311390 [sensors-5] [INFO] [1648725088.630250026] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '68', 'BAT:100', 'WT:18.67', 'PH:8.39', 'DO:73.7', 'COND:1.0', 'ORP:0.003']
+1648725088.7464285 [mission-1] [INFO] [1648725088.745372042] [ASV.mission_node]: Goal succeeded! Result: True
+1648725088.7491157 [mission-1] [INFO] [1648725088.748400534] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939887952841164, lat=37.30824427562473)
+1648725088.7529204 [mission-1] [INFO] [1648725088.751253318] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939887952841164, lat=37.30824427562473)
+1648725088.7609289 [drone-3] [INFO] [1648725088.759803993] [ASV.drone_node]: Action call received
+1648725088.7682166 [drone-3] [INFO] [1648725088.765031015] [ASV.drone_node]: Action accepted
+1648725088.7772503 [drone-3] [INFO] [1648725088.775020241] [ASV.drone_node]: Turning to : 120.32999480465219 N
+1648725088.8516796 [mqtt-4] [INFO] [1648725088.849698741] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:11:28.630933", "Latitude": 37.3083055, "Longitude": -5.9399926, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 73.7, "temperature": 18.67, "conductivity": 1.0, "oxidation_reduction_potential": 0.003}
+1648725089.1773648 [mission-1] [INFO] [1648725089.173806242] [ASV.mission_node]: Goal accepted :)
+1648725090.7929022 [mission-1] [INFO] [1648725090.791760942] [ASV.mission_node]: distance=11.419338489661971
+1648725091.7995048 [mission-1] [INFO] [1648725091.796479572] [ASV.mission_node]: distance=11.345977319919436
+1648725092.8018064 [mission-1] [INFO] [1648725092.797298217] [ASV.mission_node]: distance=10.899356167788458
+1648725093.8034203 [mission-1] [INFO] [1648725093.798997191] [ASV.mission_node]: distance=10.262210904212766
+1648725094.8077266 [mission-1] [INFO] [1648725094.804528317] [ASV.mission_node]: distance=9.677420006939537
+1648725095.8112500 [mission-1] [INFO] [1648725095.808590207] [ASV.mission_node]: distance=9.076332538543065
+1648725096.8185754 [mission-1] [INFO] [1648725096.814292149] [ASV.mission_node]: distance=8.370982345433134
+1648725097.8204324 [mission-1] [INFO] [1648725097.819285858] [ASV.mission_node]: distance=7.578899211073775
+1648725098.8250599 [mission-1] [INFO] [1648725098.823870266] [ASV.mission_node]: distance=6.641065525883351
+1648725099.8341012 [mission-1] [INFO] [1648725099.830051882] [ASV.mission_node]: distance=5.551082548394035
+1648725100.8308330 [mission-1] [INFO] [1648725100.829836716] [ASV.mission_node]: distance=4.54263513596091
+1648725101.8420274 [mission-1] [INFO] [1648725101.837855820] [ASV.mission_node]: distance=3.620512001257454
+1648725102.8458612 [mission-1] [INFO] [1648725102.841571172] [ASV.mission_node]: distance=2.741142908236333
+1648725103.8461733 [mission-1] [INFO] [1648725103.844898410] [ASV.mission_node]: distance=1.8574308962405988
+1648725104.8527653 [drone-3] [INFO] [1648725104.851573364] [ASV.drone_node]: Goal reached, waiting for sample
+1648725104.8634794 [sensors-5] [INFO] [1648725104.862761469] [ASV.sensors_node]: Sample requested
+1648725105.8679962 [sensors-5] [INFO] [1648725105.866905968] [ASV.sensors_node]: Taking sample
+1648725106.3716743 [sensors-5] [INFO] [1648725106.370715402] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '69', 'BAT:100', 'WT:18.42', 'PH:8.54', 'DO:84.6', 'COND:1.0', 'ORP:-0.006']
+1648725106.3752143 [sensors-5] [INFO] [1648725106.374568383] [ASV.sensors_node]: Taking sample
+1648725106.5745518 [mqtt-4] [INFO] [1648725106.573666278] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:11:46.371553", "Latitude": 37.3082424, "Longitude": -5.9398871, "ph": 8.54, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.6, "temperature": 18.42, "conductivity": 1.0, "oxidation_reduction_potential": -0.006}
+1648725119.8984790 [sensors-5] [INFO] [1648725119.897589582] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '70', 'BAT:100', 'WT:18.46', 'PH:8.57', 'DO:86.3', 'COND:1.0', 'ORP:-0.046']
+1648725119.9017909 [sensors-5] [INFO] [1648725119.900916849] [ASV.sensors_node]: Taking sample
+1648725120.0748010 [mqtt-4] [INFO] [1648725120.073881683] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:11:59.898080", "Latitude": 37.3082353, "Longitude": -5.9398859, "ph": 8.57, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.3, "temperature": 18.46, "conductivity": 1.0, "oxidation_reduction_potential": -0.046}
+1648725135.9305105 [sensors-5] [INFO] [1648725135.929671288] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '71', 'BAT:100', 'WT:18.76', 'PH:8.39', 'DO:72.3', 'COND:1.0', 'ORP:0.003']
+1648725136.0636661 [mission-1] [INFO] [1648725136.060465103] [ASV.mission_node]: Goal succeeded! Result: True
+1648725136.0662732 [mission-1] [INFO] [1648725136.065618688] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939920686550617, lat=37.30815479569002)
+1648725136.0691111 [mission-1] [INFO] [1648725136.068328117] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939920686550617, lat=37.30815479569002)
+1648725136.0771759 [drone-3] [INFO] [1648725136.076259865] [ASV.drone_node]: Action call received
+1648725136.0856185 [drone-3] [INFO] [1648725136.080196428] [ASV.drone_node]: Action accepted
+1648725136.0876522 [mqtt-4] [INFO] [1648725136.080196492] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:12:15.930171", "Latitude": 37.3082311, "Longitude": -5.9398917, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 72.3, "temperature": 18.76, "conductivity": 1.0, "oxidation_reduction_potential": 0.003}
+1648725136.0922017 [drone-3] [INFO] [1648725136.091610479] [ASV.drone_node]: Turning to : 200.71034614054827 N
+1648725136.5992622 [mission-1] [INFO] [1648725136.594241188] [ASV.mission_node]: Goal accepted :)
+1648725138.1090121 [mission-1] [INFO] [1648725138.107962624] [ASV.mission_node]: distance=8.892142913334489
+1648725139.1150470 [mission-1] [INFO] [1648725139.114125553] [ASV.mission_node]: distance=8.881098461036073
+1648725140.1231689 [mission-1] [INFO] [1648725140.119127397] [ASV.mission_node]: distance=8.670339452328944
+1648725141.1272333 [mission-1] [INFO] [1648725141.123845826] [ASV.mission_node]: distance=8.309228760877547
+1648725142.1294439 [mission-1] [INFO] [1648725142.128449637] [ASV.mission_node]: distance=7.745669590826538
+1648725143.1336370 [mission-1] [INFO] [1648725143.132617140] [ASV.mission_node]: distance=7.0566870921580565
+1648725144.2399163 [mission-1] [INFO] [1648725144.238839768] [ASV.mission_node]: distance=6.417658931251625
+1648725145.2416146 [mission-1] [INFO] [1648725145.240635788] [ASV.mission_node]: distance=5.668084901530548
+1648725146.2408466 [mission-1] [INFO] [1648725146.239798058] [ASV.mission_node]: distance=4.64135022441771
+1648725147.2433481 [mission-1] [INFO] [1648725147.240958353] [ASV.mission_node]: distance=3.559635277047479
+1648725148.2433462 [mission-1] [INFO] [1648725148.241481164] [ASV.mission_node]: distance=2.665052941099788
+1648725149.2433136 [mission-1] [INFO] [1648725149.241418392] [ASV.mission_node]: distance=1.8754746854066902
+1648725150.1670895 [drone-3] [INFO] [1648725150.164034946] [ASV.drone_node]: Goal reached, waiting for sample
+1648725150.1749477 [sensors-5] [INFO] [1648725150.174225896] [ASV.sensors_node]: Sample requested
+1648725151.1850486 [sensors-5] [INFO] [1648725151.181722278] [ASV.sensors_node]: Taking sample
+1648725151.6911631 [sensors-5] [INFO] [1648725151.690172099] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '72', 'BAT:100', 'WT:18.52', 'PH:8.76', 'DO:82.8', 'COND:1.0', 'ORP:0.003']
+1648725151.6966307 [sensors-5] [INFO] [1648725151.695176440] [ASV.sensors_node]: Taking sample
+1648725151.8874905 [mqtt-4] [INFO] [1648725151.885802520] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:12:31.692668", "Latitude": 37.3081527, "Longitude": -5.93992, "ph": 8.76, "smart_water_battery": 100.0, "Disolved_Oxygen": 82.8, "temperature": 18.52, "conductivity": 1.0, "oxidation_reduction_potential": 0.003}
+1648725167.2271559 [sensors-5] [INFO] [1648725167.223507456] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '73', 'BAT:100', 'WT:18.57', 'PH:8.38', 'DO:75.0', 'COND:1.0', 'ORP:0.009']
+1648725167.2295232 [sensors-5] [INFO] [1648725167.228832077] [ASV.sensors_node]: Taking sample
+1648725167.4374936 [mqtt-4] [INFO] [1648725167.436530392] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:12:47.225016", "Latitude": 37.3081533, "Longitude": -5.9399139, "ph": 8.38, "smart_water_battery": 100.0, "Disolved_Oxygen": 75.0, "temperature": 18.57, "conductivity": 1.0, "oxidation_reduction_potential": 0.009}
+1648725182.7593932 [sensors-5] [INFO] [1648725182.758245804] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '74', 'BAT:100', 'WT:18.48', 'PH:8.27', 'DO:72.5', 'COND:1.0', 'ORP:-0.001']
+1648725182.8950815 [mission-1] [INFO] [1648725182.891793790] [ASV.mission_node]: Goal succeeded! Result: True
+1648725182.8967996 [mqtt-4] [INFO] [1648725182.895921195] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:13:02.759000", "Latitude": 37.3081609, "Longitude": -5.9398977, "ph": 8.27, "smart_water_battery": 100.0, "Disolved_Oxygen": 72.5, "temperature": 18.48, "conductivity": 1.0, "oxidation_reduction_potential": -0.001}
+1648725182.8982439 [mission-1] [INFO] [1648725182.896821459] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940037384598043, lat=37.30800968639915)
+1648725182.9005206 [mission-1] [INFO] [1648725182.899560967] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940037384598043, lat=37.30800968639915)
+1648725182.9107931 [drone-3] [INFO] [1648725182.908710314] [ASV.drone_node]: Action call received
+1648725182.9165246 [drone-3] [INFO] [1648725182.915960417] [ASV.drone_node]: Action accepted
+1648725182.9233758 [drone-3] [INFO] [1648725182.922729862] [ASV.drone_node]: Turning to : 222.77433432908057 N
+1648725183.2262516 [mission-1] [INFO] [1648725183.221593051] [ASV.mission_node]: Goal accepted :)
+1648725184.9392509 [mission-1] [INFO] [1648725184.938162209] [ASV.mission_node]: distance=21.169325157005137
+1648725185.9467585 [mission-1] [INFO] [1648725185.944101075] [ASV.mission_node]: distance=21.24019847026407
+1648725186.9512498 [mission-1] [INFO] [1648725186.948515568] [ASV.mission_node]: distance=20.924094268552665
+1648725187.9519360 [mission-1] [INFO] [1648725187.950748873] [ASV.mission_node]: distance=20.396093851355946
+1648725188.9591680 [mission-1] [INFO] [1648725188.956170249] [ASV.mission_node]: distance=19.789944763018276
+1648725189.9611356 [mission-1] [INFO] [1648725189.959721089] [ASV.mission_node]: distance=19.034616162619
+1648725190.9675229 [mission-1] [INFO] [1648725190.964840622] [ASV.mission_node]: distance=18.16240761356217
+1648725191.9717853 [mission-1] [INFO] [1648725191.970306290] [ASV.mission_node]: distance=17.228174768951263
+1648725192.9756994 [mission-1] [INFO] [1648725192.974608341] [ASV.mission_node]: distance=16.026963419978767
+1648725193.9876382 [mission-1] [INFO] [1648725193.986270289] [ASV.mission_node]: distance=15.039889092830947
+1648725194.9885519 [mission-1] [INFO] [1648725194.987431669] [ASV.mission_node]: distance=14.129105837505106
+1648725195.9915621 [mission-1] [INFO] [1648725195.987630410] [ASV.mission_node]: distance=13.081938786887486
+1648725196.9991167 [mission-1] [INFO] [1648725196.996510458] [ASV.mission_node]: distance=12.341679859710759
+1648725197.9996238 [mission-1] [INFO] [1648725197.998499663] [ASV.mission_node]: distance=11.387986764208398
+1648725199.0029864 [mission-1] [INFO] [1648725199.001970380] [ASV.mission_node]: distance=10.035614094953846
+1648725200.0112588 [mission-1] [INFO] [1648725200.010037451] [ASV.mission_node]: distance=8.838677367718248
+1648725201.0157762 [mission-1] [INFO] [1648725201.014007020] [ASV.mission_node]: distance=8.181272967964842
+1648725202.0222974 [mission-1] [INFO] [1648725202.017956089] [ASV.mission_node]: distance=7.398433268399581
+1648725203.0269561 [mission-1] [INFO] [1648725203.023638270] [ASV.mission_node]: distance=6.39726779296635
+1648725204.0260596 [mission-1] [INFO] [1648725204.025067632] [ASV.mission_node]: distance=5.43857723830103
+1648725205.0351198 [mission-1] [INFO] [1648725205.030548226] [ASV.mission_node]: distance=4.5574523966352585
+1648725206.0345767 [mission-1] [INFO] [1648725206.033463572] [ASV.mission_node]: distance=4.097444560130969
+1648725207.0430999 [mission-1] [INFO] [1648725207.039485547] [ASV.mission_node]: distance=2.383827251421129
+1648725208.0476003 [mission-1] [INFO] [1648725208.043553107] [ASV.mission_node]: distance=2.3995112157636322
+1648725209.0499241 [mission-1] [INFO] [1648725209.048860675] [ASV.mission_node]: distance=2.09336021769407
+1648725210.0560303 [mission-1] [INFO] [1648725210.054211719] [ASV.mission_node]: distance=1.5334653511922725
+1648725211.0582163 [drone-3] [INFO] [1648725211.057219602] [ASV.drone_node]: Goal reached, waiting for sample
+1648725211.0646048 [sensors-5] [INFO] [1648725211.063850082] [ASV.sensors_node]: Sample requested
+1648725212.0689178 [sensors-5] [INFO] [1648725212.067824960] [ASV.sensors_node]: Taking sample
+1648725212.5721407 [sensors-5] [INFO] [1648725212.571275917] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '75', 'BAT:100', 'WT:18.27', 'PH:8.66', 'DO:84.5', 'COND:1.0', 'ORP:-0.019']
+1648725212.5784087 [sensors-5] [INFO] [1648725212.577497479] [ASV.sensors_node]: Taking sample
+1648725212.7864225 [mqtt-4] [INFO] [1648725212.785535220] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:13:32.574481", "Latitude": 37.3080064, "Longitude": -5.940038, "ph": 8.66, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.5, "temperature": 18.27, "conductivity": 1.0, "oxidation_reduction_potential": -0.019}
+1648725214.5875938 [sensors-5] [INFO] [1648725214.586646378] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '76', 'BAT:100', 'WT:18.67', 'PH:8.65', 'DO:84.6', 'COND:1.0', 'ORP:-0.124']
+1648725214.5917046 [sensors-5] [INFO] [1648725214.589908320] [ASV.sensors_node]: Taking sample
+1648725214.6993418 [mqtt-4] [INFO] [1648725214.698288025] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:13:34.587172", "Latitude": 37.3080031, "Longitude": -5.9400509, "ph": 8.65, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.6, "temperature": 18.67, "conductivity": 1.0, "oxidation_reduction_potential": -0.124}
+1648725230.1153796 [sensors-5] [INFO] [1648725230.114457505] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '77', 'BAT:100', 'WT:18.92', 'PH:8.54', 'DO:83.2', 'COND:1.0', 'ORP:-0.003']
+1648725230.4318404 [mqtt-4] [INFO] [1648725230.429746965] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:13:50.117326", "Latitude": 37.3080053, "Longitude": -5.9400391, "ph": 8.54, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.2, "temperature": 18.92, "conductivity": 1.0, "oxidation_reduction_potential": -0.003}
+1648725230.4422584 [mission-1] [INFO] [1648725230.439444912] [ASV.mission_node]: Goal succeeded! Result: True
+1648725230.4475846 [mission-1] [INFO] [1648725230.446680282] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940020625048005, lat=37.30790693006542)
+1648725230.4502094 [mission-1] [INFO] [1648725230.449287475] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940020625048005, lat=37.30790693006542)
+1648725230.4627106 [drone-3] [INFO] [1648725230.458404428] [ASV.drone_node]: Action call received
+1648725230.4669640 [drone-3] [INFO] [1648725230.466022392] [ASV.drone_node]: Action accepted
+1648725230.4738746 [drone-3] [INFO] [1648725230.472688799] [ASV.drone_node]: Turning to : 169.9331060868979 N
+1648725230.7737868 [mission-1] [INFO] [1648725230.769783802] [ASV.mission_node]: Goal accepted :)
+1648725232.4866669 [mission-1] [INFO] [1648725232.485571004] [ASV.mission_node]: distance=10.776797610000095
+1648725233.4988513 [mission-1] [INFO] [1648725233.494518046] [ASV.mission_node]: distance=10.653124051045477
+1648725234.4953427 [mission-1] [INFO] [1648725234.494340744] [ASV.mission_node]: distance=10.397601777950149
+1648725235.5018241 [mission-1] [INFO] [1648725235.496687045] [ASV.mission_node]: distance=9.744779927539888
+1648725236.5054200 [mission-1] [INFO] [1648725236.504347000] [ASV.mission_node]: distance=9.176163412342644
+1648725237.5146849 [mission-1] [INFO] [1648725237.510146174] [ASV.mission_node]: distance=8.582924926380514
+1648725238.5174263 [mission-1] [INFO] [1648725238.513322505] [ASV.mission_node]: distance=7.893555442518612
+1648725239.5234709 [mission-1] [INFO] [1648725239.520922876] [ASV.mission_node]: distance=7.174224855121512
+1648725240.5272272 [mission-1] [INFO] [1648725240.523607643] [ASV.mission_node]: distance=6.404218071902052
+1648725241.5285110 [mission-1] [INFO] [1648725241.527329874] [ASV.mission_node]: distance=5.398653693068597
+1648725242.5381708 [mission-1] [INFO] [1648725242.533976860] [ASV.mission_node]: distance=4.339853142278151
+1648725243.5426161 [mission-1] [INFO] [1648725243.538378721] [ASV.mission_node]: distance=3.303019904467042
+1648725244.5472884 [mission-1] [INFO] [1648725244.543476148] [ASV.mission_node]: distance=2.3194673797758347
+1648725245.5486193 [drone-3] [INFO] [1648725245.547596888] [ASV.drone_node]: Goal reached, waiting for sample
+1648725245.5550847 [sensors-5] [INFO] [1648725245.554224209] [ASV.sensors_node]: Sample requested
+1648725246.5594678 [sensors-5] [INFO] [1648725246.558470458] [ASV.sensors_node]: Taking sample
+1648725247.0677874 [sensors-5] [INFO] [1648725247.066667037] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '78', 'BAT:100', 'WT:18.73', 'PH:8.70', 'DO:84.8', 'COND:1.0', 'ORP:-0.010']
+1648725247.0730014 [sensors-5] [INFO] [1648725247.072098485] [ASV.sensors_node]: Taking sample
+1648725247.3813939 [mqtt-4] [INFO] [1648725247.380429908] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:14:07.069237", "Latitude": 37.3079104, "Longitude": -5.9400205, "ph": 8.7, "smart_water_battery": 100.0, "Disolved_Oxygen": 84.8, "temperature": 18.73, "conductivity": 1.0, "oxidation_reduction_potential": -0.01}
+1648725261.5949929 [sensors-5] [INFO] [1648725261.594097918] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '79', 'BAT:100', 'WT:19.04', 'PH:8.31', 'DO:77.9', 'COND:1.0', 'ORP:-0.001']
+1648725261.6006169 [sensors-5] [INFO] [1648725261.599666977] [ASV.sensors_node]: Taking sample
+1648725261.7092197 [mqtt-4] [INFO] [1648725261.705113403] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:14:21.596787", "Latitude": 37.3079053, "Longitude": -5.9400204, "ph": 8.31, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.9, "temperature": 19.04, "conductivity": 1.0, "oxidation_reduction_potential": -0.001}
+1648725277.1253316 [sensors-5] [INFO] [1648725277.124465702] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '80', 'BAT:100', 'WT:18.79', 'PH:8.39', 'DO:87.5', 'COND:1.0', 'ORP:0.016']
+1648725277.4525540 [mission-1] [INFO] [1648725277.447624252] [ASV.mission_node]: Goal succeeded! Result: True
+1648725277.4562624 [mission-1] [INFO] [1648725277.453896990] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940107305525291, lat=37.30785285626526)
+1648725277.4583299 [mqtt-4] [INFO] [1648725277.454106336] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:14:37.128718", "Latitude": 37.3079184, "Longitude": -5.9400161, "ph": 8.39, "smart_water_battery": 100.0, "Disolved_Oxygen": 87.5, "temperature": 18.79, "conductivity": 1.0, "oxidation_reduction_potential": 0.016}
+1648725277.4602017 [mission-1] [INFO] [1648725277.457044862] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940107305525291, lat=37.30785285626526)
+1648725277.4669731 [drone-3] [INFO] [1648725277.466218211] [ASV.drone_node]: Action call received
+1648725277.4698424 [drone-3] [INFO] [1648725277.469054127] [ASV.drone_node]: Action accepted
+1648725277.4801464 [drone-3] [INFO] [1648725277.477834381] [ASV.drone_node]: Turning to : 234.04251078592338 N
+1648725277.7810714 [mission-1] [INFO] [1648725277.779485689] [ASV.mission_node]: Goal accepted :)
+1648725279.4978132 [mission-1] [INFO] [1648725279.496738374] [ASV.mission_node]: distance=10.90955128980131
+1648725280.5072093 [mission-1] [INFO] [1648725280.503204945] [ASV.mission_node]: distance=10.83163651123725
+1648725281.5109529 [mission-1] [INFO] [1648725281.507569540] [ASV.mission_node]: distance=10.835669427125463
+1648725282.5056124 [mission-1] [INFO] [1648725282.504585272] [ASV.mission_node]: distance=10.221849264399031
+1648725283.5086277 [mission-1] [INFO] [1648725283.507067431] [ASV.mission_node]: distance=9.423379510412362
+1648725284.5194046 [mission-1] [INFO] [1648725284.516570586] [ASV.mission_node]: distance=8.53419061630843
+1648725285.5230994 [mission-1] [INFO] [1648725285.519832082] [ASV.mission_node]: distance=7.606629340249454
+1648725286.5241711 [mission-1] [INFO] [1648725286.523166068] [ASV.mission_node]: distance=6.65472907570462
+1648725287.5310242 [mission-1] [INFO] [1648725287.527655175] [ASV.mission_node]: distance=5.697236091880392
+1648725288.5354588 [mission-1] [INFO] [1648725288.532245315] [ASV.mission_node]: distance=4.7793652528029416
+1648725289.5394266 [mission-1] [INFO] [1648725289.536382610] [ASV.mission_node]: distance=3.8633969402736725
+1648725290.5427468 [mission-1] [INFO] [1648725290.541152795] [ASV.mission_node]: distance=2.9308623184485127
+1648725291.5477204 [mission-1] [INFO] [1648725291.545542536] [ASV.mission_node]: distance=2.0007938206575626
+1648725292.5490594 [drone-3] [INFO] [1648725292.548076802] [ASV.drone_node]: Goal reached, waiting for sample
+1648725292.5569923 [sensors-5] [INFO] [1648725292.556224807] [ASV.sensors_node]: Sample requested
+1648725293.5616558 [sensors-5] [INFO] [1648725293.560629328] [ASV.sensors_node]: Taking sample
+1648725294.0652461 [sensors-5] [INFO] [1648725294.064265255] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '81', 'BAT:100', 'WT:18.80', 'PH:8.65', 'DO:83.9', 'COND:1.0', 'ORP:-0.014']
+1648725294.0697076 [sensors-5] [INFO] [1648725294.067500559] [ASV.sensors_node]: Taking sample
+1648725294.1741688 [mqtt-4] [INFO] [1648725294.173213018] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:14:54.064811", "Latitude": 37.307854, "Longitude": -5.9401066, "ph": 8.65, "smart_water_battery": 100.0, "Disolved_Oxygen": 83.9, "temperature": 18.8, "conductivity": 1.0, "oxidation_reduction_potential": -0.014}
+1648725308.5898151 [sensors-5] [INFO] [1648725308.588859371] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '82', 'BAT:100', 'WT:19.14', 'PH:8.41', 'DO:77.0', 'COND:1.0', 'ORP:0.004']
+1648725308.5932298 [sensors-5] [INFO] [1648725308.592518251] [ASV.sensors_node]: Taking sample
+1648725308.8996012 [mqtt-4] [INFO] [1648725308.898430683] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:15:08.589689", "Latitude": 37.3078523, "Longitude": -5.9401129, "ph": 8.41, "smart_water_battery": 100.0, "Disolved_Oxygen": 77.0, "temperature": 19.14, "conductivity": 1.0, "oxidation_reduction_potential": 0.004}
+1648725324.1186624 [sensors-5] [INFO] [1648725324.115283026] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '83', 'BAT:100', 'WT:19.22', 'PH:8.41', 'DO:74.7', 'COND:1.0', 'ORP:-0.004']
+1648725324.4428718 [mqtt-4] [INFO] [1648725324.440991057] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:15:24.124029", "Latitude": 37.3078585, "Longitude": -5.9401025, "ph": 8.41, "smart_water_battery": 100.0, "Disolved_Oxygen": 74.7, "temperature": 19.22, "conductivity": 1.0, "oxidation_reduction_potential": -0.004}
+1648725324.4442358 [mission-1] [INFO] [1648725324.441354468] [ASV.mission_node]: Goal succeeded! Result: True
+1648725324.4455390 [mission-1] [INFO] [1648725324.444329901] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940141003468287, lat=37.30778506123843)
+1648725324.4479005 [mission-1] [INFO] [1648725324.446899785] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940141003468287, lat=37.30778506123843)
+1648725324.4602544 [drone-3] [INFO] [1648725324.457142783] [ASV.drone_node]: Action call received
+1648725324.4639256 [drone-3] [INFO] [1648725324.461964672] [ASV.drone_node]: Action accepted
+1648725324.4700859 [drone-3] [INFO] [1648725324.469497707] [ASV.drone_node]: Turning to : 207.75784316433536 N
+1648725324.7751281 [mission-1] [INFO] [1648725324.768887325] [ASV.mission_node]: Goal accepted :)
+1648725326.4871271 [mission-1] [INFO] [1648725326.486059786] [ASV.mission_node]: distance=9.039407593675701
+1648725327.4951775 [mission-1] [INFO] [1648725327.491697622] [ASV.mission_node]: distance=9.139574555117012
+1648725328.4991379 [mission-1] [INFO] [1648725328.495852058] [ASV.mission_node]: distance=8.799418538807286
+1648725329.5031531 [mission-1] [INFO] [1648725329.499918343] [ASV.mission_node]: distance=8.184877182669874
+1648725330.5076959 [mission-1] [INFO] [1648725330.505450906] [ASV.mission_node]: distance=7.484063749799143
+1648725331.5116477 [mission-1] [INFO] [1648725331.509403082] [ASV.mission_node]: distance=6.754090921729358
+1648725332.5178900 [mission-1] [INFO] [1648725332.514129492] [ASV.mission_node]: distance=5.932224547445662
+1648725333.5198059 [mission-1] [INFO] [1648725333.518018623] [ASV.mission_node]: distance=5.035064518111077
+1648725334.5258434 [mission-1] [INFO] [1648725334.521656159] [ASV.mission_node]: distance=4.081148351186692
+1648725335.5275538 [mission-1] [INFO] [1648725335.524957600] [ASV.mission_node]: distance=3.0977629898182877
+1648725336.5319052 [mission-1] [INFO] [1648725336.529502076] [ASV.mission_node]: distance=2.096806384136508
+1648725337.5357900 [drone-3] [INFO] [1648725337.534778865] [ASV.drone_node]: Goal reached, waiting for sample
+1648725337.5399990 [sensors-5] [INFO] [1648725337.539264814] [ASV.sensors_node]: Sample requested
+1648725338.5441239 [sensors-5] [INFO] [1648725338.543090246] [ASV.sensors_node]: Taking sample
+1648725340.0493736 [sensors-5] [INFO] [1648725340.048440499] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '84', 'BAT:100', 'WT:18.92', 'PH:8.65', 'DO:88.6', 'COND:1.0', 'ORP:-0.010']
+1648725340.0527225 [sensors-5] [INFO] [1648725340.051994277] [ASV.sensors_node]: Taking sample
+1648725340.3700213 [mqtt-4] [INFO] [1648725340.365908674] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:15:40.049129", "Latitude": 37.3077809, "Longitude": -5.9401439, "ph": 8.65, "smart_water_battery": 100.0, "Disolved_Oxygen": 88.6, "temperature": 18.92, "conductivity": 1.0, "oxidation_reduction_potential": -0.01}
+1648725356.0753930 [sensors-5] [INFO] [1648725356.074412044] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '85', 'BAT:100', 'WT:19.11', 'PH:8.08', 'DO:78.8', 'COND:1.0', 'ORP:-0.001']
+1648725356.0793126 [sensors-5] [INFO] [1648725356.078604132] [ASV.sensors_node]: Taking sample
+1648725356.3850200 [mqtt-4] [INFO] [1648725356.384005236] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:15:56.075241", "Latitude": 37.3077851, "Longitude": -5.9401425, "ph": 8.08, "smart_water_battery": 100.0, "Disolved_Oxygen": 78.8, "temperature": 19.11, "conductivity": 1.0, "oxidation_reduction_potential": -0.001}
+1648725371.6068590 [sensors-5] [INFO] [1648725371.605873951] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '86', 'BAT:100', 'WT:18.84', 'PH:8.48', 'DO:70.4', 'COND:1.0', 'ORP:-0.006']
+1648725371.7419434 [mission-1] [INFO] [1648725371.737671828] [ASV.mission_node]: Goal succeeded! Result: True
+1648725371.7441621 [mission-1] [INFO] [1648725371.743170506] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.939951959277905, lat=37.30778294396272)
+1648725371.7466819 [mission-1] [INFO] [1648725371.745883802] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.939951959277905, lat=37.30778294396272)
+1648725371.7611728 [drone-3] [INFO] [1648725371.760007560] [ASV.drone_node]: Action call received
+1648725371.7666872 [drone-3] [INFO] [1648725371.763727335] [ASV.drone_node]: Action accepted
+1648725371.7759376 [drone-3] [INFO] [1648725371.775272215] [ASV.drone_node]: Turning to : 98.01604298345622 N
+1648725371.8258266 [mqtt-4] [INFO] [1648725371.823640865] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:16:11.606481", "Latitude": 37.307807, "Longitude": -5.9401244, "ph": 8.48, "smart_water_battery": 100.0, "Disolved_Oxygen": 70.4, "temperature": 18.84, "conductivity": 1.0, "oxidation_reduction_potential": -0.006}
+1648725371.8573043 [mission-1] [INFO] [1648725371.854201690] [ASV.mission_node]: Finished preloaded mission.
+1648725371.8588510 [mission-1] Setting mode to Stand-by.
+1648725371.9717207 [mission-1] [INFO] [1648725371.969556741] [ASV.mission_node]: Changed current ASV mode to STANDBY.
+1648725371.9751832 [mission-1] [INFO] [1648725371.973187470] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648725371.9822731 [mission-1] [INFO] [1648725371.979136818] [ASV.mission_node]: Goal accepted :)
+1648725371.9869370 [mission-1] [INFO] [1648725371.986237941] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648725371.9908016 [drone-3] [INFO] [1648725371.989655157] [ASV.drone_node]: Vehicle armed
+1648725371.9943421 [mission-1] [INFO] [1648725371.993588571] [ASV.mission_node]: vehicle in 'STANDBY' mode
+1648725373.7901750 [drone-3] [ERROR] [1648725373.787027800] [ASV.drone_node]: asv_mode was changed externally, possible EKF fail
+1648725373.7920604 [drone-3] [INFO] [1648725373.791446826] [ASV.drone_node]: System mode LOITER
+1648725373.7930048 [drone-3] System GPS_status: GPSInfo:fix=5,num_sat=10
+1648725373.7937253 [drone-3] System status: ACTIVE
+1648725373.7943351 [drone-3]  System able to arm True  
+1648725373.7960031 [drone-3] [INFO] [1648725373.794176313] [ASV.drone_node]: system seems normal, retrying
+1648725373.8000679 [mission-1] [INFO] [1648725373.799181130] [ASV.mission_node]: distance=15.342412903646197
+1648725374.8114545 [mission-1] [INFO] [1648725374.807908831] [ASV.mission_node]: distance=15.319198386548589
+1648725375.8154998 [mission-1] [INFO] [1648725375.812817898] [ASV.mission_node]: distance=15.53167807176277
+1648725376.8198817 [mission-1] [INFO] [1648725376.817408479] [ASV.mission_node]: distance=15.043155713250801
+1648725377.8208454 [mission-1] [INFO] [1648725377.815701522] [ASV.mission_node]: distance=14.377675645348589
+1648725378.8268847 [mission-1] [INFO] [1648725378.823620481] [ASV.mission_node]: distance=13.860442872070976
+1648725379.8280020 [mission-1] [INFO] [1648725379.826872889] [ASV.mission_node]: distance=13.24957894336596
+1648725380.8349302 [mission-1] [INFO] [1648725380.831315568] [ASV.mission_node]: distance=12.502092654607111
+1648725381.8392832 [mission-1] [INFO] [1648725381.836546899] [ASV.mission_node]: distance=11.743608111282644
+1648725382.8431208 [mission-1] [INFO] [1648725382.839150103] [ASV.mission_node]: distance=10.847745675971455
+1648725383.8473101 [mission-1] [INFO] [1648725383.844021955] [ASV.mission_node]: distance=9.726886463509159
+1648725384.8512027 [mission-1] [INFO] [1648725384.847929112] [ASV.mission_node]: distance=8.613368135143052
+1648725385.8550863 [mission-1] [INFO] [1648725385.851444503] [ASV.mission_node]: distance=7.637976766849547
+1648725386.8568740 [mission-1] [INFO] [1648725386.855225269] [ASV.mission_node]: distance=6.762881952489608
+1648725387.8635008 [mission-1] [INFO] [1648725387.860663292] [ASV.mission_node]: distance=5.869047891952218
+1648725388.8671393 [mission-1] [INFO] [1648725388.863236788] [ASV.mission_node]: distance=4.925118162885524
+1648725389.8724334 [mission-1] [INFO] [1648725389.871269145] [ASV.mission_node]: distance=3.9289743206146257
+1648725390.8751588 [mission-1] [INFO] [1648725390.872948579] [ASV.mission_node]: distance=2.914121893617197
+1648725391.8767812 [mission-1] [INFO] [1648725391.875740429] [ASV.mission_node]: distance=1.860268598518592
+1648725392.8783312 [drone-3] [INFO] [1648725392.877426307] [ASV.drone_node]: Goal reached, waiting for sample
+1648725392.8841152 [sensors-5] [INFO] [1648725392.883472157] [ASV.sensors_node]: Sample requested
+1648725393.8885040 [sensors-5] [INFO] [1648725393.887518959] [ASV.sensors_node]: Taking sample
+1648725394.3922455 [sensors-5] [INFO] [1648725394.391369954] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '87', 'BAT:100', 'WT:18.95', 'PH:8.52', 'DO:81.9', 'COND:1.0', 'ORP:-0.015']
+1648725394.3958473 [sensors-5] [INFO] [1648725394.395222248] [ASV.sensors_node]: Taking sample
+1648725394.5741665 [mqtt-4] [INFO] [1648725394.573268165] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:16:34.392193", "Latitude": 37.307781, "Longitude": -5.9399453, "ph": 8.52, "smart_water_battery": 100.0, "Disolved_Oxygen": 81.9, "temperature": 18.95, "conductivity": 1.0, "oxidation_reduction_potential": -0.015}
+1648725403.9133689 [sensors-5] [INFO] [1648725403.911821304] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '88', 'BAT:100', 'WT:18.88', 'PH:8.60', 'DO:86.5', 'COND:1.0', 'ORP:-0.326']
+1648725403.9167583 [sensors-5] [INFO] [1648725403.915762941] [ASV.sensors_node]: Taking sample
+1648725404.0740626 [mqtt-4] [INFO] [1648725404.073164593] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:16:43.912651", "Latitude": 37.3077772, "Longitude": -5.9399362, "ph": 8.6, "smart_water_battery": 100.0, "Disolved_Oxygen": 86.5, "temperature": 18.88, "conductivity": 1.0, "oxidation_reduction_potential": -0.326}
+1648725419.4407239 [sensors-5] [INFO] [1648725419.439792231] [ASV.sensors_node]: sensor read: ['\x06', '5C3F1CE819623CBF', 'SW3', '89', 'BAT:100', 'WT:18.89', 'PH:8.44', 'DO:76.2', 'COND:1.0', 'ORP:0.006']
+1648725419.5631213 [mission-1] [INFO] [1648725419.559327497] [ASV.mission_node]: Goal succeeded! Result: True
+1648725419.5786996 [mqtt-4] [INFO] [1648725419.575903685] [ASV.mqtt_node]: sensor data sent to database{"veh_num": 3, "date": "2022-03-31 13:16:59.443157", "Latitude": 37.3077775, "Longitude": -5.9399361, "ph": 8.44, "smart_water_battery": 100.0, "Disolved_Oxygen": 76.2, "temperature": 18.89, "conductivity": 1.0, "oxidation_reduction_potential": 0.006}
+1648725515.0671604 [mqtt-4] [INFO] [1648725515.063962932] [ASV.mqtt_node]: Received {'mission_type': 'MANUAL', 'VehicleNum': 3} on topic veh3
+1648725515.0903430 [mqtt-4] [INFO] [1648725515.087121297] [ASV.mqtt_node]: mqtt_node is calling service change_mission_mode
+1648725515.0936267 [mission-1] [INFO] [1648725515.092751070] [ASV.mission_node]: Changed current ASV mode to MANUAL.
+1648725515.0968041 [mission-1] [INFO] [1648725515.096002640] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648725515.1015518 [mission-1] [INFO] [1648725515.100802529] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648725515.2116752 [drone-3] [INFO] [1648725515.209865218] [ASV.drone_node]: Vehicle armed
+1648725515.2161138 [mission-1] [INFO] [1648725515.215042676] [ASV.mission_node]: vehicle in 'MANUAL' mode
+1648725587.2688580 [mqtt-4] [INFO] [1648725587.264879467] [ASV.mqtt_node]: Received {'load_mission': 3, 'VehicleNum': 3} on topic veh3
+1648725587.3660488 [mission-1] [INFO] [1648725587.362347306] [ASV.mission_node]: asked to load mission 3
+1648725587.3677475 [mqtt-4] [INFO] [1648725587.362620118] [ASV.mqtt_node]: mqtt_node is calling service load_mission
+1648725587.3711052 [mission-1] [INFO] [1648725587.370224999] [ASV.mission_node]: mission: MisionesLoyola_dron_3.kml was loaded successfully
+1648725590.3921769 [mqtt-4] [INFO] [1648725590.388213847] [ASV.mqtt_node]: Received {'mission_type': 'PREMISSION', 'VehicleNum': 3} on topic veh3
+1648725590.4986012 [mqtt-4] [INFO] [1648725590.494390587] [ASV.mqtt_node]: mqtt_node is calling service change_mission_mode
+1648725590.5022054 [mission-1] [INFO] [1648725590.498502030] [ASV.mission_node]: Changed current ASV mode to PRELOADED_MISSION.
+1648725590.5050895 [mission-1] [INFO] [1648725590.503780236] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648725590.5092347 [mission-1] [INFO] [1648725590.508476276] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648725590.5113761 [drone-3] [INFO] [1648725590.510755597] [ASV.drone_node]: Vehicle armed
+1648725590.5155015 [mission-1] [INFO] [1648725590.514908573] [ASV.mission_node]: Starting Pre-loaded Mission /home/xavier/ASV_Loyola_US/MisionesLoyola_dron_3.kml
+1648725590.6255937 [mission-1] [INFO] [1648725590.622428030] [ASV.mission_node]: Next waypoint is asv_interfaces.msg.Location(lon=-5.940157211651672, lat=37.30767880496103)
+1648725590.6279905 [mission-1] [INFO] [1648725590.626955283] [ASV.mission_node]: going to asv_interfaces.msg.Location(lon=-5.940157211651672, lat=37.30767880496103)
+1648725590.6354547 [drone-3] [INFO] [1648725590.634257724] [ASV.drone_node]: Action call received
+1648725590.6515996 [drone-3] [INFO] [1648725590.650112628] [ASV.drone_node]: Action accepted
+1648725590.6585674 [drone-3] [INFO] [1648725590.657788642] [ASV.drone_node]: Turning to : 33.52843947987411 N
+1648725590.9509511 [mission-1] [INFO] [1648725590.948614968] [ASV.mission_node]: Goal accepted :)
+1648725592.6774573 [mission-1] [INFO] [1648725592.673800428] [ASV.mission_node]: distance=18.888825560679074
+1648725593.6828306 [mission-1] [INFO] [1648725593.681757311] [ASV.mission_node]: distance=18.826616833024573
+1648725594.6879754 [mission-1] [INFO] [1648725594.683579138] [ASV.mission_node]: distance=18.89790294043231
+1648725595.7919145 [mission-1] [INFO] [1648725595.789513479] [ASV.mission_node]: distance=18.433828638390178
+1648725596.7916222 [mission-1] [INFO] [1648725596.787631806] [ASV.mission_node]: distance=17.682333521352714
+1648725597.7930501 [mission-1] [INFO] [1648725597.790983496] [ASV.mission_node]: distance=16.849679328547445
+1648725598.6861913 [mqtt-4] [INFO] [1648725598.685273743] [ASV.mqtt_node]: Received {'cancel_movement': 'True', 'VehicleNum': 3} on topic veh3
+1648725598.7949977 [mission-1] [INFO] [1648725598.792105570] [ASV.mission_node]: distance=15.978858634771962
+1648725598.8075879 [mqtt-4] [INFO] [1648725598.804934306] [ASV.mqtt_node]: mqtt_node is calling service cancel_movement
+1648725598.9077094 [mission-1] [INFO] [1648725598.904727985] [ASV.mission_node]: asked to stop the vehicle, changing mode to STANDBY
+1648725598.9110725 [mission-1] [INFO] [1648725598.910153673] [ASV.mission_node]: the submarine was moving, canceling movement
+1648725598.9146607 [mission-1] [INFO] [1648725598.913817888] [ASV.mission_node]: mission emptied
+1648725598.9182041 [mission-1] [INFO] [1648725598.917439610] [ASV.mission_node]: Changed current ASV mode to STANDBY.
+1648725598.9221189 [mission-1] [INFO] [1648725598.921131375] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648725598.9247820 [drone-3] [INFO] [1648725598.923702485] [ASV.drone_node]: Received cancel request
+1648725598.9268415 [mission-1] [INFO] [1648725598.926032972] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648725598.9296825 [drone-3] [INFO] [1648725598.929015701] [ASV.drone_node]: Vehicle armed
+1648725598.9360089 [mission-1] [INFO] [1648725598.935250322] [ASV.mission_node]: vehicle in 'STANDBY' mode
+1648725599.6107361 [mqtt-4] [INFO] [1648725599.607593797] [ASV.mqtt_node]: Received {'cancel_movement': 'True', 'VehicleNum': 3} on topic veh3
+1648725599.6706066 [mqtt-4] [INFO] [1648725599.668775108] [ASV.mqtt_node]: mqtt_node is calling service cancel_movement
+1648725599.6724122 [mission-1] [INFO] [1648725599.671015458] [ASV.mission_node]: asked to stop the vehicle, changing mode to STANDBY
+1648725599.6744814 [mission-1] [INFO] [1648725599.673773339] [ASV.mission_node]: the submarine was moving, canceling movement
+1648725599.8377047 [mqtt-4] [INFO] [1648725599.834190811] [ASV.mqtt_node]: Received {'cancel_movement': 'True', 'VehicleNum': 3} on topic veh3
+1648725599.9017611 [mqtt-4] [INFO] [1648725599.900666491] [ASV.mqtt_node]: mqtt_node is calling service cancel_movement
+1648725600.0027003 [mission-1] [INFO] [1648725599.997976520] [ASV.mission_node]: Goal failed with status: 5
+1648725600.5192354 [mission-1] [INFO] [1648725600.515429803] [ASV.mission_node]: asked to stop the vehicle, changing mode to STANDBY
+1648725606.9188683 [mqtt-4] [INFO] [1648725606.916112529] [ASV.mqtt_node]: Received {'mission_type': 'MANUAL', 'VehicleNum': 3} on topic veh3
+1648725606.9990485 [mqtt-4] [INFO] [1648725606.996442181] [ASV.mqtt_node]: mqtt_node is calling service change_mission_mode
+1648725607.0023148 [mission-1] [INFO] [1648725607.001551864] [ASV.mission_node]: Changed current ASV mode to MANUAL.
+1648725607.0056295 [mission-1] [INFO] [1648725607.004881130] [ASV.mission_node]: mission_node is calling service change_asv_mode
+1648725607.0109770 [mission-1] [INFO] [1648725607.010112149] [ASV.mission_node]: mission_node is calling service arm_vehicle
+1648725607.0139780 [drone-3] [INFO] [1648725607.012696221] [ASV.drone_node]: Vehicle armed
+1648725607.0176773 [mission-1] [INFO] [1648725607.016846325] [ASV.mission_node]: vehicle in 'MANUAL' mode

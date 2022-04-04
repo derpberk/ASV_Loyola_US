@@ -1,0 +1,19 @@
+---
+layout: post
+title:  "version 1.1.0 is out!"
+date:   2022-04-04 10:36:58 +0100
+categories: jekyll update
+---
+
+The version 1.1.0 of our drone is ready and will be tested at test 8 the 07/04/2022 in Loyola's Lake.
+
+This version includes the following:
+- Planification was implemented
+- Remote startup and shutdown
+- Parameter configuration on the air
+- New logs and information to the server
+- EKF fail countermeasures
+- MQTT fail countermeasures
+- Action outside of ROS2 code
+- New missions added
+- Several sections of code were optimised
