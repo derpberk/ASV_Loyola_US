@@ -1,0 +1,6 @@
+#request
+bool read_only true
+bool planner_status 
+---
+bool planner_status
+bool success true

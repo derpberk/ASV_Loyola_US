@@ -5,7 +5,7 @@ import launch_ros.actions
 import launch
 import os
 from ament_index_python.packages import get_package_share_directory
-from asv_interfaces.msg import Nodeupdate, String
+from asv_interfaces.msg import Nodeupdate, String, Status
 
 # TODO: we must assure watchdog never crashes, so keep code simple
 
@@ -19,6 +19,8 @@ class Watchdog_node(Node):
         self.watchdog_subscriber = self.create_subscription(Nodeupdate, 'Watchdog', self.watchdog_callback, 10)
         self.error_log_publisher = self.create_publisher(String, 'error', 10)
         self.error_log_publisher_timer = self.create_timer(1, self.error_log_publish)
+        self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
+
 
 
     def __init__(self):
@@ -30,6 +32,9 @@ class Watchdog_node(Node):
         self.error_list=[]
         self.last_error_subscriber_number=0
         self.watchdog_timer = self.create_timer(watchdog_timer, self.watchdog_timer_function)
+        aux=datetime.today()       
+        name=str("/home/xavier/ASV_Status_Log/"+ aux.strftime("%m.%d.%Y..%H.%M") + ".txt")
+        self.status_file= open(name ,"w")
 
     def error_callback(self,msg):
         error = "there has been an error in node: \'%s\' at time %s\n\n%s" % (msg.node, datetime.utcfromtimestamp(self.get_clock().now().seconds_nanoseconds()[0]+3600).strftime('%Y-%m-%d %H:%M:%S'), self.parse_error(msg.message))
@@ -89,6 +94,10 @@ class Watchdog_node(Node):
         parameters = [config]
         launch.LaunchDescription([sensors])
     )"""
+
+    def status_suscriber_callback(self,msg):
+        self.status_file.write(f" {datetime.utcfromtimestamp(self.get_clock().now().seconds_nanoseconds()[0]+3600).strftime('%Y-%m-%d %H:%M:%S')} [{msg.lat},{msg.lon}] Battery:{msg.battery}\n")
+
 
 def main(args=None):
     # init ROS2

@@ -2,6 +2,9 @@ import subprocess  # For executing a shell command
 import os
 import signal
 import psutil
+import sys
+import signal
+from datetime import datetime
 def ping_google():
     host="www.google.es"
     command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds
@@ -57,7 +60,7 @@ def show_ps():
             pass
 
 def kill_ros2():
-    processes=["mission", "mqtt", "drone", "sensors", "watchdog", "_ros2_daemon", "dummy_publisher"]
+    processes=["mission", "mqtt", "drone", "sensors", "watchdog", "_ros2_daemon", "dummy_publisher", "camera"]
     for proc in psutil.process_iter():
         try:
             # Check if process name contains the given name string.
@@ -71,3 +74,43 @@ def kill_ros2():
 
 def restart_asv():
     subprocess.run(args=['/bin/bash', '-i', '-c', "restart_asv"], preexec_fn=os.setsid)
+
+def start_recording():
+    name=datetime.today()
+    name=name.strftime('%Y.%m.%d..%H.%M')
+    name=str("recording"+name+".svo")
+    command="python3 /home/xavier/repositorios/zed-examples/svo\ recording/recording/python/svo_recording.py"+ " " + name
+
+    return subprocess.Popen([command], cwd="/home/xavier/zed_datasets", shell=True, preexec_fn=os.setsid)
+
+def singint_python():
+    for proc in psutil.process_iter():
+        try:
+            # Check if process name contains the given name string.
+            pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
+            if "python3" == pinfo['name'].lower():
+               print(f"process {pinfo['name'].lower()} was interrupted")
+               proc.send_signal(signal.SIGINT)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False
+
+def singint_pid(proccess):
+    pid=proccess.pid
+    try:
+        os.killpg(os.getpgid(pid), signal.SIGINT)
+    except:
+        pass
+    return False
+
+def kill_python():
+    for proc in psutil.process_iter():
+        try:
+            # Check if process name contains the given name string.
+            pinfo = proc.as_dict(attrs=['pid', 'name', 'create_time'])
+            if "python3" == pinfo['name'].lower():
+               print(f"process {pinfo['name'].lower()} was killed")
+               proc.kill()
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+    return False;

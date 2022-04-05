@@ -1,0 +1,12 @@
+#request
+bool read_only true
+int32 pump_channel 7
+int32 number_of_samples 4
+float64 time_between_samples 0.5
+bool use_pump false
+---
+int32 pump_channel 7
+int32 number_of_samples 4
+float64 time_between_samples 0.5
+bool use_pump false
+bool success true

@@ -37,7 +37,7 @@ class Planner_node(Node):
 
     def __init__(self):
         # start the node
-        super().__init__('mission_node')
+        super().__init__('planner_node')
 
         # declare parameter of drone IP
         self.parameters()
@@ -73,8 +73,10 @@ class Planner_node(Node):
     def enable_planning_callback(self, request, response):
         if self.request.value:
             self.use_planner=True
+            self.get_logger().info("planner enabled")
         else:
             self.use_planner=False
+            self.get_logger().info("planner disabled")
         return response
 
     def calculate_path_callback(self, request, response):

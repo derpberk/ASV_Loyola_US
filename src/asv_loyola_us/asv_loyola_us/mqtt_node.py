@@ -5,7 +5,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -31,6 +31,9 @@ class MQTT_node(Node):
         self.load_mission_client = self.create_client(LoadMission, 'load_mission')
         self.cancel_movement_client = self.create_client(CommandBool, 'cancel_movement')
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
+        self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
+        self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
+        
 
 
     def declare_topics(self):
@@ -85,8 +88,13 @@ class MQTT_node(Node):
         self.load_mission = -1
         self.cancel_movement = -1
         self.shutdown = False
-        self.planned_mqtt_point = None
+        self.camera_handler=False
+        self.camera_signal=CommandBool.Request()
         self.update_params=False
+        self.read_params=False
+        self.enable_planner=CommandBool.Request()
+        self.sensor_params=SensorParams.Request()
+        self.enable_planner.value=False #prestart as no planner
         #call services
         self.declare_services()
 
@@ -118,21 +126,26 @@ class MQTT_node(Node):
                     call_service(self, self.asv_mission_mode_client, self.call_msg)
                     self.call_msg.asv_mode = -1
                 if self.mqtt_point is not None: #we need to add a new mqtt point
-                        aux=CommandBool.Request()
-                        aux.value=False
-                        call_service(self, self.enable_planning_client, self.aux)
                         call_service(self, self.new_samplepoint_client, self.mqtt_point)
                         self.get_logger().info(f"point sent")
                         self.mqtt_point = None
-                if self.planned_mqtt_point is not None: #we need to add a new mqtt point
-                        aux=CommandBool.Request()
-                        aux.value=True
-                        call_service(self, self.enable_planning_client, self.aux)
-                        call_service(self, self.new_samplepoint_client, self.planned_mqtt_point)
-                        self.get_logger().info(f"planned point sent")
-                        self.planned_mqtt_point = None
                 if self.shutdown:
                     self.get_logger().warning("Drone was asked to shutdown, changing into LAND mode")
+                elif self.update_params:
+                    #call_service(self, self.enable_planning_client, self.aux)
+                    self.get_logger().info(f"params write")
+                    call_service(self, self.enable_planning_client, self.enable_planner)
+                    call_service(self, self.sensor_parameters_client, self.sensor_params)
+                    self.update_params=False
+                elif self.read_params:
+                    #call_service(self, self.enable_planning_client, self.aux)
+                    self.get_logger().info("params read")
+                    self.sensor_read=call_service(self, self.sensor_parameters_client, self.sensor_params)
+                    self.params_read()
+                    self.read_params=False
+                elif self.camera_handler:
+                    call_service(self, self.camera_recording_client, self.camera_signal)
+                    self.camera_handler=False
                 self.processing = False
             sleep(0.1)
 
@@ -173,6 +186,8 @@ class MQTT_node(Node):
         """
         #TODO: if message are spammed it may crash
         if self.processing==True:
+            sleep(0.2) #wait for 0.2 seconds
+            self.processing=False #free processing as ROS2 may have crashed and unable to attend instruction
             return
         if msg.topic == f"veh{self.vehicle_id}":
             self.processing=True
@@ -194,11 +209,6 @@ class MQTT_node(Node):
                     self.mqtt_point.new_point.lon = message["lon"]
                 elif message["mission_type"] == "RTL":
                     self.call_msg.asv_mode = 5
-                elif message["mission_type"] == "PLANNEDPOINT":
-                    self.call_msg.asv_mode = 4
-                    self.planned_mqtt_point = Newpoint.Request()
-                    self.planned_mqtt_point.new_point.lat = message["lat"]
-                    self.planned_mqtt_point.new_point.lon = message["lon"]
                 elif message["mission_type"] == "SHUTDOWN":
                     #rclpy.shutdown()
                     #TODO: rclpy.shutdown() is still developing and is not able to close nodes or processes with multithread
@@ -213,15 +223,35 @@ class MQTT_node(Node):
             if "load_mission" in message:
                 self.load_mission = LoadMission.Request()
                 self.load_mission.file_name = str(message["load_mission"])
+
             if "cancel_movement" in message:
                 self.cancel_movement = CommandBool.Request()
                 self.cancel_movement.value = True
+
             if "update_parameters" in message:
-                aux=message["num_samples"]
-                aux=message["pump_channel"]
-                aux=message["pump"]
-                aux=message["time_between_samples"]
-                self.update_params=True
+                try:
+                    self.enable_planner=message["enable_planner"]
+                    self.sensor_params.read_only=False
+                    self.sensor_params.number_of_samples = message["num_samples"]
+                    self.sensor_params.pump_channel = message["pump_channel"]
+                    self.sensor_params.use_pump = message["enable_pump"]
+                    self.sensor_params.time_between_samples = message["time_between_samples"]
+                    self.update_params=True
+                except:
+                    self.update_params=False #params arrived in a bad way
+               
+            if "read_params" in message:
+                self.read_params=True
+                self.sensor_params.read_only=True
+
+            if "start_recording" in message:
+                self.camera_handler=True
+                self.camera_signal.value=True
+
+            if "stop_recording" in message:
+                self.camera_handler=True
+                self.camera_signal.value=False
+
 
     def on_disconnect(self,  client,  __, _):
         sleep(1)
@@ -329,6 +359,18 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
         restart_asv() #restart ASV
+
+
+    def params_read(self):
+        msg = json.dumps({
+                "veh_num": self.vehicle_id,
+                "planner_status": self.enable_planner,
+                "pump_status": self.sensor_params.use_pump,
+                "number_of_samples": self.sensor_params.number_of_samples,
+                "pump_channel": self.sensor_params.pump_channel,
+                "time_between_samples": self.sensor_params.time_between_samples,
+            })  # Must be a JSON format file.
+        self.mqtt.send_new_msg(message, topic="parameters")  # Send the MQTT message
 
 
 def main():

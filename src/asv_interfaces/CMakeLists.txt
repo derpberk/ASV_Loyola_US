@@ -33,6 +33,8 @@ set(srv_files
   "srv/Takesample.srv"
   "srv/LoadMission.srv"
   "srv/CommandStr.srv"
+  "srv/PlannerParams.srv"
+  "srv/SensorParams.srv"
   #"srv/Service2.srv"
    # etc
   )

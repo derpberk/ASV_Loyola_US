@@ -311,7 +311,7 @@ class Dronekit_node(Node):
         return CancelResponse.ACCEPT
 
 
-    def goto_execute_callback(self, goal_handle):
+    def goto_execute_callback(self, goal_handle): #TODO: check correct behaviour
         feedback_msg = Goto.Feedback()
         counter=0 #counter to avoid excesive logs
         #Calculate Path
@@ -319,7 +319,7 @@ class Dronekit_node(Node):
         destionation.new_point=goal_handle.request.samplepoint
         path=self.call_service(self.calculate_path_client,destination)
         #if there is no path, go directly to destination
-        if path=False or path.success=False:
+        if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
             path=[goal_handle.request.samplepoint]
 

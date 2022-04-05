@@ -1,6 +1,6 @@
 from time import sleep
 from submodulos.MQTT import MQTT
-from submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2
+from submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2, restart_asv
 import json, traceback
 from datetime import datetime
 import os
@@ -55,6 +55,13 @@ class startup:
             #TODO: transformar el topic con la informacion a formato JSON
             self.mqtt.send_new_msg(msg)  # Send the MQTT message
             sleep(1)
+            if not ping_google():
+                #we lost connection, restart
+                print("Connection closed, restarting program")
+                restart_asv()
+                exit()
+
+
 
         msg = json.dumps({
             "veh_num": self.vehicle_id,

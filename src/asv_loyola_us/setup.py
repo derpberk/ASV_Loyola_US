@@ -31,6 +31,7 @@ setup(
             'sensors = asv_loyola_us.sensor_module_node:main',
             'planner = asv_loyola_us.planner_node:main',
             'watchdog = asv_loyola_us.watchdog_node:main',
+            'camera = asv_loyola_us.camera_node:main',
         ],
     },
 )

@@ -5,7 +5,7 @@ import json
 import time
 import serial
 import random
-from asv_interfaces.srv import Takesample
+from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 import Jetson.GPIO as GPIO
 from datetime import datetime
@@ -30,10 +30,14 @@ class Sensor_node(Node):
         self.baudrate = self.get_parameter('baudrate').get_parameter_value().integer_value
         self.declare_parameter('timeout', 6)
         self.timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('time_between_samples', 0.5)
+        self.time_between_samples = self.get_parameter('time_between_samples').get_parameter_value().double_value
 
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
+        self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
+        self.update_parameters_server = self.create_service(SensorParams, 'Sensor_params', self.update_parameters_callback)
         self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
 
     def declare_topics(self):
@@ -101,6 +105,7 @@ class Sensor_node(Node):
                 time.sleep(1.0)
             for i in range(self.num_samples):
                 self.read_sensor(i, self.num_samples)                        #read smart water
+                time.sleep(self.time_between_samples)
             if self.pump_installed:
                 GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
                 self.get_logger().info("deteniendo bomba")
@@ -188,127 +193,36 @@ class Sensor_node(Node):
                     print("The cause of the exception: " + E)
                     #self.serial.reset_input_buffer()
 
-    """deprecated
-    def read_frame_string(self):
-        is_frame_ok = False  # While a frame hasnt correctly readed #
-        self.serial.reset_input_buffer()  # Erase the input buffer to start listening
-
-        self.sensor_data.date = str(datetime.now())
-        
-
-        while not is_frame_ok:
-
-            time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
-
-            if self.serial.inWaiting() < 27:  # If the frame has a lenght inferior to the minimum of the Header
-                continue
-
-            else:
-
-                try:
-                    bytes = self.serial.read_all()  # Read all the buffer #
-
-                    string = bytes.decode('ascii', 'ignore').split(":")  # Convert to ASCII and ignore non readible characters
-                    while len(string) > 1:
-
-                        sensor_name = string.pop(0)
-                        sensor_value = ""
-                        aux = string.pop(0)
-
-                        #the name of the sensor can be found here https://development.libelium.com/smart_water_sensor_guide/sensors
-                        if sensor_name == "Temperature (celsius degrees)":
-                            for i in aux:
-                                if i == " ":
-                                    continue
-                                if i == "\r":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.temperature=float(sensor_value)
-                            self.get_logger().info(f"Found temperature data {self.sensor_data.temperature}")
-
-                        elif sensor_name == "Conductivity Output Resistance":
-                            sensor_value=aux.split(" ")
-                            self.sensor_data.conductivity_res = float(sensor_value[1])
-                            # sensor_name == " Conductivity of the solution (uS/cm)":
-                            sensor_value = ""
-                            aux=string.pop()
-                            for i in aux:
-                                if i == " ":
-                                    continue
-                                if i == "\r":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.conductivity=float(sensor_value)
-                            self.get_logger().info(f"Found conductivity data, resistance:{self.sensor_data.temperature}, ")
-
-
-                        elif sensor_name == "DO Output Voltage":
-                            sensor_value = aux.split(" ")
-                            self.sensor_data.o2 = float(sensor_value[1])
-                            # sensor_name == " DO Percentage ":
-                            sensor_value = ""
-                            aux = string.pop()
-                            for i in aux:
-                                if i == " ":
-                                    continue
-                                if i == "\r":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.o2_percentage = float(sensor_value)
-
-
-
-                        elif sensor_name == "pH value":
-                            aux = aux.split(" ")
-                            sensor_value = ""
-                            for i in aux[1]:
-                                if i == " ":
-                                    continue
-                                if i == "v":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.ph_volt = float(sensor_value)
-                            # sensor_name == " temperature ":
-                            sensor_value = ""
-                            aux = string.pop(0)
-
-                            for i in aux:
-                                if i == " ":
-                                    continue
-                                if i == "d":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.ph_temp = float(sensor_value)
-                            print(aux, self.sensor_data.ph_temp)
-                            # sensor_name == " pH Estimated: ":
-                            sensor_value = ""
-                            aux = string.pop(0)
-                            for i in aux:
-                                if i == " ":
-                                    continue
-                                if i == "\r":
-                                    break
-                                sensor_value = sensor_value + i
-                            self.sensor_data.ph = float(sensor_value)
-
-                        elif sensor_name == " ORP Estimated":
-                            sensor_value = aux.split(" ")
-                            self.sensor_data.oxidation_reduction_potential = float(sensor_value[1])
-
-                        else:
-                            self.get_logger().error(f"Sensor not known{sensor_name}")
-                        #TODO: turbidity
-                    is_frame_ok = True
-
-                except Exception as E:
-
-                    print("ERROR READING THE SENSOR. THIS IS NO GOOD!")
-                    print("The cause of the exception: " + E)
-                    self.serial.reset_input_buffer()
-    """
-
     def status_suscriber_callback(self, msg):
         self.status=msg
+
+    def update_parameters_callback(self, request, response):
+        if request.read_only:
+            response.pump_channel = self.pump_channel
+            response.number_of_samples = self.num_samples
+            response.time_between_samples = self.time_between_samples
+            response.use_pump = self.pump_installed
+            return response
+        if request.use_pump != self.pump_installed:
+            self.pump_installed=request.use_pump
+            self.get_logger().info("pump installed" if request.use_pump else "pump deactivated")
+        if self.pump_installed and (request.pump_channel != self.pump_channel):
+            self.get_logger().info(f"pump channel changed to {request.pump_channel}")
+            self.pump_channel = request.pump_channel
+            GPIO.setup(self.pump_channel, GPIO.OUT) #TODO: consider deactivating old channel
+        if self.num_samples != request.number_of_samples:
+            self.num_samples = request.number_of_samples
+            self.get_logger().info(f"number of samples changed to {request.number_of_samples}")
+        if response.time_between_samples != self.time_between_samples:
+            self.time_between_samples = response.time_between_samples
+            self.get_logger().info(f"time between samples changed to {request.time_between_samples} s")
+        response.pump_channel = request.pump_channel
+        response.number_of_samples = request.number_of_samples
+        response.time_between_samples = request.time_between_samples
+        response.use_pump = request.use_pump
+        return response
+
+
 
 
 def main(args=None):

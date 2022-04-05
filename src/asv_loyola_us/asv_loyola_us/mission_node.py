@@ -176,11 +176,11 @@ class Mission_node(Node):
                     self.arm_vehicle(True)
                     self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
             else: #we arrive here, so we have a mission to follow
-                if len(self.samplepoints) == 0: #first check if mission is finished, as this is a loop, change to STANDBY mode if thats the case
+                if self.waiting_for_action: #check if we are waiting to reach a new point
+                    pass
+                elif len(self.samplepoints) == 0: #check if mission is finished, as this is a loop, change to STANDBY mode if thats the case
                     self.get_logger().info(f"Finished preloaded mission.\nSetting mode to Stand-by.")
                     self.mission_mode = 1
-                elif self.waiting_for_action: #check if we are waiting to reach a new point
-                    pass
                 else: #go to the next point
                     self.go_to(self.get_next_wp())
 
