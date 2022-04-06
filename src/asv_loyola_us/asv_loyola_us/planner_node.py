@@ -46,6 +46,9 @@ class Planner_node(Node):
         # declare the services
         self.declare_services()
 
+        # declare the topics
+        self.declare_topics()
+
         # declare actions
         #self.declare_actions()
         self.use_planner=False
@@ -71,12 +74,14 @@ class Planner_node(Node):
         return response
 
     def enable_planning_callback(self, request, response):
-        if self.request.value:
-            self.use_planner=True
-            self.get_logger().info("planner enabled")
+        if request.value:
+            if not self.use_planner:
+                self.use_planner=True
+                self.get_logger().info("planner enabled")
         else:
-            self.use_planner=False
-            self.get_logger().info("planner disabled")
+            if self.use_planner:
+                self.use_planner=False
+                self.get_logger().info("planner disabled")
         return response
 
     def calculate_path_callback(self, request, response):
@@ -90,21 +95,23 @@ class Planner_node(Node):
             response.point_list=[request.new_point]
             return response
         #check if we are inside the map
-        if (not self.planner.between_limits(([self.status.lat,self.status.lon])) or (not self.planner.between_limits(([request.new_point.lat,request.new_point.lon])):
+        if (not self.planner.between_limits(([self.status.lat,self.status.lon]))) or (not self.planner.between_limits(([request.new_point.lat,request.new_point.lon]))):
             self.get_logger().error("We are outside the map")
             response.success=False
             return response
         #check if drone is inside a wall (non reachable point)
         aux=self.planner.calculate_cell([self.status.lat,self.status.lon])
-        if self.planner.map[aux[0]][aux[1]]:
+        if self.planner.map[aux[0]][aux[1]] == 1:
             self.get_logger().error("Drone is inside a wall, cannot calculate path")
+            response.success=False
             return response
         #check if destination is insida a wall
         aux=self.planner.calculate_cell([request.new_point.lat,request.new_point.lon])
-        if self.planner.map[aux[0]][aux[1]]:
+        if self.planner.map[aux[0]][aux[1]] == 1:
             self.get_logger().error("Destination is inside a wall, cannot calculate path")
+            response.success=False
             return response
-        
+        self.get_logger().info("calculating path")
         #save starttime
         starttime=self.get_clock().now().seconds_nanoseconds()
         #calculate path
@@ -125,14 +132,12 @@ class Planner_node(Node):
         
         #return gps points
 
-        self.gps_path.pop(0) #we may want to pop the first point, as it is the position of the drone
-
+        self.planner.gps_path.pop(0) #we may want to pop the first point, as it is the position of the drone
         for i in self.planner.gps_path:
             aux=Location()
             aux.lat=i[0]
             aux.lon=i[1]
-            response.point_list.append[i]
-
+            response.point_list.append(aux)
         return response
 
     def status_suscriber_callback(self, msg):

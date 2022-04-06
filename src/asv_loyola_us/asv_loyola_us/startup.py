@@ -1,6 +1,6 @@
 from time import sleep
 from submodulos.MQTT import MQTT
-from submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2, restart_asv
+from submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, kill_ros2, restart_asv, check_internet
 import json, traceback
 from datetime import datetime
 import os
@@ -19,8 +19,9 @@ class startup:
         kill_ros2() #if this program is called from a crash, close last ros2 session
         self.asv_offline=True #we start offline
         kill_ssh_tunelling()
-        while not ping_google(): #ping google has an internal delay
+        while not check_internet():
             print("There is no internet connection, retrying...")
+            sleep(1)
         try:
             print(f"MQTT connecting to dronesloyolaus.eastus.cloudapp.azure.com")
             self.mqtt = MQTT(str(self.vehicle_id), addr="dronesloyolaus.eastus.cloudapp.azure.com", topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
@@ -55,7 +56,7 @@ class startup:
             #TODO: transformar el topic con la informacion a formato JSON
             self.mqtt.send_new_msg(msg)  # Send the MQTT message
             sleep(1)
-            if not ping_google():
+            if not check_internet():
                 #we lost connection, restart
                 print("Connection closed, restarting program")
                 restart_asv()

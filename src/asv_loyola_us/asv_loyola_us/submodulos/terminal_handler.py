@@ -10,6 +10,14 @@ def ping_google():
     command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds
 
     return subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0 #this returns 0 if ping is successfull
+
+def check_internet():
+    host="www.google.es"
+      
+    command = ["curl", "-I", "https://linuxhint.com/"]
+
+    return subprocess.run(args=command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0 #this returns 0 if there is internet
+
 def ping_mqtt():
     host="127.0.0.1"
     command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds

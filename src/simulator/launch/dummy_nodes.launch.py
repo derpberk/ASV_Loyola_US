@@ -82,6 +82,15 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    camera = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='camera',
+        emulate_tty=True,
+        output='screen',
+        name='camera_node',
+        prefix=['stdbuf -o L'],
+        parameters = [config]
+    )
 
 
     return launch.LaunchDescription([
@@ -90,4 +99,6 @@ def generate_launch_description():
         dummy_publisher,
         mqtt,
         sensors,
+        planner,
+        camera,
     ])

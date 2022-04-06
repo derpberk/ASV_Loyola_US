@@ -52,7 +52,7 @@ class Dronekit_node(Node):
         #client
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
         self.take_sample_client = self.create_client(Takesample, 'get_sample')
-        self.calculate_path_client = self.create_client(Newpoint, 'get_sample')
+        self.calculate_path_client = self.create_client(Newpoint, 'calculate_path')
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
@@ -316,14 +316,16 @@ class Dronekit_node(Node):
         counter=0 #counter to avoid excesive logs
         #Calculate Path
         destination=Newpoint.Request()
-        destionation.new_point=goal_handle.request.samplepoint
+        destination.new_point=goal_handle.request.samplepoint
         path=self.call_service(self.calculate_path_client,destination)
         #if there is no path, go directly to destination
         if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
             path=[goal_handle.request.samplepoint]
-        #extract path
-        path=path.point_list
+        else:
+            #extract path
+            path=path.point_list
+        self.get_logger().info(f"path is {path}")
         self.get_logger().info(
         f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
         self.vehicle.mode = VehicleMode("GUIDED")
@@ -363,7 +365,9 @@ class Dronekit_node(Node):
                     counter+=1
                 time.sleep(0.1)
             #waypoint reached so go to next one
-            path.pop(0)    
+            path.pop(0)
+            if len(path)>0:
+                self.get_logger().info(f"waypoint reached going to [{path[0].lat},{path[0].lon}")
         # after reaching samplepoint
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()

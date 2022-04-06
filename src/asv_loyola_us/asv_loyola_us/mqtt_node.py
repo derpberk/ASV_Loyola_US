@@ -10,7 +10,7 @@ from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
-from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, restart_asv
+from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, restart_asv, check_internet
 from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
@@ -53,7 +53,7 @@ class MQTT_node(Node):
         self.parameters()
 
         #check if there is internet connection
-        while not ping_google(): #ping google has an internal delay
+        while not check_internet(): #ping google has an internal delay
             self.get_logger().error("There is no internet connection, retrying...") 
 
         #start MQTT Connection
@@ -230,12 +230,12 @@ class MQTT_node(Node):
 
             if "update_parameters" in message:
                 try:
-                    self.enable_planner=message["enable_planner"]
+                    self.enable_planner.value=bool(message["enable_planner"])
                     self.sensor_params.read_only=False
-                    self.sensor_params.number_of_samples = message["num_samples"]
-                    self.sensor_params.pump_channel = message["pump_channel"]
-                    self.sensor_params.use_pump = message["enable_pump"]
-                    self.sensor_params.time_between_samples = message["time_between_samples"]
+                    self.sensor_params.number_of_samples = int(message["num_samples"])
+                    self.sensor_params.pump_channel = int(message["pump_channel"])
+                    self.sensor_params.use_pump = bool(message["enable_pump"])
+                    self.sensor_params.time_between_samples = float(message["time_between_samples"])
                     self.update_params=True
                 except:
                     self.update_params=False #params arrived in a bad way
@@ -256,8 +256,8 @@ class MQTT_node(Node):
     def on_disconnect(self,  client,  __, _):
         sleep(1)
         self.get_logger().error("connection to server was lost")
-        if not ping_google():
-            while not ping_google():
+        if not check_internet():
+            while not check_internet():
                 self.get_logger().error("no internet connection, waiting for internet",once=True)
             self.get_logger().info("Internet connection regained")
         else:
@@ -363,14 +363,15 @@ class MQTT_node(Node):
 
     def params_read(self):
         msg = json.dumps({
-                "veh_num": self.vehicle_id,
-                "planner_status": self.enable_planner,
+                "veh_num": 3,
+                "planner_status": self.enable_planner.value,
                 "pump_status": self.sensor_read.use_pump,
                 "number_of_samples": self.sensor_read.number_of_samples,
                 "pump_channel": self.sensor_read.pump_channel,
                 "time_between_samples": self.sensor_read.time_between_samples,
             })  # Must be a JSON format file.
-        self.mqtt.send_new_msg(message, topic="parameters")  # Send the MQTT message
+        self.get_logger().info("parameters sent")
+        self.mqtt.send_new_msg(msg, topic="parameters")  # Send the MQTT message
 
 
 def main():

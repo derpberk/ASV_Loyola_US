@@ -38,8 +38,7 @@ class Sensor_node(Node):
     def declare_services(self):
         self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
         self.update_parameters_server = self.create_service(SensorParams, 'Sensor_params', self.update_parameters_callback)
-        self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
-
+        
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.sensor_publisher = self.create_publisher(Sensor, 'sensors', 10)

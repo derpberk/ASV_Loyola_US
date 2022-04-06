@@ -43,6 +43,8 @@ class Dronekit_node(Node):
         #client
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
         self.take_sample_client = self.create_client(Takesample, 'get_sample')
+        self.calculate_path_client = self.create_client(Newpoint, 'calculate_path')
+
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
@@ -136,8 +138,6 @@ class Dronekit_node(Node):
         off_x = location2.lon - self.lon
         off_y = location2.lat - self.lat
 
-        self.lon=location2.lon
-        self.lat=location2.lat
         bearing = 90.00 + atan2(-off_y, off_x) * 57.2957795
         if bearing < 0:
             bearing += 360.00
@@ -246,41 +246,71 @@ class Dronekit_node(Node):
         return CancelResponse.ACCEPT
 
 
-    def goto_execute_callback(self, goal_handle):
+    def goto_execute_callback(self, goal_handle): #TODO: check correct behaviour
         feedback_msg = Goto.Feedback()
+        counter=0 #counter to avoid excesive logs
+        #Calculate Path
+        destination=Newpoint.Request()
+        destination.new_point=goal_handle.request.samplepoint
+        path=self.call_service(self.calculate_path_client,destination)
+        #if there is no path, go directly to destination
+        if path==False or path.success==False:
+            self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
+            path=[goal_handle.request.samplepoint]
+        else:
+            #extract path
+            path=path.point_list
+        self.get_logger().info(f"path is {path}")
+        self.get_logger().info(
+        f"Turning to : {self.get_bearing(path[0])} N")
         self.mode = VehicleMode("GUIDED")
-        time.sleep(2)
-        counter = 0.0
-        while rclpy.ok() and counter <10:
-            if goal_handle.is_cancel_requested:
-                #make it loiter around actual position
-                goal_handle.canceled()
-                #self.vehicle.simple_goto(LocationGlobal(self.status.lat, self.status.lon, 0.0))
-                self.mode = VehicleMode("LOITER")
-                return Goto.Result()
-            """if self.goto_goal_handle.is_active:
-                self.get_logger().info('Goal aborted')
-                self.vehicle.mode = VehicleMode("LOITER")
-                return Goto.Result()"""
-            if not self.armed:
-                self.get_logger().info('Goal aborted')
-                return Goto.Result()
-            feedback_msg.distance = 10-counter
-            counter = counter + 1.0
-            goal_handle.publish_feedback(feedback_msg)
-            time.sleep(1)
-        # after reaching
-
+        time.sleep(1)
+        while (rclpy.ok()) and (len(path)>0):
+            counter2=3
+            while rclpy.ok() and counter2>0:
+                if goal_handle.is_cancel_requested:
+                    #make it loiter around actual position
+                    goal_handle.canceled()
+                    self.mode = VehicleMode("LOITER")
+                    return Goto.Result()
+                """if self.goto_goal_handle.is_active:
+                    self.get_logger().info('Goal aborted')
+                    self.vehicle.mode = VehicleMode("LOITER")
+                    return Goto.Result()"""
+                if not self.status.armed:
+                    self.get_logger().info('vehicle was forced to disconnect Goal aborted')
+                    #make it loiter around actual position
+                    self.mode = VehicleMode("LOITER")
+                    return Goto.Result()
+                if self.mode != VehicleMode("GUIDED"):
+                    self.get_logger().error("asv_mode was changed externally, possible EKF fail")
+                    if True:
+                        self.get_logger().info("system seems normal, retrying")
+                        self.mode = VehicleMode("GUIDED")
+                        #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
+                if counter>10:
+                    feedback_msg.distance = float(counter2)
+                    goal_handle.publish_feedback(feedback_msg)
+                    counter=0
+                    counter2-=1
+                else:
+                    counter+=1
+                time.sleep(0.1)
+            #waypoint reached so go to next one
+            self.lon=path[0].lon
+            self.lat=path[0].lat
+            path.pop(0)
+            if len(path)>0:
+                self.get_logger().info(f"waypoint reached going to [{path[0].lat},{path[0].lon}")
+        # after reaching samplepoint
         self.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
-        self.get_bearing(goal_handle.request.samplepoint)
         value=self.call_service(self.take_sample_client, Takesample.Request())
-        self.get_logger().info(f'Sample value {value}')
+        #self.get_logger().debug(f'Sample value {value}')
         result=Goto.Result()
         result.success = True
         return result
-
 
 
     ####################################### END ACTION DEFINITION ############################################

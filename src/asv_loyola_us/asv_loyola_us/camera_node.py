@@ -81,27 +81,26 @@ class Camera_node(Node):
 
 def main():
     rclpy.init()
-    while rclpy.ok():
-        try:
-            camera_node = Camera_node()
-            rclpy.spin(camera_node)
-        except:
-            """
-            There has been an error with the program, so we will send the error log to the watchdog
-            """
-            x = rclpy.create_node('camera_node') #we state what node we are
-            publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
-            #we create the message
-            msg = Nodeupdate()
-            msg.node = "camera_node" #our identity
-            msg.message = traceback.format_exc() #the error
-            #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
-            #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
-            # este topic está oculto en echo al usar _
-            while publisher.get_subscription_count() == 0: #while no one is listening
-                sleep(0.01) #we wait
-            publisher.publish(msg) #we send the message
-            x.destroy_node() #we destroy node and finish
+    try:
+        camera_node = Camera_node()
+        rclpy.spin(camera_node)
+    except:
+        """
+        There has been an error with the program, so we will send the error log to the watchdog
+        """
+        x = rclpy.create_node('camera_node') #we state what node we are
+        publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
+        #we create the message
+        msg = Nodeupdate()
+        msg.node = "camera_node" #our identity
+        msg.message = traceback.format_exc() #the error
+        #to be sure the message reaches, we must wait till wathdog is listening (publisher needs time to start up)
+        #TODO: Vulnerable si alguien esta haciendo echo del topic, el unico subscriptor debe ser wathdog
+        # este topic está oculto en echo al usar _
+        while publisher.get_subscription_count() == 0: #while no one is listening
+            sleep(0.01) #we wait
+        publisher.publish(msg) #we send the message
+        x.destroy_node() #we destroy node and finish
 
 
 if __name__ == '__main__':
