@@ -365,9 +365,9 @@ class Dronekit_node(Node):
                     counter+=1
                 time.sleep(0.1)
             #waypoint reached so go to next one
+            if len(path)>1:
+                self.get_logger().info(f"waypoint reached going to [{path[1].lat},{path[1].lon}")
             path.pop(0)
-            if len(path)>0:
-                self.get_logger().info(f"waypoint reached going to [{path[0].lat},{path[0].lon}")
         # after reaching samplepoint
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()

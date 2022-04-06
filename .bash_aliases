@@ -27,13 +27,13 @@ buall;
 s;
 }
 
-#function roslaunch(){
-#ros2 launch asv_loyola_us system.launch.py;
-#}
-
 function roslaunch(){
-ros2 launch simulator dummy_system.launch.py;
+ros2 launch asv_loyola_us system.launch.py;
 }
+
+#function roslaunch(){
+#ros2 launch simulator dummy_system.launch.py;
+#}
 
 function restart_asv(){
     sudo -S <<< "xavier" systemctl restart asv_start.service; 
