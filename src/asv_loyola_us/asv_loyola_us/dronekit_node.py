@@ -320,8 +320,9 @@ class Dronekit_node(Node):
         path=self.call_service(self.calculate_path_client,destination)
         #if there is no path, go directly to destination
         if path==False or path.success==False:
-            self.get_logger().error("something went wrong with path planner, dronekit bypassing it")
-            path=[goal_handle.request.samplepoint]
+            self.get_logger().error("something went wrong with path planner")
+            return Goto.Result()
+            #path=[goal_handle.request.samplepoint]
         else:
             #extract path
             path=path.point_list
