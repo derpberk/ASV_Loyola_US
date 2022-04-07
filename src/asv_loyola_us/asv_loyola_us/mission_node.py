@@ -428,8 +428,11 @@ class Mission_node(Node):
             goal_msg = Goto.Goal()
             goal_msg.samplepoint = self.point_backup
             if self.mission_mode == 2 or self.mission_mode == 4:
+
                 self.get_logger().info(f'asking again to go to {self.point_backup}')
+                self.change_ASV_mode("MANUAL")
                 sleep(2) #sleep to avoid spamming points
+                self.arm_vehicle(True)
                 self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
                 self._send_goal_future.add_done_callback(self.go_to_response)
             #TODO: decide what to do if goal is rejected, in other words, action busy
