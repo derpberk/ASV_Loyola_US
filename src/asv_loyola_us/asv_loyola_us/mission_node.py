@@ -427,15 +427,18 @@ class Mission_node(Node):
             #restore the point
             goal_msg = Goto.Goal()
             goal_msg.samplepoint = self.point_backup
-            if self.mission_mode == 2 or self.mission_mode == 4:
-
-                self.get_logger().info(f'asking again to go to {self.point_backup}')
-                self.change_ASV_mode("MANUAL")
-                sleep(2) #sleep to avoid spamming points
-                self.arm_vehicle(True)
-                self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
-                self._send_goal_future.add_done_callback(self.go_to_response)
-            #TODO: decide what to do if goal is rejected, in other words, action busy
+            if self.status.armed: #if we are armed, EKF failed, so retry
+                if self.mission_mode == 2 or self.mission_mode == 4:
+                    self.get_logger().info(f'asking again to go to {self.point_backup}')
+                    self.change_ASV_mode("LOITER")
+                    sleep(2) #sleep to avoid spamming points
+                    self.arm_vehicle(True)
+                    self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+                    self._send_goal_future.add_done_callback(self.go_to_response)
+                #TODO: decide what to do if goal is rejected, in other words, action busy
+            else: #we disarmed using the RC, go to manual mode
+                self.get_logger("Vehicle was disarmed, interpreted as Manual interruption, switching to manual mode")
+                self.mission_mode=3 #manual mode
             return
         self.get_logger().info('Goal accepted :)')
         self._get_result_future = self.goal_handle.get_result_async()
@@ -474,7 +477,7 @@ class Mission_node(Node):
         self.get_logger().info("asked to stop the vehicle, changing mode to STANDBY")
         self.mission_mode = 1 #change mode to Standby
         if self.waiting_for_action: #if the action was active
-            self.get_logger().info("the submarine was moving, canceling movement")
+            self.get_logger().info("the asv was moving, canceling movement")
             self.goal_handle.cancel_goal_async()
             if self.current_mission_mode==2: #we were doing a mission
                 self.samplepoints=[] #we empty the mission
