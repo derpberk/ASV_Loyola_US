@@ -132,7 +132,7 @@ class Sensor_node(Node):
 
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
 
-            if self.DEBUG == False and self.serial.inWaiting() < 27:  # If theGPIO.output(self.pump_channel, GPIO.HIGH) #start filling the tank frame has a lenght inferior to the minimum of the Header
+            if self.DEBUG == False and self.serial.inWaiting() < 27:  # If frame has a lenght inferior to the minimum of the Header
                 continue
 
             else:
@@ -149,7 +149,11 @@ class Sensor_node(Node):
 
                     last_frame = frames[-1].split('#')[
                     :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
-                    self.get_logger().info(f"sensor read: {last_frame}")
+                    self.get_logger().debug(f"sensor read: {last_frame}")
+
+                    if len(last_frame<4): #we read an almost empty frame, this is weird
+                        self.get_logger().info(f"sensor weird read: {last_frame}")
+                        continue #discard this read
 
                     for field in last_frame:  # Iterate over the frame fields
 

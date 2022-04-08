@@ -281,7 +281,7 @@ class Mission_node(Node):
         else:
             self.get_logger().fatal(f"Current ASV Mode should be 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
             raise ValueError(f"Current ASV Mode should be 2: {self.mission_mode_strs[2]} but it is {self.current_mission_mode}: {self.mission_mode_strs[self.current_mission_mode]}")
-        self.get_logger().info(f"Next waypoint is {nextwp}" )
+        self.get_logger().debug(f"Next samplepoint is {nextwp}" )
         return nextwp
 
 
@@ -399,7 +399,7 @@ class Mission_node(Node):
         This function starts the call to the action /goto
     """     
     def go_to(self, location):
-        self.get_logger().info(f"going to {location}")
+        self.get_logger().info(f"going to [{location.lat},{location.lon}]")
         self.destination_publisher.publish(location)
         self.goto_action_client.wait_for_server()
         self.waiting_for_action=True

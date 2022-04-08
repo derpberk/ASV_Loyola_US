@@ -345,19 +345,18 @@ class Dronekit_node(Node):
                     if self.vehicle.mode != VehicleMode("MANUAL"):
                         self.get_logger().warning('EKF FAILED, sensor read not good enough, waiting for better signal, switching to manual')
                         ekf_failed=True
-                    else: #if  
-                        if counter>30:
+                    elif counter>30:
                             self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
                             #TODO: include a counter, if we keep in this state for too much time leave
                 
                 elif self.vehicle.mode != VehicleMode("GUIDED"): #vehicle is not in desired mode
                     self.get_logger().warning("asv_mode was changed externally")
                     if ekf_failed:
-                        self.get_logger().info("EKF failsafe cleared, restoring mission")
+                        self.get_logger().info("EKF failsafe cleared, resuming mission")
                         self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
-                        self.vehicle.mode = VehicleMode("GUIDED")
-                        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
-                        self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
+                    self.vehicle.mode = VehicleMode("GUIDED")
+                    self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+                    self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
                         
                 
                 elif not self.status.armed: #event manual disarm
