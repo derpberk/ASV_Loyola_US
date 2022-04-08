@@ -157,6 +157,10 @@ class Mission_node(Node):
         # This mode puts ASV in LOITER mode and arms it, vehicle will remain in the same position
         elif self.mission_mode == 1:  
             if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
+                if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
+                        self.get_logger().info("The vehicle is not able to go into automatic mode")
+                        self.mission_mode=3
+                        continue
                 self.change_ASV_mode("LOITER")
                 self.arm_vehicle(True)
                 self.get_logger().info("vehicle in \'STANDBY\' mode")
@@ -167,6 +171,10 @@ class Mission_node(Node):
         elif self.mission_mode == 2:  
             if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
                 #set ASV mode to Loiter
+                if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
+                    self.get_logger().info("The vehicle is not able to go into automatic mode")
+                    self.mission_mode=3
+                    continue
                 self.change_ASV_mode("LOITER")
                 #check if we have a mission to follow, go to STANDBY if not
                 if len(self.samplepoints) == 0:
@@ -197,6 +205,10 @@ class Mission_node(Node):
         # but it administrates a buffer of 1 MQTT message due to code flow
         elif self.mission_mode == 4: 
             if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+                if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
+                    self.get_logger().info("The vehicle is not able to go into automatic mode")
+                    self.mission_mode=3
+                    continue
                 self.change_ASV_mode("LOITER")
                 self.arm_vehicle(True)
                 self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
@@ -209,7 +221,11 @@ class Mission_node(Node):
         # RTL mode
         #This mode will arm the vehicle and set RTL mode
         #TODO: this mode is supposed to make ASV return to home, but we have not yet checked if it works
-        elif self.mission_mode == 5:  
+        elif self.mission_mode == 5: 
+            if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual
+                    self.get_logger().info("The vehicle lost GPS reference")
+                    self.mission_mode=3
+                    continue
             if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
                 self.arm_vehicle(True)
                 self.change_ASV_mode("RTL")

@@ -227,6 +227,9 @@ class A_star:
         self.gps_path=[]
         for i in self.path:
             self.gps_path.append(self.calculate_gps(i))
+        if len(self.gps_path)>0: #if we have points
+            self.gps_path.pop()
+            self.gps_path.append(destination)
             
     def between_limits(self, coordinate):
         NW=self.locations[0][0]
