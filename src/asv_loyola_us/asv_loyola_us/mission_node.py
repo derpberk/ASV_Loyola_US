@@ -424,21 +424,21 @@ class Mission_node(Node):
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
             self.get_logger().error('Goal rejected :(, something is not working')
-            #restore the point
             goal_msg = Goto.Goal()
             goal_msg.samplepoint = self.point_backup
-            if self.status.armed: #if we are armed, EKF failed, so retry
-                if self.mission_mode == 2 or self.mission_mode == 4:
-                    self.get_logger().info(f'asking again to go to {self.point_backup}')
-                    self.change_ASV_mode("LOITER")
-                    sleep(2) #sleep to avoid spamming points
-                    self.arm_vehicle(True)
-                    self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
-                    self._send_goal_future.add_done_callback(self.go_to_response)
-                #TODO: decide what to do if goal is rejected, in other words, action busy
-            else: #we disarmed using the RC, go to manual mode
-                self.get_logger("Vehicle was disarmed, interpreted as Manual interruption, switching to manual mode")
-                self.mission_mode=3 #manual mode
+            if self.mission_mode == 2 or self.mission_mode == 4:#mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
+                self.get_logger().info(f'asking again to go to {self.point_backup}')
+                self.change_ASV_mode("LOITER")
+                sleep(2) #sleep to avoid spamming points
+                self.arm_vehicle(True)
+                self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+                self._send_goal_future.add_done_callback(self.go_to_response)
+            #TODO: decide what to do if goal is rejected, in other words, action busy
+            elif self.mission_mode == 3: #we disarmed using the RC and are in manual mode
+                self.get_logger().info("Vehicle in manual mode, interpreted as Manual interruption, restoring point and killing mission handler")
+                #restore the point
+                self.samplepoints.insert(0,self.point_backup)
+                self.waiting_for_action=False
             return
         self.get_logger().info('Goal accepted :)')
         self._get_result_future = self.goal_handle.get_result_async()
@@ -454,7 +454,13 @@ class Mission_node(Node):
         if status == GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().info('Goal succeeded! Result: {0}'.format(result.success))
         else:
-            self.get_logger().info('Goal failed with status: {0}'.format(status))
+            if self.mission_mode == 3:
+                #restore the point
+                self.get_logger().info(f'Goal failed due to Manual interruption. Status: {status}')
+                self.samplepoints.insert(0,self.point_backup)
+            else:
+                self.get_logger().info('Goal failed with status: {0}'.format(status))
+            
         self.waiting_for_action=False #we indicate the state machine that action finished
 
     """
@@ -482,6 +488,8 @@ class Mission_node(Node):
             if self.current_mission_mode==2: #we were doing a mission
                 self.samplepoints=[] #we empty the mission
                 self.get_logger().info("mission emptied")
+        else:
+            self.get_logger().info("vehicle was already stoped, nothing to do")
         response.success=True
         return response
             

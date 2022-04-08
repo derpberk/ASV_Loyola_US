@@ -325,39 +325,54 @@ class Dronekit_node(Node):
             #path=[goal_handle.request.samplepoint]
         else:
             #extract path
+            #self.get_logger().info(f"path is {path}")
             path=path.point_list
-        self.get_logger().info(f"path is {path}")
-        self.get_logger().info(
-        f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
+        #	self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
         self.vehicle.mode = VehicleMode("GUIDED")
         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
         time.sleep(1)
         while (rclpy.ok()) and (len(path)>0):
             self.vehicle.simple_goto(LocationGlobal(path[0].lat, path[0].lon, 0.0))
-            while rclpy.ok() and not self.reached_position(path[0]):
-                if goal_handle.is_cancel_requested:
+            ekf_failed=False #bool to know were we come from
+            while rclpy.ok() and not self.reached_position(path[0]): #while we reach the goal, check for events
+                if goal_handle.is_cancel_requested:#event mission canceled
                     #make it loiter around actual position
                     goal_handle.canceled()
                     self.vehicle.mode = VehicleMode("LOITER")
                     return Goto.Result()
-                """if self.goto_goal_handle.is_active:
-                    self.get_logger().info('Goal aborted')
-                    self.vehicle.mode = VehicleMode("LOITER")
-                    return Goto.Result()"""
-                if not self.status.armed:
-                    self.get_logger().info('vehicle was forced to disconnect Goal aborted')
-                    #make it loiter around actual position
-                    self.vehicle.mode = VehicleMode("LOITER")
-                    return Goto.Result()
-                if self.vehicle.mode != VehicleMode("GUIDED"):
-                    self.get_logger().error("asv_mode was changed externally, possible EKF fail")
-                    self.get_logger().info(f"System mode {self.vehicle.mode.name}\nSystem GPS_status: {self.vehicle.gps_0}\nSystem status: {self.vehicle.system_status.state}\n System able to arm {self.vehicle.is_armable}  ",once=True)
-                    if self.vehicle.ekf_ok:
-                        self.get_logger().info("system seems normal, retrying")
+
+                elif not self.vehicle.ekf_ok: #if ekf is not ok, stop
+                    if self.vehicle.mode != VehicleMode("MANUAL"):
+                        self.get_logger().warning('EKF FAILED, sensor read not good enough, waiting for better signal, switching to manual')
+                        ekf_failed=True
+                    else: #if  
+                        if counter>30:
+                            self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
+                            #TODO: include a counter, if we keep in this state for too much time leave
+                
+                elif self.vehicle.mode != VehicleMode("GUIDED"): #vehicle is not in desired mode
+                    self.get_logger().warning("asv_mode was changed externally")
+                    if ekf_failed:
+                        self.get_logger().info("EKF failsafe cleared, restoring mission")
+                        self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
                         self.vehicle.mode = VehicleMode("GUIDED")
                         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
                         self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
-                        #TODO: include a counter, if we keep in this state for 15 seconds take action to do not lose drone
+                        
+                
+                elif not self.status.armed: #event manual disarm
+                    if self.vehicle.is_armable:
+                        self.get_logger().info('vehicle was forced to disconnect Goal aborted')
+                    else:
+                        self.get_logger().info('ASV reached a fatal state, leaving mission')
+                    self.vehicle.mode = VehicleMode("MANUAL")
+                    mode=ASVmode.Request()
+                    mode.asv_mode=3
+                    self.call_service(self.asv_mission_mode_client, mode)
+                        
+                    return Goto.Result()
+                
+                
                 if counter>30:
                     feedback_msg.distance = self.calculate_distance(path[0])
                     goal_handle.publish_feedback(feedback_msg)

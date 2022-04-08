@@ -125,6 +125,7 @@ class Planner_node(Node):
         time=round(time, 9)
         if self.planner.gps_path is not None:
             self.get_logger().info(f"path calculated in {time} seconds")
+            self.get_logger().info(f"path is {self.planner.gps_path}")
         else:
             self.get_logger().info(f"No path was found, time spent: {time} seconds")
             response.success=False
