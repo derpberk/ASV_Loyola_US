@@ -436,7 +436,7 @@ class Mission_node(Node):
             #TODO: decide what to do if goal is rejected, in other words, action busy
             elif self.mission_mode == 3: #we disarmed using the RC and are in manual mode
                 self.get_logger().info("Vehicle in manual mode, interpreted as Manual interruption, restoring point and killing mission handler")
-                #restore the point
+                #restore the point #TODO: check the point comes from mission and not simplepoint
                 self.samplepoints.insert(0,self.point_backup)
                 self.waiting_for_action=False
             return
