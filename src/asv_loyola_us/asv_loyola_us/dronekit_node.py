@@ -102,10 +102,6 @@ class Dronekit_node(Node):
             self.get_logger().fatal("Drone module is dead")
             self.destroy_node()
 
-            #TODO: manage error of timeout
-            #      manage error of connection refused
-            #      manage error of critical startup (failsafe)
-
         
 
     def arm_vehicle_callback(self, request, response):
@@ -261,28 +257,6 @@ class Dronekit_node(Node):
         return response
         #TODO: add other responses
 
-
-    def change_asv_mode_callback(self, request, response):
-        #string takes preference before int
-        if len(request.asv_mode_str) != 0:
-            if request.asv_mode_str in self.mode_type.values():
-                mode=request.asv_mode_str
-            else:
-                self.get_logger().info(f"{request.asv_mode_str} is not a valid mode")
-                response.success=False
-                return response
-        else:
-            if request.asv_mode in self.mode_type:
-                mode=self.mode_type[str(request.asv_mode)]
-            else:
-                self.get_logger().info(f"{request.asv_mode} is not a valid mode")
-                response.success = False
-                return response
-        self.vehicle.mode = VehicleMode(mode)
-        response.success=True
-        return response
-        #TODO: add other responses
-
     ######################################### ACTION GOTO DESCRIPTION ############################################
 
     def goto_accept(self, goal_request):
@@ -350,6 +324,7 @@ class Dronekit_node(Node):
                 elif not self.vehicle.ekf_ok: #if ekf is not ok, stop
                     if self.vehicle.mode != VehicleMode("MANUAL"):
                         self.get_logger().warning('EKF FAILED, sensor read not good enough, waiting for better signal, switching to manual')
+                        self.vehicle.mode = VehicleMode("MANUAL")
                         ekf_failed=True
                     elif counter>30:
                             self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")

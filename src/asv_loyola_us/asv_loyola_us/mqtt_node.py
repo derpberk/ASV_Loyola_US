@@ -5,7 +5,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -33,6 +33,7 @@ class MQTT_node(Node):
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
         self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
+        self.load_map_client = self.create_client(CommandStr, 'load_map')
         
 
 
@@ -88,6 +89,7 @@ class MQTT_node(Node):
         self.load_mission = -1
         self.cancel_movement = -1
         self.shutdown = False
+        self.map_name=None
         self.camera_handler=False
         self.camera_signal=CommandBool.Request()
         self.update_params=False
@@ -146,6 +148,9 @@ class MQTT_node(Node):
                 elif self.camera_handler:
                     call_service(self, self.camera_recording_client, self.camera_signal)
                     self.camera_handler=False
+                elif self.map_name != None:
+                    call_service(self, self.load_map_client, self.map_name)
+                    self.map_name=None
                 self.processing = False
             sleep(0.1)
 
@@ -251,7 +256,10 @@ class MQTT_node(Node):
             if "stop_recording" in message:
                 self.camera_handler=True
                 self.camera_signal.value=False
-
+            
+            if "load_map" in message:
+                self.map_name=CommandStr.Request()
+                self.map_name.string=message["mission_type"]
 
     def on_disconnect(self,  client,  __, _):
         sleep(1)

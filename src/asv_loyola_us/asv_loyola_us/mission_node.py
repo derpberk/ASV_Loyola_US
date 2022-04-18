@@ -455,6 +455,9 @@ class Mission_node(Node):
                 #restore the point #TODO: check the point comes from mission and not simplepoint
                 self.samplepoints.insert(0,self.point_backup)
                 self.waiting_for_action=False
+            else:
+                self.get_logger().info(f'Goal was rejected, unknown state {self.mission_mode}')
+                self.waiting_for_action=False
             return
         self.get_logger().info('Goal accepted :)')
         self._get_result_future = self.goal_handle.get_result_async()
