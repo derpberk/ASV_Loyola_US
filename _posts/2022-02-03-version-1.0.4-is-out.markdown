@@ -5,7 +5,7 @@ date:   2022-02-22 13:45:56 +0100
 categories: jekyll update
 ---
 
-The version 1.4 of our drone is ready and will be tested at test 4 the 23/02/2022 in Loyola's Lake.
+The version 1.0.4 of our drone is ready and will be tested at test 4 the 23/02/2022 in Loyola's Lake.
 
 This version includes the following:
 - Robot is able to follow points indicated from server

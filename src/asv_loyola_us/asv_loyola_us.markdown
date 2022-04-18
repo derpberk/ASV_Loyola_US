@@ -25,8 +25,14 @@ For more information about the configuration of the package visit [setup](./setu
 
 <img src="../../miscelaneous/mission1.png" alt="drawing" width="45%" style="vertical-align:middle"/>
 <img src="../../miscelaneous/mission2.png" alt="drawing" width="45%"/>
+
+
 <img src="../../miscelaneous/mission3.png" alt="drawing" width="45%" style="vertical-align:middle"/>
 <img src="../../miscelaneous/mission4.png" alt="drawing" width="45%"/>
+
+
+<img src="../../miscelaneous/alamillo_short.png" alt="drawing" width="45%" style="vertical-align:middle"/>
+<img src="../../miscelaneous/alamillo.png" alt="drawing" width="45%"/>
 
 
 
