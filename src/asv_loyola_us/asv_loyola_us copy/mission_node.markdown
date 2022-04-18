@@ -11,7 +11,7 @@ This is the main node of the ASV. It contains the <a href="#main">state machine(
 
 <pre>
 Services
-/<a href="./services/cancel_movement.html">cancel_movement</a>  <a href="#cancel_movement" style="float:right;text-align:right;">cancel_movement_callback</a>
+/<a href="./services/cancel_movement.html">close_asv</a>  <a href="#cancel_movement" style="float:right;text-align:right;">cancel_movement_callback</a>
 /<a href="./services/close_asv.html">close_asv</a>  <a href="#close_asv" style="float:right;text-align:right;">close_asv_callback</a>
 /<a href="./services/load_mission.html">load_mission</a> <a href="#load_mission" style="float:right;text-align:right;">load_mission_callback</a>
 /<a href="./services/change_mission_mode.html">change_mission_mode</a> <a href="#new_mission_mode" style="float:right;text-align:right;">change_mission_mode_callback</a>
@@ -37,7 +37,6 @@ functions
 <a href="#close_asv_callback">close_asv_callback(request, response)</a>
 <a href="#get_next_wp">get_next_wp()</a>
 <a href="#go_to">go_to(location)</a>
-<a href="#goto_response_callback">goto_response_callback(future)</a>
 <a href="#goto_feedback_callback">go_to_feedback_callback(feedback)</a>
 <a href="#goto_finished_callback">goto_finished_callback(future)</a>
 <a href="#load_mission_callback">load_mission_callback(request, response)</a>
@@ -55,11 +54,6 @@ functions
 variables
 <a id="self.mission_mode">mission_mode</a>
 <a id="self.samplepoints">samplepoints</a>
-<a id="self.samplepoints">waiting_for_action</a>
-<a id="self.samplepoints">current_mission_mode</a>
-<a id="self.samplepoints">mission_mode</a>
-<a id="self.samplepoints">status</a>
-<a id="self.samplepoints">point_backup</a>
 </pre>
 
 <pre>
@@ -86,9 +80,7 @@ This function calls the service [arm_vehicle](./404) to arm the vehicle
 <H3>cancel_movement_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L461" style="float:right;text-align:right;">code</a></H3> 
 <a id="cancel_movement_callback"></a>
 
-This function is a callback from the service /cancel_movement
-This function forces the stop of the drone and deletes the destination point, returning the drone to standby mode
-
+This function stops the vehicle and cancels the action call if it is executing
 
 
 
@@ -126,13 +118,14 @@ This function is called at the start of each state of the state machine, its use
 <H3>close_asv_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L327" style="float:right;text-align:right;">code</a></H3>
 <a id="close_asv_callback"></a>
 
-This function is a callback from service /close_asv
-this function is not used, it should be better developed
-This functions turns off the ASV safelly, killing the node
-Args:
-    bool always true to turn off the vehicle
-Returns:
-    Bool indicating success of the action
+- params
+  - request:
+    - value: 
+- output
+  - response:
+    - 
+- managed variables
+  - 
 
 <FONT COLOR="#ff0000"> TODO:<br>
 - close the ASV safelly<br>
@@ -156,11 +149,11 @@ This function pops a samplepoint from the list of points if current mission mode
 
 <H3>load_mission_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L360" style="float:right;text-align:right;">code</a></H3> 
 <a id="load_mission_callback"></a>
-This function loads a mission from file if it exists
+This function loads a mission from file
 
 - params
   - request
-    - file_name: (str): name of the file (it must be a number), empty string "" to load last mission
+    - file_name: Name of the file (example) "MisionesLoyola_dron_2.kml", empty string "" to load last mission
 - output
   - response
     - success: True upon success False otherwise
@@ -171,56 +164,18 @@ This function loads a mission from file if it exists
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>go_to(location) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L417" style="float:right;text-align:right;">code</a></H3> 
-<a id="go_to"></a>
-This function starts the call to the action /goto, generating a future
+<H3>go_to(location) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L400" style="float:right;text-align:right;">code</a></H3> 
+<a id="load_mission_callback"></a>
+This function loads a mission from file
 
 - params
-  - location: GPS coordinates where to take a sample
-
-goto_feedback_callback
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO RESPONSE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_response(future) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L417" style="float:right;text-align:right;">code</a></H3> 
-<a id="goto_response"></a>
-This function is the first answer from the action service, indicates whether the request is accepted or rejected
-
-- params
-  - future: either accept or reject
-
-If the point is accepted it logs and acknoledges response to start action
-
-if it is rejected it logs and:
-- If we are in mission or simplepoint mode we will retry as ekf may have failed
-- If we are in manual mode we will store the point as it means manual interruption through RC
-- If we are in any other mode we will do nothing as action must die
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO FEEDBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_feedback_callback(feedback) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L417" style="float:right;text-align:right;">code</a></H3> 
-<a id="goto_feedback_callback"></a>
-This function prints the feedback from the goto action
-
-- params
-  - feedback: distance to the point
-
-
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO FINISHED %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_finished_callback(future) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L417" style="float:right;text-align:right;">code</a></H3> 
-<a id="goto_finished_callback"></a>
-This function prints the result once the action finishes
-
-- params
-  - future: boolean value, meaningless
-
-
-it logs whether action finished successfuly or unsuccessfuly and resumes state machine by setting <a href="#waiting_for_action">waiting for action</a> to false
+  - request
+    - file_name: Name of the file (example) "MisionesLoyola_dron_2.kml", empty string "" to load last mission
+- output
+  - response
+    - success: True upon success False otherwise
+- managed variables
+  - <a href="#self.samplepoints">samplepoints</a>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MAIN %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -228,7 +183,7 @@ it logs whether action finished successfuly or unsuccessfuly and resumes state m
 <H3>main() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L142" style="float:right;text-align:right;">code</a></H3>
 <a id="main"></a>
 
-This function contains all the states of the robot. It is executed at a period of 10Hz
+This function contains all the states of the robot. It is executed at a period of 1Hz
 
 ![state_machine](../../../miscelaneous/UML_drone.png)
 
@@ -239,23 +194,22 @@ This function contains all the states of the robot. It is executed at a period o
 
   <li>Standby</li>
   <dd>- waiting state, the robot is armed in loiter and waiting for signals</dd>
-  <dd>- if EKF fails at start it will go into manual mode</dd>
 
   <li>Pre-loaded mission</li>
-  <dd>- if EKF fails at start it will go into manual mode</dd>
-  <dd>- checks if there is a mission loaded, going to Standby otherwise</dd>
+  <dd>- checks if there is a mission loaded, giving instructions</dd>
   <dd>- arms vehicle</dd>
   <dd>- call go_to service while there are points left</dd>
   <dd>- Indicates the mission have finished and changes to Standby mode</dd>
+<FONT COLOR="#ff0000">TODO:<br>
+    - use planner and collect samples making sure to store them</FONT>
 
 <li>Manual mode</li>
   <dd>- ASV mode changes to Manual and Vehicle is armed</dd>
 
 <li>Simple Go-To</li>
-  <dd>- if EKF fails at start it will go into manual mode</dd>
   <dd>- Sets vehicle into Loiter mode</dd>
   <dd>- Arm vehicle</dd>
-  <dd>- Waits for points to be received (there is a buffer of 1 point while we are reaching another)</dd>
+  <dd>- Waits for points to be received</dd>
 
 <li>RTL</li>
   <dd>- change vehicle mode to "RTL"</dd>
@@ -323,10 +277,9 @@ Managed variables are initialized
 - initialized variables
   - <a href="#self.mission_mode">mission_mode: 0</a>
   - <a href="#self.current_mission_mode">current_mission_mode: -1</a>
-  - <a href="#self.mission_mode_strs">mission_mode_strs: ["LAND", "STANDBY", "PRELOADED_MISSION", "MANUAL", "SIMPLE POINT", "RTL"]</a>
-  - <a href="#self.mqtt_waypoint">mqtt_waypoint: None</a>
+  - <a href="#self.mission_mode_strs">mission_mode_strs: ["STANDBY", "GUIDED", "MANUAL", "SIMPLE", "RTL"]</a>
+  - <a href="#self.mqtt_waypoint">mqtt_waypoint: []</a>
   - <a href="#self.status">status: Status()</a>
-  - <a href="#self.waiting_for_action">waiting_for_action: False</a>
   - <a href="#self.samplepoints">samplepoints: mission_2</a>
  
 <FONT COLOR="#ff0000"> TODO:<br>

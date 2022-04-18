@@ -7,16 +7,17 @@ layout: page
 ---
 <H1>Planner Node</H1> 
 
-This node is in charge of calculating a path for the UAV to move
+This node is in charge of calculating a path for the ASV to move
 
 
 <FONT COLOR="#ff0000"> TODO:<br>
-- Right now is indevelopment as we need to figure out a bit map of obstacles and how to include the camera for obstacle detection<br>
-- We need a get map function</FONT>
+- Use maps with cost instead of binnary, ponder other planners a part from A_star</FONT>
 
 <pre>
 Services
-/
+/<a href="./services/load_map.html">load_map</a>  <a href="#load_map" style="float:right;text-align:right;">load_map_callback</a>
+/<a href="./services/enable_planning.html">enable_planning</a>  <a href="#enable_planning" style="float:right;text-align:right;">enable_planning_callback</a>
+/<a href="./services/cancel_movement.html">calculate_path</a>  <a href="#calculate_path" style="float:right;text-align:right;">calculate_path_callback</a>
 </pre>
 <pre>
 Topics
@@ -24,59 +25,89 @@ Topics
 </pre>
 <pre>
 Actions
-/<a href="./actions/go_to.html">go_to</a>  <a href="#go_to_callback" style="float:right;text-align:right;">go_to_callback</a>
+/
 </pre>
 
 <pre>
 functions
-<a href="#get_path">get_path(goal)</a>
-<a href="#go_to_callback">go_to_callback(goal_handle)</a>
+
+
+
+<a href="#load_map_callback">load_map_callback(request, response)</a>
+<a href="#enable_planning_callback">enable_planning_callback(request, response)</a>
+<a href="#calculate_path_callback">calculate_path_callback(request, response)</a>
 </pre>
 
 
 <pre>
 variables
-<a id="self.path">path</a>
-<a id="self.map">map</a>
+<a id="self.use_planner">use_planner</a>
+<a id="self.planner">planner</a>
 <a id="self.status">status</a>
 </pre>
 
 <pre>
 Parameters
 <a href="./parameters/debug.html">debug</a>
+<a href="./parameters/map_filename.html">map_filename</a>
 </pre>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%% START OF FUNCTION DEFINITIONS AREA %%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GET PATH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>get_path(goal) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/planner_node.py#L91" style="float:right;text-align:right;">code</a></H3>
-<a id="get_path"></a>
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ENABLE PLANNER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-This function calculates the path to go from the actual position to the goal point
+<H3>enable_planning_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L76" style="float:right;text-align:right;">code</a></H3>
+<a id="enable_planning_callback"></a>
 
--params:
-  - goal: reference point
+This function enables or disables planning
+
+- request:
+  - value: (Boolean) True to enable, False to disable planning
+- response:
+  - success: always True
 
 
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CALCULATE PATH CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>go_to_callback(goal_handle) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/planner_node.py#L52" style="float:right;text-align:right;">code</a></H3>
-<a id="go_to_callback"></a>
+<H3>calculate_path_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L87" style="float:right;text-align:right;">code</a></H3>
+<a id="calculate_path_callback"></a>
 
-This function executes the action in charge of going to the goal point
+This function calculates the path towards a point if planner is enabled, returns destination if planner is not enabled (logs time spent calculating path)
 
-- goal_handle
-  - request:
-    - samplepoint: reference point
-  - feedback:
-    - 
-  - resutl:
-    - success: True if point reached false otherwise
+- request:
+  - new_point: (Location) Point where we want to take a samplepoint
+- response:
+  - point_list: (Location[]) Tuple containing all the waypoints to reach destination
+  - success: (Bool) True upon path, false otherwise
+
+
+Before calculating the path it takes into account the following things
+
+- If drone is Offline returns False
+
+- If we use planner
+  - If we are outside the map return False
+  - If drone or destination is inside a wall return False
+
+If there is no path return false
+Otherwise return path and True
+
+
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LOAD MAP CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>load_map_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L67" style="float:right;text-align:right;">code</a></H3>
+<a id="load_map_callback"></a>
+
+This function loads a map inside the planner if map exists
+
+- request:
+  - file_name: (str) string containing the name of the map
+- response:
+  - success: (Bool) True upon success
 
 <FONT COLOR="#ff0000"> TODO:<br>
-- In development </FONT>
-
+- Add logs</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

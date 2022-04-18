@@ -38,10 +38,7 @@ functions
 <a href="#condition_yaw">condition_yaw(heading, relative=false)</a>
 <a href="#dictionary">dictionary(dictionary)</a>
 <a href="#get_bearing">get_bearing(location2)</a>
-<a href="#goto_accept">goto_accept(goal_request)</a>
-<a href="#goto_accepted_callback">goto_accepted_callback(goal_handle)</a>
-<a href="#goto_cancel">goto_cancel(goal_handle)</a>
-<a href="#goto_execute_callback">goto_execute_callback(goal_handle)</a>
+<a href="#go_to">go_to(goal_handle)</a>
 <a href="#reached_position">reached_position(current_loc, goal_loc)</a>
 <a href="#status_publish">status_publish()</a>
 </pre>
@@ -52,7 +49,6 @@ variables
 <a id="self.status">status</a>
 <a id="self.vehicle">vehicle</a>
 <a id="self.mode_type">mode_type</a>
-<a id="self.goto_goal_handle">goto_goal_handle</a>
 </pre>
 
 <pre>
@@ -60,7 +56,6 @@ Parameters
 <a href="./parameters/vehicle_ip.html">vehicle_ip</a>
 <a href="./parameters/timeout.html">timeout</a>
 <a href="./parameters/vehicle_id.html">vehicle_id</a>
-<a href="./parameters/status.html">status</a>
 </pre>
 
 
@@ -112,23 +107,6 @@ This function is used due to the [issue](https://github.com/diydrones/ardupilot/
   - heading: angle in degrees to take in yaw
   - relative: flag to take the heading value in absolute value or with a relative offset
 
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CALCULATE DISTANCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>calculate_distance(goal_loc) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L216" style="float:right;text-align:right;">code</a></H3>
-<a id="calculate_distance"></a>
-
-Returns the ground distance in metres towads a Location object.
-This method is an approximation, and will not be accurate over large distances and close to the
-earth's poles. It comes from the ArduPilot test code:
-https://github.com/diydrones/ardupilot/blob/master/Tools/autotest/common.py
-Args:
-    goal_loc: (Location)
-Returns:
-    distance from the ASV to the goal_loc in meters
-
-
-
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DICTIONARY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>dictionary(dictionary) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L256" style="float:right;text-align:right;">code</a></H3>
@@ -157,83 +135,33 @@ This method is an approximation, and may not be accurate over large distances an
 - output
   - bearing: the angle difference from location1 to location2
 
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO ACCEPT%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO POINT CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>goto_accept(goal_request) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L286" style="float:right;text-align:right;">code</a></H3>
-<a id="goto_accept"></a>
+<H3>go_to_point_callback(request, response) <a href="    def go_to_point_callback(self, request, response):" style="float:right;text-align:right;">code</a></H3>
+<a id="go_to_point_callback"></a>
 
-This function manages action calls it will reject the call if:
-- There is another call in progress
-- Vehicle is not armed or vehicle mode is not loiter
-- Distance to destination is greater than 5km
+Callback function from the service [go_to_point_command](./404) 
+executes a simple go to routine towards the new_point requested, returns True when the drone reaches the point.
+If vehicle not armed, changes ASV_mission_mode to Standby, and returns false
 
-Args:
-- goal_request:
+This function returns false if vehicle is not armed and drone is not in Loiter mode (this means asv_mission_mode != 3)
+This function changes ASV_mode to "GUIDED", calls simple goto and <a href="#condition_yaw">condition_yaw()</a>, and upon <a href="#reached_position">reached_position()</a> it changes back to "LOITER" asv_mode and returns True
+
+- params
   - request:
-    - samplepoint: (Location) destination where to take a sample
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO ACCEPTED CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_accepted_callback(goal_handle) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L308" style="float:right;text-align:right;">code</a></H3>
-<a id="goto_accepted_callback"></a>
-
-declares variables to indicate an action is in process
-
-Args:
-- goal_handle:
-  - request:
-    - samplepoint: (Location) destination where to take a sample
-
-
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO CANCEL %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_cancel(goal_handle) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L286" style="float:right;text-align:right;">code</a></H3>
-<a id="goto_cancel"></a>
-
-This function manages action canceled, it only logs
-Args:
-- goal_handle:
-  - request:
-    - samplepoint: (Location) destination where to take a sample
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GO TO EXECUTE CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>goto_cancel(goal_handle) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L286" style="float:right;text-align:right;">code</a></H3>
-<a id="goto_cancel"></a>
-
-This function goberns the go to behaviour
-
-Args:
-- goal_handle:
-  - request:
-    - samplepoint: (Location) destination where to take a sample
-  - feedback:
-    - distance: (float) distance to waypoint
+    - new_point: point we want to go to
+- output
   - response:
-    -success: (Bool)
+    - success: True upon reach, false otherwise
 
-
-It starts calling planner to get the path to follow and extracting it to a variable, if there is no planner it will log and finish action
-
-While there are points left it will go to point, while going to point it will check:
-- EKF is ok, waiting in manual mode while EKF is off
-- mode is not guided (change to guided), log if ekf was fixed
-- ASV is disarmed (This means RC interrupted mission) log and switch to manual mode, finishing action but not erasing mission, to be able to resume
-
-Once samplepoint is reached, change into loiter mode and take sample, then return success
-
-
-
+<FONT COLOR="#999900"> WARNING:<br>
+- This services must not be called too quickly, if you ask for the point where the drone is rn calling the simple_go_to routine several times in 0.1s, it may freeze the drone</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% REACHED POSITION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-<H3>reached_position(goal_loc) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L165" style="float:right;text-align:right;">code</a></H3>
+<H3>reached_position(current_loc, goal_loc) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L165" style="float:right;text-align:right;">code</a></H3>
 <a id="reached_position"></a>
-This function returns true if the goal_loc is withing 1.5m of the drone, false otherwise.
+This function checks whether the 2 locations given as arguments are the same, returns true if they are withing 0.5m of each other, false otherwise.
 
 - params
   - current_loc: actual position
@@ -253,8 +181,8 @@ This function returns true if the goal_loc is withing 1.5m of the drone, false o
 This function publishes the [status](./404) (battery, longitude, latitude, yaw, vehicle id, armed_status) at a rate of 2Hz on the topic [/status](./404)
 
 <FONT COLOR="#999900"> WARNING:<br>
-- This will raise an error if the data read from the drone is of different type, the data must be of the type Status() variables need.<br>
-- If data is invalid it will publish a -1 value (value imposible to give normally)</FONT>
+- This will raise an error if the data read from the drone is void, the data must be of the type Status() variable needs.<br>
+- Right now is patched not publishing that message, but it needs a better solution to have more control over it</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

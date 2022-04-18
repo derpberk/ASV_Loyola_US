@@ -13,7 +13,6 @@ This is the sensor node of the ASV.
 <pre>
 Services
 /<a href="./services/get_sample.html">get_sample</a>  <a href="#get_sample_callback" style="float:right;text-align:right;">get_sample_callback</a>
-/<a href="./services/Sensor_params.html">Sensor_params</a>  <a href="#update_parameters_callback" style="float:right;text-align:right;">update_parameters_callback</a>
 </pre>
 <pre>
 Topics
@@ -46,7 +45,6 @@ Parameters
 <a href="./parameters/pump.html">pump</a>
 <a href="./parameters/pump_channel.html">pump_channel</a>
 <a href="./parameters/timeout.html">timeout</a>
-<a href="./parameters/time_between_samples.html">time_between_samples</a>
 <a href="./parameters/USB_string.html">USB_string</a>
 </pre>
 
@@ -77,27 +75,6 @@ This function is a callback from the service <a href="./services/get_sample.html
 This function Reads from the serial port of the Smart Water and parses the message into variables.
 
 
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ SENSOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>update_parameters_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L202" style="float:right;text-align:right;">code</a></H3>
-<a id="update_parameters_callback"></a>
-
-This function updates the value of the parameters logging changes
-
-- request
-  - read_only: (Bool) If true parameters wont be updated
-  - pump_channel: (Int)
-  - number_of_samples: (int)
-  - time_between_samples: (float)
-  - use_pump: (Bool)
-
-- response
-  - pump_channel: (Int)
-  - number_of_samples: (int)
-  - time_between_samples: (float)
-  - use_pump: (Bool)
-
-  
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STATUS SUBSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>status_suscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L310" style="float:right;text-align:right;">code</a></H3>

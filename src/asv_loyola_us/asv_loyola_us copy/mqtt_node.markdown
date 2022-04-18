@@ -16,23 +16,12 @@ Services
 
 <pre>
 Topics
-/
+/<a href="./topics/destination.html">status</a>  <a href="#destination" style="float:right;text-align:right;">destination</a>
+/<a href="./topics/mission_mode.html">status</a>  <a href="#mission_mode" style="float:right;text-align:right;">mission_mode</a>
 </pre>
 <pre>
 Actions
 /
-</pre>
-
-
-<pre>
-MQTT messages
-/<a href="./MQTT_messages/mission_type.html">mission_type</a>  <a href="#MQTT_messages" style="float:right;text-align:right;">messages</a>
-/<a href="./MQTT_messages/load_mission.html">load_mission</a> 
-/<a href="./MQTT_messages/cancel_movement.html">cancel_movement</a> 
-/<a href="./MQTT_messages/update_parameters.html">update_parameters</a> 
-/<a href="./MQTT_messages/read_params.html">read_params</a> 
-/<a href="./MQTT_messages/start_recording.html">start_recording</a> 
-/<a href="./MQTT_messages/stop_recording.html">stop_recording</a> 
 </pre>
 
 <pre>
@@ -43,31 +32,17 @@ functions
 <a href="#main">main()</a>
 <a href="#mission_mode_suscriber_callback">mission_mode_suscriber_callback(msg)</a>
 <a href="#on_message">on_message(client, _, message)</a>
-<a href="#on_disconnect">on_disconnect(client, _, message)</a>
-<a href="#params_read">params_read()</a>
 <a href="#sensors_subscriber_callback">sensors_subscriber_callback(msg)</a>
 <a href="#sendinfo_callback">send_info_callback(request, response)</a>
-<a href="#shutdown_asv">shutdown_asv()</a>
 <a href="#status_suscriber_callback">status_suscriber_callback(msg)</a>
 </pre>
-
-
 
 
 <pre>
 variables
 <a id="self.processing">processing</a>
-<a id="self.mission_mode">mission_mode</a>
-<a id="self.status">status</a>
 <a id="self.mqtt_point">mqtt_point</a>
-<a id="self.call_msg">call_msg</a>
-<a id="self.shutdown">shutdown</a>
-<a id="self.camera_signal">camera_signal</a>
-<a id="self.update_params">update_params</a>
-<a id="self.read_params">read_params</a>
-<a id="self.camera_handler">camera_handler</a>
-<a id="self.enable_planner">enable_planner</a>
-<a id="self.sensor_params">sensor_params</a>
+<a id="self.load_mission">load_mission</a>
 <a id="self.cancel_movement">cancel_movement</a>
 </pre>
 
@@ -98,6 +73,7 @@ This function is executed periodically each 0.5 seconds by a timer, it pubblishe
 
 <H3>destination_subscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L212" style="float:right;text-align:right;">code</a></H3>
 <a id="destination_subscriber_callback"></a>
+
 This function is a suscriber of /<a href="./topics/destination.html">destination</a> topic, it sends a mqtt message to the topic "destination" indicating:
 - vehicle number
 - location
@@ -120,8 +96,7 @@ This function is a suscriber of /<a href="./topics/rosout.html">rosout</a> topic
 
 <H3>main() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L88" style="float:right;text-align:right;">code</a></H3>
 <a id="main"></a>
-
-This function declares variables and tells server that drone is starting, after that its main behaviour consist in a loop that calls a service when it is necessary
+This function consist in a loop that calls a service when it is necessary
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% MISSION MODE SUBSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -138,29 +113,15 @@ This function is a suscriber of /<a href="./topics/mission_mode.html">mission_mo
 
 <H3>on_message(_client, _, msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L130" style="float:right;text-align:right;">code</a></H3>
 <a id="on_message"></a>
-<a id="MQTT_messages"></a>
+
 Asyncronous handler of a MQTT message. Ir receives a message from the broker. Depending on the fields of the input message, setting the variables so that the main loop executes the call services.
 
 This function is kept independent of the main loop and executed in a thread so it is kept alive even if ROS2 Crashes to execute a hard reset remotely
 
-It uses a variable <a id="self.processing">processing</a>  to avoid massive input of messages.
-
 -Args:
  - _client: Client object
  - msg: MQTT message object.
 
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ON DISCONNECT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>on_disconnect(_client, _, msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L130" style="float:right;text-align:right;">code</a></H3>
-<a id="on_disconnect"></a>
-
-This function logs if MQTT connection closes and internet status
-
--Args:
- - _client: Client object
- - msg: MQTT message object.
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SEND INFO CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -198,27 +159,6 @@ This function is a suscriber of /<a href="./topics/sensors.html">destination</a>
 - Temperature
 - Conductivity
 - Oxidation Reduction Potential
-
-
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHUTDOWN ASV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>shutdown_asv() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L342" style="float:right;text-align:right;">code</a></H3>
-<a id="shutdown_asv"></a>
-
-this function is callable through MQTT even if ros2 crashes as it is executed in a new thread once shutdown is called
-
-Stops ASV status update, sends info about shutting ros2 to server and waits 2 seconds for other logs to happen, afterwards it hard closes Ros2 and makes <a href=../../startup.html>startup</a> to start again
-
-
-
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARAMS READ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
-
-<H3>params_read() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L364" style="float:right;text-align:right;">code</a></H3>
-<a id="params_read"></a>
-
-This function sends an MQTT message updating the values of the parameters, it parses the service call response
 
 
 
