@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>Proyecto sin título</name>
+	<gx:CascadingStyle kml:id="__managed_style_26D7E58CFD2170E94EB6">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.23.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4.8</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_1868E688D22170E94EB6">
+		<styleUrl>https://earth.google.com/balloon_components/base/1.0.23.0/card_template.kml#main</styleUrl>
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>3.2</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_03C0D4B10D2170E94EB6">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_1868E688D22170E94EB6</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_26D7E58CFD2170E94EB6</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Placemark id="03680B30CA2170E907C1">
+		<name>Alamillo</name>
+		<description><![CDATA[<div>test</div>]]></description>
+		<LookAt>
+			<longitude>-6.000305695651561</longitude>
+			<latitude>37.41909720749783</latitude>
+			<altitude>4.89806841508631</altitude>
+			<heading>0</heading>
+			<tilt>0</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>265.2063199222539</range>
+			<altitudeMode>absolute</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_03C0D4B10D2170E94EB6</styleUrl>
+		<LineString>
+			<coordinates>
+				-6.001051411117358,37.41884004339617,4.883955898224769 -6.001228118575755,37.41876531606128,4.737672309005965 -6.001122342372208,37.41864397184953,4.737558013903262 -6.000884936343453,37.41866824265679,4.737569846022467 -6.000781512711864,37.41881572420687,4.737588038400871 -6.000628725678129,37.41865330933113,4.737581622970383 -6.000424228048798,37.41869624740219,4.737564129428289 -6.00010696441964,37.41872252048827,4.920389004885182 -5.999923560839557,37.41878958947644,4.737671214068104 -5.999911807159219,37.41897254034441,4.73756442933375 -6.000099851754634,37.41900987744276,4.737500685276917 -5.999904754940269,37.41911255361901,4.737533002919578 -5.999841288458639,37.41930110503276,4.737570827788455 -5.999693203356548,37.41916109116375,4.73745796572458 -5.999676750883564,37.41898560729443,4.737517672374885 -5.999389981773867,37.41900427431532,4.737506444310546 -5.999319467022827,37.41881198837666,4.737611167902185 -5.999077866090977,37.41900237913367,4.872318560543687 -5.999230632565368,37.41918710232667,4.887643138250457 -5.999476950563706,37.4191853590881,4.737513152573252 -5.99929629959731,37.41939427423934,4.850782203718856 -5.999355595050996,37.41962523157034,5.045338076483345 -5.999539725751523,37.41978971581108,4.799543229894572 -5.999824190299941,37.41988325364854,4.737530927630377 -6.000021509273052,37.41977777599288,4.737509733368073 -6.000029100406254,37.41953668241403,4.737564478846443 -6.000022575642424,37.4193645365958,4.898008856974087 -6.000221808297018,37.41928625349412,4.898028294243082 -6.000158893209578,37.41911469620576,4.898039970750963 -6.000368611003958,37.4191829861199,4.898041533937443 -6.000353930712297,37.41903308184199,4.898032478773045 -6.000574134236961,37.41907971833918,4.89809368495065 -6.000609785395577,37.41886152402213,4.898015036158291 -6.000773365464466,37.41896479109325,4.898036817499682 -6.000953721984546,37.41888983790279,4.898031041490272 
+			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>
