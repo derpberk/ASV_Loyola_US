@@ -54,7 +54,7 @@ class MQTT_node(Node):
         self.parameters()
 
         #check if there is internet connection
-        while not check_internet(): #ping google has an internal delay
+        while not ping_google(): #ping google has an internal delay
             self.get_logger().error("There is no internet connection, retrying...") 
 
         #start MQTT Connection
@@ -96,7 +96,7 @@ class MQTT_node(Node):
         self.read_params=False
         self.enable_planner=CommandBool.Request()
         self.sensor_params=SensorParams.Request()
-        self.enable_planner.value=False #prestart as no planner
+        self.enable_planner.value=True #prestart as no planner
         #call services
         self.declare_services()
 
@@ -264,8 +264,8 @@ class MQTT_node(Node):
     def on_disconnect(self,  client,  __, _):
         sleep(1)
         self.get_logger().error("connection to server was lost")
-        if not check_internet():
-            while not check_internet():
+        if not ping_google():
+            while not ping_google():
                 self.get_logger().error("no internet connection, waiting for internet",once=True)
             self.get_logger().info("Internet connection regained")
         else:
@@ -348,7 +348,10 @@ class MQTT_node(Node):
         self.get_logger().info(f'sensor data sent to database{message}')
 
     def shutdown_asv(self):
-        self.mqtt_timer.destroy() #stop updating drone status
+        try:
+            self.mqtt_timer.destroy() #stop updating drone status
+        except:
+            pass
         self.call_msg.asv_mode = 0 #change to land mode to put vehicle in a safe spot        
         for i in range(4):
             msg = json.dumps({

@@ -19,7 +19,7 @@ class startup:
         kill_ros2() #if this program is called from a crash, close last ros2 session
         self.asv_offline=True #we start offline
         kill_ssh_tunelling()
-        while not check_internet():
+        while not ping_google():
             print("There is no internet connection, retrying...")
             sleep(1)
         try:
@@ -56,7 +56,7 @@ class startup:
             #TODO: transformar el topic con la informacion a formato JSON
             self.mqtt.send_new_msg(msg)  # Send the MQTT message
             sleep(1)
-            if not check_internet():
+            if not ping_google():
                 #we lost connection, restart
                 print("Connection closed, restarting program")
                 restart_asv()

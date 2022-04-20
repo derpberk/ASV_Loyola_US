@@ -150,10 +150,13 @@ class Sensor_node(Node):
                     last_frame = frames[-1].split('#')[
                     :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
                     self.get_logger().debug(f"sensor read: {last_frame}")
-
-                    if len(last_frame<4): #we read an almost empty frame, this is weird
-                        self.get_logger().info(f"sensor weird read: {last_frame}")
-                        continue #discard this read
+                    try:
+                        if len(last_frame<4): #we read an almost empty frame, this is weird
+                            self.get_logger().info(f"sensor weird read: {last_frame}")
+                            continue #discard this read
+                    except:
+                        self.get_logger().info(f"sensor weird read with no len: {last_frame}")
+                        continue#if len is 0 discard
 
                     for field in last_frame:  # Iterate over the frame fields
 
@@ -205,6 +208,7 @@ class Sensor_node(Node):
             response.number_of_samples = self.num_samples
             response.time_between_samples = self.time_between_samples
             response.use_pump = self.pump_installed
+            self.get_logger().info(f"params read sent")
             return response
         if request.use_pump != self.pump_installed:
             self.pump_installed=request.use_pump

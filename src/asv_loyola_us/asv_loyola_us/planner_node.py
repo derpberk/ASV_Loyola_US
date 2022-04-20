@@ -51,7 +51,7 @@ class Planner_node(Node):
 
         # declare actions
         #self.declare_actions()
-        self.use_planner=False
+        self.use_planner=True
         self.status=Status()
         try:
             self.planner=A_star(self.map_filepath, 1)

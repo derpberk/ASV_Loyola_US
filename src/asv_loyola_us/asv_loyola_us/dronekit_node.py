@@ -270,12 +270,12 @@ class Dronekit_node(Node):
             if not self.vehicle.ekf_ok:
                 self.get_logger().error(f"EKF seems to be the main issue, GPS status is {self.vehicle.gps_0}")
             return GoalResponse.REJECT #To move we must be armed and in loiter
-        if self.calculate_distance(goal_request.request.samplepoint)>5000: #if we are too far away from the point, reject, we may be going to Africa
+        """if self.calculate_distance(goal_request.request.samplepoint)>5000: #if we are too far away from the point, reject, we may be going to Africa
             self.get_logger().error(f"selected point is too far away from the drone, {self.calculate_distance(goal_request.request.samplepoint)}m. Returning to Manual mode")
             mode=ASVmode.Request()
             mode.asv_mode=3
             self.call_service(self.asv_mission_mode_client, mode)
-            return GoalResponse.REJECT
+            return GoalResponse.REJECT"""
         self.get_logger().info(f'Action accepted')
         return GoalResponse.ACCEPT
 

@@ -130,8 +130,8 @@ class Mission_node(Node):
             #INFO: we could use a while instead of an if to wait till it is on, but it may become an infinite loop
 
         #same workaround for MQTT
-        while not self.mqtt_send_info.wait_for_service(timeout_sec=1.0):
-            self.get_logger().fatal('mqtt node is not answering', once=True)
+        while not self.mqtt_send_info.wait_for_service(timeout_sec=10.0):
+            self.get_logger().fatal('mqtt node is not answering')
 
 
     """
@@ -160,10 +160,10 @@ class Mission_node(Node):
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                         self.get_logger().info("The vehicle is not able to go into automatic mode")
                         self.mission_mode=3
-                        continue
-                self.change_ASV_mode("LOITER")
-                self.arm_vehicle(True)
-                self.get_logger().info("vehicle in \'STANDBY\' mode")
+                else:
+                    self.change_ASV_mode("LOITER")
+                    self.arm_vehicle(True)
+                    self.get_logger().info("vehicle in \'STANDBY\' mode")
 
 
         # Pre-loaded Mission mode
@@ -174,13 +174,12 @@ class Mission_node(Node):
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
                     self.mission_mode=3
-                    continue
-                self.change_ASV_mode("LOITER")
                 #check if we have a mission to follow, go to STANDBY if not
-                if len(self.samplepoints) == 0:
+                elif len(self.samplepoints) == 0:
                     self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
                     self.mission_mode = 1 #return vehicle to
                 else:
+                    self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
                     self.get_logger().info(f"Starting Pre-loaded Mission {self.mission_filepath}")
             else: #we arrive here, so we have a mission to follow
@@ -208,10 +207,10 @@ class Mission_node(Node):
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
                     self.mission_mode=3
-                    continue
-                self.change_ASV_mode("LOITER")
-                self.arm_vehicle(True)
-                self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
+                else:
+                    self.change_ASV_mode("LOITER")
+                    self.arm_vehicle(True)
+                    self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
             if self.mqtt_waypoint is not None and not self.waiting_for_action: #if we have a point and we are not busy
                 self.go_to(self.mqtt_waypoint) #go to the point
                 self.mqtt_waypoint = None #discard the point
@@ -225,8 +224,7 @@ class Mission_node(Node):
             if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual
                     self.get_logger().info("The vehicle lost GPS reference")
                     self.mission_mode=3
-                    continue
-            if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+            elif self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
                 self.arm_vehicle(True)
                 self.change_ASV_mode("RTL")
                 self.get_logger().info("vehicle in \'RTL\' mode")
@@ -443,12 +441,14 @@ class Mission_node(Node):
             goal_msg = Goto.Goal()
             goal_msg.samplepoint = self.point_backup
             if self.mission_mode == 2 or self.mission_mode == 4:#mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
-                self.get_logger().info(f'asking again to go to {self.point_backup}')
-                self.change_ASV_mode("LOITER")
-                sleep(2) #sleep to avoid spamming points
-                self.arm_vehicle(True)
-                self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
-                self._send_goal_future.add_done_callback(self.go_to_response)
+                if self.status.armed:
+                    self.get_logger().info(f'asking again to go to {self.point_backup}')
+                    self.change_ASV_mode("LOITER")
+                    sleep(2) #sleep to avoid spamming points
+                    self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
+                    self._send_goal_future.add_done_callback(self.go_to_response)
+                else:
+                    self.mission_mode=3
             #TODO: decide what to do if goal is rejected, in other words, action busy
             elif self.mission_mode == 3: #we disarmed using the RC and are in manual mode
                 self.get_logger().info("Vehicle in manual mode, interpreted as Manual interruption, restoring point and killing mission handler")
