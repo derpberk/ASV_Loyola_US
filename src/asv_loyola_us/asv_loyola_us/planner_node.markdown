@@ -106,6 +106,8 @@ This function loads a map inside the planner if map exists
 - response:
   - success: (Bool) True upon success
 
+You can check available maps in [maps section](../../../maps.html)
+
 <FONT COLOR="#ff0000"> TODO:<br>
 - Add logs</FONT>
 
