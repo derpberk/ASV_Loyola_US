@@ -30,6 +30,8 @@ class Sensor_node(Node):
         self.baudrate = self.get_parameter('baudrate').get_parameter_value().integer_value
         self.declare_parameter('timeout', 6)
         self.timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('sensor_read_timeout', 30)
+        self.sensor_read_timeout = self.get_parameter('sensor_read_timeout').get_parameter_value().integer_value
         self.declare_parameter('time_between_samples', 0.5)
         self.time_between_samples = self.get_parameter('time_between_samples').get_parameter_value().double_value
 
@@ -126,11 +128,17 @@ class Sensor_node(Node):
 
         is_frame_ok = False  # While a frame hasnt been correctly read #
         #self.serial.reset_input_buffer()  # Erase the input buffer to start listening
-
+        waited_time=0 #timeout for sensor read
 
         while not is_frame_ok:
 
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
+            
+            if waited_time >= self.sensor_read_timeout:
+                self.get_logger().error(f"waited for sensor read for too long, skipping sensor read")
+                break
+                
+            waited_time+=0.5 # add time to wait
 
             if self.DEBUG == False and self.serial.inWaiting() < 27:  # If frame has a lenght inferior to the minimum of the Header
                 continue
@@ -150,13 +158,13 @@ class Sensor_node(Node):
                     last_frame = frames[-1].split('#')[
                     :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
                     self.get_logger().debug(f"sensor read: {last_frame}")
-                    """try:
-                        if len(last_frame<4): #we read an almost empty frame, this is weird
+                    try:
+                        if len(last_frame)<4: #we read an almost empty frame, this is weird
                             self.get_logger().info(f"sensor weird read: {last_frame}")
                             continue #discard this read
                     except:
                         self.get_logger().info(f"sensor weird read with no len: {last_frame}")
-                        continue#if len is 0 discard"""
+                        continue#if len is 0 discard
 
                     for field in last_frame:  # Iterate over the frame fields
 

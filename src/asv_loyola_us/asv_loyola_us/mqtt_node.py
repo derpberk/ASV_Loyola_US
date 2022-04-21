@@ -21,6 +21,8 @@ class MQTT_node(Node):
     def parameters(self):
         self.declare_parameter('vehicle_id', 1)
         self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
+        self.declare_parameter('internet_loss_timeout', 30)
+        self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
         self.declare_parameter('mqtt_addr', "127.0.0.1")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
 
@@ -259,14 +261,21 @@ class MQTT_node(Node):
             
             if "load_map" in message:
                 self.map_name=CommandStr.Request()
-                self.map_name.string=message["mission_type"]
+                self.map_name.string=message["load_map"]
 
     def on_disconnect(self,  client,  __, _):
         sleep(1)
         self.get_logger().error("connection to server was lost")
         if not ping_google():
+            time_without_internet=0
             while not ping_google():
                 self.get_logger().error("no internet connection, waiting for internet",once=True)
+                sleep(1)
+                time_without_internet+=1
+                if time_without_internet >= self.internet_loss_timeout:
+                    self.processing == True
+                    self.call_msg.asv_mode = 3 #if we waited for too long, change into manual mode
+
             self.get_logger().info("Internet connection regained")
         else:
             self.get_logger().error("there is internet, unknown reason, retrying to connect to MQTT")

@@ -71,8 +71,10 @@ class Planner_node(Node):
                 self.map_filepath = os.path.expanduser("~/ASV_Loyola_US/mapas/" + request.string)
                 self.planner=A_star(self.map_filepath, 1)
             except:
-                self.get_logger().info("Map load failed")
+                self.get_logger().info("Map load failed, specified map doesnt exist")
                 response.success=False
+        else:
+            self.get_logger().info("Map load failed, string has no len")
         return response
 
     def enable_planning_callback(self, request, response):

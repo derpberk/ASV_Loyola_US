@@ -83,6 +83,7 @@ class Mission_node(Node):
         #start the drone
         self.startup()
         self.get_logger().info('All systems operative')
+        self.get_logger().info(f"Drone running version {self.version()}")
 
         #ask mqtt to start sending once everything is operative
         call_service(self, self.mqtt_send_info, CommandBool.Request())
@@ -513,8 +514,17 @@ class Mission_node(Node):
         return response
             
 
-
-
+    def version(self):
+        version="unknown"
+        try:
+            with open('/home/xavier/ASV_Loyola_US/version.txt', 'r') as f:
+                for line in f:
+                    line=line.strip().replace(" ", "").split(":")
+                    version = str(line[1])
+                    break
+        except:
+            pass
+        return version
 
 def main(args=None):
     #init ROS2

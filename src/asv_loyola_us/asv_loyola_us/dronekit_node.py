@@ -40,6 +40,8 @@ class Dronekit_node(Node):
         self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         self.declare_parameter('timeout', 15)
         self.timout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('max_distance', 5000)
+        self.max_distance = self.get_parameter('max_distance').get_parameter_value().integer_value
         self.declare_parameter('vehicle_id', 1)
         self.vehicle_id=self.get_parameter('vehicle_id').get_parameter_value().integer_value
 
@@ -305,9 +307,10 @@ class Dronekit_node(Node):
             #path=[goal_handle.request.samplepoint]
         else:
             #extract path
-            #self.get_logger().info(f"path is {path}")
             path=path.point_list
-        #	self.get_logger().info(f"Turning to : {self.get_bearing(self.vehicle.location.global_relative_frame, path[0])} N")
+        if self.calculate_distance(path[0])>self.max_distance:
+            self.get_logger().warning(f'we are too far away from the destination point {self.calculate_distance(path[0])}m, cancelling action')
+            return Goto.Result()
         self.vehicle.mode = VehicleMode("GUIDED")
         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
         time.sleep(1)
