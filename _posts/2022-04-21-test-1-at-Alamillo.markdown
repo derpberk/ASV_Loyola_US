@@ -45,3 +45,5 @@ Notas:
     
 
 The logs can be found [here](../../../../../miscelaneous/log2404.rar)
+
+![video](../../../../../miscelaneous/drona.gif)
