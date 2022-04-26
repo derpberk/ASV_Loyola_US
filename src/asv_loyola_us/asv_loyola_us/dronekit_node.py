@@ -38,12 +38,16 @@ class Dronekit_node(Node):
     def parameters(self):
         self.declare_parameter('vehicle_ip', 'tcp:navio.local:5678')
         self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
-        self.declare_parameter('timeout', 15)
-        self.timout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('connect_timeout', 15)
+        self.connect_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
         self.declare_parameter('max_distance', 5000)
         self.max_distance = self.get_parameter('max_distance').get_parameter_value().integer_value
         self.declare_parameter('vehicle_id', 1)
         self.vehicle_id=self.get_parameter('vehicle_id').get_parameter_value().integer_value
+        self.declare_parameter('arm_timeout', 15)
+        self.arm_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.declare_parameter('travelling_timeout', 60)
+        self.travelling_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -81,8 +85,9 @@ class Dronekit_node(Node):
         # connect to vehicle
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         try:
-            self.vehicle = connect(self.vehicle_ip, timeout=self.timout)
+            self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout)
             self.dictionary()
+            self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback)
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
@@ -114,6 +119,9 @@ class Dronekit_node(Node):
                 -True : arm vehicle
                 -False: disarm vehicle
         """
+        if self.status.manual_mode:
+            self.get_logger().info(f"RC in manual, cannot arm or disarm")
+            return response
         try:
             if request.value:
                 self.vehicle.arm()
@@ -145,12 +153,12 @@ class Dronekit_node(Node):
         try:
             self.status.armed = self.vehicle.armed
             self.status.vehicle_id = self.vehicle_id
-            asv_mode= str(self.vehicle.mode)
-            self.status.asv_mode=asv_mode[12:]
+            self.status.asv_mode=str(self.vehicle.mode.name)
             self.status.ekf_ok = bool(self.vehicle.ekf_ok)
+            self.status_publisher.publish(self.status)
         except:
             pass
-        self.status_publisher.publish(self.status)
+        
 
 
     def get_bearing(self, location1, location2):
@@ -240,6 +248,9 @@ class Dronekit_node(Node):
 
     def change_asv_mode_callback(self, request, response):
         #string takes preference before int
+        if self.status.manual_mode:
+            self.get_logger().info(f"RC in manual, cannot change mode")
+            return response
         if len(request.asv_mode_str) != 0:
             if request.asv_mode_str in self.mode_type.values():
                 mode=request.asv_mode_str
@@ -270,14 +281,11 @@ class Dronekit_node(Node):
         if not self.vehicle.armed or self.vehicle.mode != VehicleMode("LOITER"):
             self.get_logger().error(f'Error: vehicle should be armed and in loiter mode\nbut arming is {self.vehicle.armed} and vehicle is in {self.vehicle.mode}.')
             if not self.vehicle.ekf_ok:
-                self.get_logger().error(f"EKF seems to be the main issue, GPS status is {self.vehicle.gps_0}")
+                self.get_logger().error(f"EKF seems to be the main issue, System Status: mode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable}")
             return GoalResponse.REJECT #To move we must be armed and in loiter
-        """if self.calculate_distance(goal_request.request.samplepoint)>5000: #if we are too far away from the point, reject, we may be going to Africa
-            self.get_logger().error(f"selected point is too far away from the drone, {self.calculate_distance(goal_request.request.samplepoint)}m. Returning to Manual mode")
-            mode=ASVmode.Request()
-            mode.asv_mode=3
-            self.call_service(self.asv_mission_mode_client, mode)
-            return GoalResponse.REJECT"""
+        if self.manual_mode:
+            self.get_logger().error(f'RC in manual mode, action rejected')
+            return GoalResponse.REJECT
         self.get_logger().info(f'Action accepted')
         return GoalResponse.ACCEPT
 
@@ -285,6 +293,11 @@ class Dronekit_node(Node):
         #we could make a list of goal handles and make a queue of points to go to and accept everything,
         #for the time being, we will just start executing
         self.goto_goal_handle=goal_handle
+        if self.calculate_distance(goal_handle.request.samplepoint)>self.max_distance:
+            self.get_logger().warning(f'we are too far away from the destination point {self.calculate_distance(goal_handle.request.samplepoint)}m, cancelling action')
+            result.finish_flag = "Point too far away"
+            goal_handle.abort()
+            return Goto.Result()
         goal_handle.execute() #execute goto_execute_callback
 
     def goto_cancel(self, goal_handle):
@@ -295,7 +308,11 @@ class Dronekit_node(Node):
 
     def goto_execute_callback(self, goal_handle): #TODO: check correct behaviour
         feedback_msg = Goto.Feedback()
-        counter=0 #counter to avoid excesive logs
+        result=Goto.Result()
+        arm_counter=0 #counter to leave if several seconds disarmed
+        ekf_counter=0 #counter to leave if several seconds with ekf in bad state
+        ekf_failed=False #bool to know were we come from
+
         #Calculate Path
         destination=Newpoint.Request()
         destination.new_point=goal_handle.request.samplepoint
@@ -303,65 +320,88 @@ class Dronekit_node(Node):
         #if there is no path, go directly to destination
         if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner")
-            return Goto.Result()
+            result.finish_flag = "Planner couldn't calculate point"
+            goal_handle.abort()
+            return result
             #path=[goal_handle.request.samplepoint]
         else:
             #extract path
             path=path.point_list
-        if self.calculate_distance(path[0])>self.max_distance:
-            self.get_logger().warning(f'we are too far away from the destination point {self.calculate_distance(path[0])}m, cancelling action')
-            return Goto.Result()
         self.vehicle.mode = VehicleMode("GUIDED")
         self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
         time.sleep(1)
         while (rclpy.ok()) and (len(path)>0):
+            travelling_counter=0 #counter time since going to waypoint
             self.vehicle.simple_goto(LocationGlobal(path[0].lat, path[0].lon, 0.0))
-            ekf_failed=False #bool to know were we come from
             while rclpy.ok() and not self.reached_position(path[0]): #while we reach the goal, check for events
                 if goal_handle.is_cancel_requested:#event mission canceled
                     #make it loiter around actual position
                     goal_handle.canceled()
                     self.vehicle.mode = VehicleMode("LOITER")
-                    return Goto.Result()
+                    result.finish_flag = "Action cancelled"
+                    return result
+                
+                elif self.status.manual_mode:
+                        self.get_logger().warning("manual interruption during mission")
+                        result.finish_flag = "Manual interruption"
+                        goal_handle.abort()
+                        return result
 
                 elif not self.vehicle.ekf_ok: #if ekf is not ok, stop
                     if self.vehicle.mode != VehicleMode("MANUAL"):
-                        self.get_logger().warning('EKF FAILED, sensor read not good enough, waiting for better signal, switching to manual')
+                        self.get_logger().warning('EKF FAILED, sensor read not good enough, waiting for better signal, switching to manual and disarming')
                         self.vehicle.mode = VehicleMode("MANUAL")
+                        self.vehicle.disarm()
                         ekf_failed=True
-                    elif counter>30:
+                    elif counter%30:
                             self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
                             #TODO: include a counter, if we keep in this state for too much time leave
+                    if ekf_counter > self.ekf_timeout*10:
+                        result.finish_flag = "ekf timeout"
+                        self.get_logger().info('EKF timeout, exiting action')
+                        goal_handle.abort()
+                        return result
                 
-                elif self.vehicle.mode != VehicleMode("GUIDED"): #vehicle is not in desired mode
+                elif self.vehicle.mode != VehicleMode("GUIDED") : #vehicle is not in desired mode
                     self.get_logger().warning("asv_mode was changed externally")
                     if ekf_failed:
                         self.get_logger().info("EKF failsafe cleared, resuming mission")
-                        self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
-                    self.vehicle.mode = VehicleMode("GUIDED")
+                        self.get_logger().info(f"System Status: mode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
+                        ekf_failed=False #reset flag
+                        self.vehicle.arm() #arm to avoid inconsistent state
+                    self.vehicle.mode = VehicleMode("GUIDED") #restore mode
                     self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
                     self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
-                        
-                
-                elif not self.status.armed: #event manual disarm
+            
+                elif not self.status.armed: #event vehicle disarmed
                     if self.vehicle.is_armable:
-                        self.get_logger().info('vehicle was forced to disconnect Goal aborted')
+                        self.get_logger().fatal('vehicle is not armable, inconsistent state')
                     else:
-                        self.get_logger().info('ASV reached a fatal state, leaving mission')
-                    self.vehicle.mode = VehicleMode("MANUAL")
-                    mode=ASVmode.Request()
-                    mode.asv_mode=3
-                    self.call_service(self.asv_mission_mode_client, mode)
-                        
-                    return Goto.Result()
+                        if arm_counter%10==0:
+                            self.get_logger().info('received external disarm in auto mode, waiting for RC')
+                        if self.vehicle.channels['5']>1600:
+                            self.vehicle.arm()
+                            self.get_logger().info('vehicle armed')
+                            arm_counter=0
+                        else:
+                            arm_counter+=1
+                        if arm_counter > self.arm_timeout*10:
+                            self.get_logger().info('Waited for RC for too long, exiting action')
+                            result.finish_flag = "timeout vehicle disarmed"
+                            goal_handle.abort()
+                            return result
+
+                if travelling_counter>self.travelling_timeout*10:
+                    self.get_logger().info('timeout reaching the point, exiting action')
+                    result.finish_flag = "timeout reaching point"
+                    goal_handle.abort()
+                    return result
                 
-                
-                if counter>30:
+                if travelling_counter%30==0: #each 3 seconds
                     feedback_msg.distance = self.calculate_distance(path[0])
                     goal_handle.publish_feedback(feedback_msg)
-                    counter=0
                 else:
-                    counter+=1
+                    travelling_counter+=1
                 time.sleep(0.1)
             #waypoint reached so go to next one
             if len(path)>1:
@@ -373,8 +413,8 @@ class Dronekit_node(Node):
         self.get_logger().info('Goal reached, waiting for sample')
         value=self.call_service(self.take_sample_client, Takesample.Request())
         #self.get_logger().debug(f'Sample value {value}')
-        result=Goto.Result()
         result.success = True
+        result.finish_flag = "Normal execution"
         return result
 
 
@@ -401,6 +441,33 @@ class Dronekit_node(Node):
                 break
 
 
+    def rc_read_callback(self):
+        #if there is no RC return home
+        try:
+            if all([self.vehicle.channels['6'] == 0, self.vehicle.channels['6'] == 0]):
+                if self.vehicle.mode != VehicleMode("RTL"):
+                    self.get_logger().info("seems there is no RC connected, going into RTL mode")
+                    self.status.manual_mode = True
+                    self.vehicle.mode = VehicleMode("RTL")
+        
+        try:
+            if self.status.manual_mode!=self.vehicle.channels['6']>1600:
+                self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1600 else "automatic control regained")
+                self.status.manual_mode=self.vehicle.channels['6']>1600
+            if self.status.manual_mode:
+                
+                if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
+                    self.get_logger().info("manual switching vehicle mode to manual")
+                    self.vehicle.mode = VehicleMode("MANUAL"):
+                if self.vehicle.armed!=self.vehicle.channels['5']>1600:
+                    if self.vehicle.channels['5']>1600:
+                        self.vehicle.arm()
+                        self.get_logger().info("manual arm")
+                    else:
+                        self.vehicle.disarm()
+                        self.get_logger().info("manual disarm")
+        except:
+            self.get_logger().info("rc read failed")
 
 
     def dictionary(self):

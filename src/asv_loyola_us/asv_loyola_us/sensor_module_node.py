@@ -131,6 +131,10 @@ class Sensor_node(Node):
         waited_time=0 #timeout for sensor read
 
         while not is_frame_ok:
+            
+            if self.status.manual_mode:
+                self.get_logger().error(f"manual mode, skipping sensor read")
+                return
 
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
             

@@ -6,3 +6,4 @@ float64 battery -1
 bool armed false
 string asv_mode "Offline"
 bool ekf_ok false
+bool manual_mode false

@@ -144,12 +144,17 @@ class Mission_node(Node):
         #LAND mode
         #This mode disarms the robot, and throws a warning if it has been armed externally
         if self.mission_mode == 0:
+            if self.status.manual_mode:
+                self.get_logger().warning("RC in manual mode, switching to MANUAL")
+                self.mission_mode=3
             if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
                 self.get_logger().info("vehicle resting.")
                 self.change_ASV_mode("MANUAL")
                 self.arm_vehicle(False)
             if self.status.armed:
                 self.get_logger().warning("Vehicle was armed externally! .", once=True)
+        
+
         #TODO: first objective was to disarm the vehicle for safety if it is armed, however we cannot arm the vehicle in this mode, and that
         # made people freak, so no safety mode that forces vehicle off, just a mode that warns
 
@@ -157,14 +162,18 @@ class Mission_node(Node):
         # STANDBY mode
         # This mode puts ASV in LOITER mode and arms it, vehicle will remain in the same position
         elif self.mission_mode == 1:  
+            if self.status.manual_mode:
+                self.get_logger().warning("RC in manual mode, switching to MANUAL")
+                self.mission_mode=3
             if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                         self.get_logger().info("The vehicle is not able to go into automatic mode")
-                        self.mission_mode=3
+                        self.mission_mode=0
                 else:
                     self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
                     self.get_logger().info("vehicle in \'STANDBY\' mode")
+            
 
 
         # Pre-loaded Mission mode
@@ -174,7 +183,7 @@ class Mission_node(Node):
                 #set ASV mode to Loiter
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
-                    self.mission_mode=3
+                    self.mission_mode=0
                 #check if we have a mission to follow, go to STANDBY if not
                 elif len(self.samplepoints) == 0:
                     self.get_logger().info("no preloaded mission, call \"/load_mission\" service")
@@ -207,7 +216,7 @@ class Mission_node(Node):
             if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
-                    self.mission_mode=3
+                    self.mission_mode=0
                 else:
                     self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
@@ -224,7 +233,7 @@ class Mission_node(Node):
         elif self.mission_mode == 5: 
             if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual
                     self.get_logger().info("The vehicle lost GPS reference")
-                    self.mission_mode=3
+                    self.mission_mode=0
             elif self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
                 self.arm_vehicle(True)
                 self.change_ASV_mode("RTL")
@@ -280,6 +289,14 @@ class Mission_node(Node):
             response.previous_mode = self.current_mission_mode
             self.mission_mode = request.asv_mode
             response.success = True
+            if self.waiting_for_action: #if the action was active
+                try:
+                    self.get_logger().info("the asv was moving, canceling movement")
+                    self.goal_handle.cancel_goal_async()
+                    if  self.mission_mode == 3: #if mission, restore the point
+                        self.samplepoints.insert(0,self.point_backup)
+                except:
+                    pass
         return response
 
 
@@ -439,26 +456,30 @@ class Mission_node(Node):
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
             self.get_logger().error('Goal rejected :(, something is not working')
-            goal_msg = Goto.Goal()
-            goal_msg.samplepoint = self.point_backup
-            if self.mission_mode == 2 or self.mission_mode == 4:#mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
+            if self.status.manual_mode:
+                self.get_logger().info("Manual interruption, killing mission handler")
+                #restore the point #TODO: check the point comes from mission and not simplepoint
+                self.mission_mode=3 #go to manual
+            elif self.mission_mode == 2 or self.mission_mode == 4:#mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
                 if self.status.armed:
-                    self.get_logger().info(f'asking again to go to {self.point_backup}')
+                    self.get_logger().info('Vehicle in wrong state, trying to recover')
                     self.change_ASV_mode("LOITER")
+                    self.get_logger().info(f'asking again to go to {self.point_backup}')
                     sleep(2) #sleep to avoid spamming points
+                    goal_msg = Goto.Goal()
+                    goal_msg.samplepoint = self.point_backup
                     self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
                     self._send_goal_future.add_done_callback(self.go_to_response)
                 else:
-                    self.mission_mode=3
-            #TODO: decide what to do if goal is rejected, in other words, action busy
-            elif self.mission_mode == 3: #we disarmed using the RC and are in manual mode
-                self.get_logger().info("Vehicle in manual mode, interpreted as Manual interruption, restoring point and killing mission handler")
-                #restore the point #TODO: check the point comes from mission and not simplepoint
-                self.samplepoints.insert(0,self.point_backup)
-                self.waiting_for_action=False
+                    self.mission_mode=0
+                    self.get_logger().error('Vehicle disarmed, going to REST mode')
+                    #TODO: add timeout in case ekf fails for too long
             else:
                 self.get_logger().info(f'Goal was rejected, unknown state {self.mission_mode}')
-                self.waiting_for_action=False
+            self.waiting_for_action=False
+            if self.current_mission_mode == 2:
+                self.get_logger().info(f'restoring point')
+                self.samplepoints.insert(0,self.point_backup)
             return
         self.get_logger().info('Goal accepted :)')
         self._get_result_future = self.goal_handle.get_result_async()
@@ -469,17 +490,24 @@ class Mission_node(Node):
         This function prints the result once the action finishes
     """   
     def go_to_finished(self, future):
-        result = future.result().result
-        status = future.result().status
+        result = future.result().result #this variable is the result specified in the action
+        status = future.result().status # ABORT = 4     CANCELED = 5    CANCEL_GOAL = 2     EXECUTE = 1     SUCCEED = 3     NOT_SPECIFIED = 6
+        status_string= ["0 IS NOT AN STATE", "EXECUTE", "CANCEL_GOAL", "SUCCEEDED", "ABORT", "CANCELED", "NOT SPECIFIED"]
         if status == GoalStatus.STATUS_SUCCEEDED:
             self.get_logger().info('Goal succeeded! Result: {0}'.format(result.success))
         else:
-            if self.mission_mode == 3:
-                #restore the point
-                self.get_logger().info(f'Goal failed due to Manual interruption. Status: {status}')
+            self.get_logger().info(f'Goal failed with status: {status_string[int(status)]}')
+            self.get_logger().info(f'reason : {result.finish_flag}')
+            if self.mission_mode == 2: # restore the point
                 self.samplepoints.insert(0,self.point_backup)
+            if result.finish_flag == "Manual interruption":
+                self.mission_mode = 3
+                self.get_logger().info("Manual interruption, going into MANUAL mode")
             else:
-                self.get_logger().info('Goal failed with status: {0}'.format(status))
+                self.mission_mode = 1
+                self.get_logger().info("going into STANDBY mode")
+
+            
             
         self.waiting_for_action=False #we indicate the state machine that action finished
 
@@ -500,14 +528,10 @@ class Mission_node(Node):
         This function forces the stop of the drone and deletes the destination point, returning the drone to standby mode
     """   
     def cancel_movement_callback(self, request, response):
-        self.get_logger().info("asked to stop the vehicle, changing mode to STANDBY")
-        self.mission_mode = 1 #change mode to Standby
+        self.get_logger().info("asked to stop the vehicle")
         if self.waiting_for_action: #if the action was active
             self.get_logger().info("the asv was moving, canceling movement")
             self.goal_handle.cancel_goal_async()
-            if self.current_mission_mode==2: #we were doing a mission
-                self.samplepoints=[] #we empty the mission
-                self.get_logger().info("mission emptied")
         else:
             self.get_logger().info("vehicle was already stoped, nothing to do")
         response.success=True

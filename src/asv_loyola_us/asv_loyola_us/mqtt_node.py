@@ -173,7 +173,8 @@ class MQTT_node(Node):
             "armed": self.status.armed,
             "mission_mode": self.mission_mode,
             "asv_mode": self.status.asv_mode,
-            "EKF": self.status.ekf_ok
+            "EKF": self.status.ekf_ok,
+            "manual_mode": self.status.manual_mode
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message

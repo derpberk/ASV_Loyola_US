@@ -2,7 +2,8 @@
 asv_interfaces/Location samplepoint
 ---
 # Result
-bool success
+bool success false
+string finish_flag "unknown"
 ---
 # Feedback
 float64 distance
