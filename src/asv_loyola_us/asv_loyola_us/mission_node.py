@@ -293,7 +293,7 @@ class Mission_node(Node):
                 try:
                     self.get_logger().info("the asv was moving, canceling movement")
                     self.goal_handle.cancel_goal_async()
-                    if  self.mission_mode == 3: #if mission, restore the point
+                    if  self.current_mission_mode == 2: #if mission, restore the point
                         self.samplepoints.insert(0,self.point_backup)
                 except:
                     pass

@@ -283,7 +283,7 @@ class Dronekit_node(Node):
             if not self.vehicle.ekf_ok:
                 self.get_logger().error(f"EKF seems to be the main issue, System Status: mode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable}")
             return GoalResponse.REJECT #To move we must be armed and in loiter
-        if self.manual_mode:
+        if self.status.manual_mode:
             self.get_logger().error(f'RC in manual mode, action rejected')
             return GoalResponse.REJECT
         self.get_logger().info(f'Action accepted')
@@ -353,7 +353,7 @@ class Dronekit_node(Node):
                         self.vehicle.mode = VehicleMode("MANUAL")
                         self.vehicle.disarm()
                         ekf_failed=True
-                    elif counter%30:
+                    elif counter%30 == 0:
                             self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
                             #TODO: include a counter, if we keep in this state for too much time leave
                     if ekf_counter > self.ekf_timeout*10:
@@ -362,7 +362,7 @@ class Dronekit_node(Node):
                         goal_handle.abort()
                         return result
                 
-                elif self.vehicle.mode != VehicleMode("GUIDED") : #vehicle is not in desired mode
+                elif self.vehicle.mode != VehicleMode("GUIDED"): #vehicle is not in desired mode
                     self.get_logger().warning("asv_mode was changed externally")
                     if ekf_failed:
                         self.get_logger().info("EKF failsafe cleared, resuming mission")
@@ -374,7 +374,7 @@ class Dronekit_node(Node):
                     self.vehicle.simple_goto(LocationGlobal(goal_handle.request.samplepoint.lat, goal_handle.request.samplepoint.lon, 0.0))
             
                 elif not self.status.armed: #event vehicle disarmed
-                    if self.vehicle.is_armable:
+                    if not self.vehicle.is_armable:
                         self.get_logger().fatal('vehicle is not armable, inconsistent state')
                     else:
                         if arm_counter%10==0:
@@ -397,7 +397,7 @@ class Dronekit_node(Node):
                     goal_handle.abort()
                     return result
                 
-                if travelling_counter%30==0: #each 3 seconds
+                if travelling_counter%30 == 0: #each 3 seconds
                     feedback_msg.distance = self.calculate_distance(path[0])
                     goal_handle.publish_feedback(feedback_msg)
                 else:
@@ -444,12 +444,12 @@ class Dronekit_node(Node):
     def rc_read_callback(self):
         #if there is no RC return home
         try:
-            if all([self.vehicle.channels['6'] == 0, self.vehicle.channels['6'] == 0]):
+            if all([self.vehicle.channels['5'] == 0, self.vehicle.channels['6'] == 0]):
                 if self.vehicle.mode != VehicleMode("RTL"):
                     self.get_logger().info("seems there is no RC connected, going into RTL mode")
                     self.status.manual_mode = True
                     self.vehicle.mode = VehicleMode("RTL")
-        
+
         try:
             if self.status.manual_mode!=self.vehicle.channels['6']>1600:
                 self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1600 else "automatic control regained")
