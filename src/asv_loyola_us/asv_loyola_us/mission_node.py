@@ -27,6 +27,8 @@ class Mission_node(Node):
         self.mission_filepath = os.path.expanduser(path)
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+        self.declare_parameter('mqtt_point_timeout', 15)
+        self.mqtt_point_timeout = self.get_parameter('mqtt_point_timeout').get_parameter_value().integer_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -218,6 +220,7 @@ class Mission_node(Node):
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
                     self.mission_mode=0
                 else:
+                    timeout_counter=0
                     self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
                     self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
@@ -225,6 +228,16 @@ class Mission_node(Node):
                 self.go_to(self.mqtt_waypoint) #go to the point
                 self.mqtt_waypoint = None #discard the point
                 #TODO: may be, implement a higher buffer for points
+            if self.waiting_for_action == False and self.mqtt_waypoint == None:
+                timeout_counter += 1
+                if timeout_counter > self.mqtt_point_timeout*10:
+                    self.mission_mode = 1
+                    self.get_logger().info(f"No point in { self.mqtt_point_timeout} seconds, going into standby mode")
+            else:
+                timeout_counter=0
+
+
+
 
 
         # RTL mode
