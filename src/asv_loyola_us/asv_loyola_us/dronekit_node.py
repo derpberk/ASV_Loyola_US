@@ -451,16 +451,16 @@ class Dronekit_node(Node):
                     self.vehicle.mode = VehicleMode("RTL")
 
         try:
-            if self.status.manual_mode!=self.vehicle.channels['6']>1600:
-                self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1600 else "automatic control regained")
-                self.status.manual_mode=self.vehicle.channels['6']>1600
+            if self.status.manual_mode!=self.vehicle.channels['6']>1200:
+                self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
+                self.status.manual_mode=self.vehicle.channels['6']>1200
             if self.status.manual_mode:
                 
                 if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
                     self.get_logger().info("manual switching vehicle mode to manual")
                     self.vehicle.mode = VehicleMode("MANUAL"):
-                if self.vehicle.armed!=self.vehicle.channels['5']>1600:
-                    if self.vehicle.channels['5']>1600:
+                if self.vehicle.armed!=self.vehicle.channels['5']>1200:
+                    if self.vehicle.channels['5']>1200:
                         self.vehicle.arm()
                         self.get_logger().info("manual arm")
                     else:
