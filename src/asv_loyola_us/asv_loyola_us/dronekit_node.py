@@ -39,15 +39,15 @@ class Dronekit_node(Node):
         self.declare_parameter('vehicle_ip', 'tcp:navio.local:5678')
         self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         self.declare_parameter('connect_timeout', 15)
-        self.connect_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.connect_timeout = self.get_parameter('connect_timeout').get_parameter_value().integer_value
         self.declare_parameter('max_distance', 5000)
         self.max_distance = self.get_parameter('max_distance').get_parameter_value().integer_value
         self.declare_parameter('vehicle_id', 1)
         self.vehicle_id=self.get_parameter('vehicle_id').get_parameter_value().integer_value
         self.declare_parameter('arm_timeout', 15)
-        self.arm_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.arm_timeout = self.get_parameter('arm_timeout').get_parameter_value().integer_value
         self.declare_parameter('travelling_timeout', 60)
-        self.travelling_timeout = self.get_parameter('timeout').get_parameter_value().integer_value
+        self.travelling_timeout = self.get_parameter('travelling_timeout').get_parameter_value().integer_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -91,6 +91,8 @@ class Dronekit_node(Node):
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
+            self.vehicle.add_message_listener('SYS_STATUS', self.vehicle_status_callback)
+
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to navio2 was refused")
             self.get_logger().fatal("Drone module is dead")
@@ -379,7 +381,7 @@ class Dronekit_node(Node):
                     else:
                         if arm_counter%10==0:
                             self.get_logger().info('received external disarm in auto mode, waiting for RC')
-                        if self.vehicle.channels['5']>1600:
+                        if self.vehicle.channels['5']>1200:
                             self.vehicle.arm()
                             self.get_logger().info('vehicle armed')
                             arm_counter=0
@@ -444,22 +446,23 @@ class Dronekit_node(Node):
     def rc_read_callback(self):
         #if there is no RC return home
         try:
+            #manage no RC detected
             if all([self.vehicle.channels['5'] == 0, self.vehicle.channels['6'] == 0]):
                 if self.vehicle.mode != VehicleMode("RTL"):
-                    self.get_logger().info("seems there is no RC connected, going into RTL mode")
+                    self.get_logger().info("seems there is no RC connected", once=True)
                     self.status.manual_mode = True
-                    self.vehicle.mode = VehicleMode("RTL")
-
-        try:
-            if self.status.manual_mode!=self.vehicle.channels['6']>1200:
+                    #self.vehicle.mode = VehicleMode("RTL")
+            #manage RC switch between auto and manual mode
+            if self.status.manual_mode!=(self.vehicle.channels['6']>1200):
                 self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
-                self.status.manual_mode=self.vehicle.channels['6']>1200
-            if self.status.manual_mode:
-                
+                self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
+
+            #manage arm when RC in manual
+            if self.status.manual_mode:                
                 if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
                     self.get_logger().info("manual switching vehicle mode to manual")
-                    self.vehicle.mode = VehicleMode("MANUAL"):
-                if self.vehicle.armed!=self.vehicle.channels['5']>1200:
+                    self.vehicle.mode = VehicleMode("MANUAL")
+                if self.vehicle.armed!=(self.vehicle.channels['5']>1200):
                     if self.vehicle.channels['5']>1200:
                         self.vehicle.arm()
                         self.get_logger().info("manual arm")
@@ -469,9 +472,13 @@ class Dronekit_node(Node):
         except:
             self.get_logger().info("rc read failed")
 
+    def vehicle_status_callback(self, vehicle, name, msg):
+        pass
+        #self.get_logger().info(f"{name} : {msg}")
 
     def dictionary(self):
         self.mode_type=dictionary("ASV_MODE")
+        
 
 def main(args=None):
     #init ROS2
@@ -500,6 +507,7 @@ def main(args=None):
         while publisher.get_subscription_count() == 0: #while no one is listening
             time.sleep(0.01) #we wait
         publisher.publish(msg) #we send the message
+        x.get_logger().fatal(msg.message)
         x.destroy_node() #we destroy node and finish
     #after close connection shut down ROS2
     rclpy.shutdown()
