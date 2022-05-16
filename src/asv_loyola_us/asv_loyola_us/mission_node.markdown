@@ -7,7 +7,7 @@ layout: page
 <H1>Mission Node</H1> 
 
 This is the main node of the ASV. It contains the <a href="#main">state machine(value)</a> of the robot and the main services that an user will use.
-
+![diagram](../../../assets/main.jpg)
 
 <pre>
 Services

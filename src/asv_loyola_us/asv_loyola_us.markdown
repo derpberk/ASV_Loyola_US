@@ -29,6 +29,8 @@ You can check the relationship between the nodes in the following [diagram](http
 
 For more information about the configuration of the package visit [setup](./setup)
 
+![diagram](../../assets/UML%20Diagram.jpg)
+
 
 <img src="../../miscelaneous/mission1.png" alt="drawing" width="45%" style="vertical-align:middle"/>
 <img src="../../miscelaneous/mission2.png" alt="drawing" width="45%"/>

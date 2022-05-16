@@ -8,6 +8,7 @@ layout: page
 
 This node is in charge or the communications with the server
 
+![diagram](../../../assets/mqtt.jpg)
 
 <pre>
 Services

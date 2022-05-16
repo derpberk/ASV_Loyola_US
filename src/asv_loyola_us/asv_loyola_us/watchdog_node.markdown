@@ -7,6 +7,7 @@ layout: page
 <H1>Watchdog Node</H1> 
 This node is in charge of raising errors if something is not working properly. must supervise every other node
 
+
 <FONT COLOR="#ff0000"> TODO:<br>
 - Logging, parsing and other errors handling need to be done</FONT>
 

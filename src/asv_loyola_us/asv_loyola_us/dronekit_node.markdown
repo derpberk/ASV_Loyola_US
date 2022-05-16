@@ -9,6 +9,7 @@ layout: page
 
 This node is in charge of the communication with the Raspberry pi
 
+![diagram](../../../assets/dronekit.jpg)
 
 <FONT COLOR="#ff0000"> TODO:<br>
 - The name of the node will be changed to communication when able to<br>
