@@ -7,10 +7,15 @@ import serial
 import random
 from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
+from asv_interfaces.action import SensorSample
+
 import Jetson.GPIO as GPIO
 from datetime import datetime
 from .submodulos.call_service import call_service #to call services
 import traceback
+
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
 
 class Sensor_node(Node):
 
@@ -45,6 +50,14 @@ class Sensor_node(Node):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.sensor_publisher = self.create_publisher(Sensor, 'sensors', 10)
 
+    def declare_actions(self):
+        self.sensor_read_server = ActionServer(self, SensorSample, 'sensor_read', execute_callback=self.sensor_read_execute_callback,
+                                         goal_callback=self.sensor_read_accept,
+                                         handle_accepted_callback=self.sensor_read_accepted_callback,
+                                         cancel_callback=self.sensor_read_cancel,
+                                         callback_group=ReentrantCallbackGroup())
+        self.goto_goal_handle = None
+
 
     def __init__(self):
         #start the node
@@ -62,6 +75,7 @@ class Sensor_node(Node):
             if self.DEBUG == False:
                 self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
             self.declare_services()
+            self.declare_actions()
         except ConnectionRefusedError:
             self.get_logger().error(f"Failed to connect to SmartWater module, connection refused")
             self.get_logger().fatal("Sensor module is dead")
@@ -82,6 +96,9 @@ class Sensor_node(Node):
         self.get_logger().info("sensor node initialized")
         #declare the services
 
+
+
+    """
     def get_sample_callback(self, request, response):
         self.get_logger().info(f"Sample requested")
         if request.debug:
@@ -123,32 +140,34 @@ class Sensor_node(Node):
             response.sensor.oxidation_reduction_potential = self.sensor_data.oxidation_reduction_potential
         return response
 
+    """
+
     def read_sensor(self, num, max_samples):
         self.get_logger().info(f"Taking sample {num+1} of {max_samples}")
-
+        
+        waited_time=0
         is_frame_ok = False  # While a frame hasnt been correctly read #
         #self.serial.reset_input_buffer()  # Erase the input buffer to start listening
-        waited_time=0 #timeout for sensor read
-
+        
         while not is_frame_ok:
             
             if self.status.manual_mode:
                 self.get_logger().error(f"manual mode, skipping sensor read")
-                return
+                return False
 
-            time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
-            
+
             if waited_time >= self.sensor_read_timeout:
                 self.get_logger().error(f"waited for sensor read for too long, skipping sensor read")
                 break
                 
             waited_time+=0.5 # add time to wait
 
+            time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
+                
             if self.DEBUG == False and self.serial.inWaiting() < 27:  # If frame has a lenght inferior to the minimum of the Header
                 continue
 
             else:
-
                 try:
                     if self.DEBUG:
                         bytes = "<=>#5C3F1CE819623CBF#SW3#7#BAT:98#WT:15.42#PH:-5.46#DO:8.0#COND:0.6#ORP:0.545#"
@@ -168,7 +187,7 @@ class Sensor_node(Node):
                             continue #discard this read
                     except:
                         self.get_logger().info(f"sensor weird read with no len: {last_frame}")
-                        continue#if len is 0 discard
+                        continue #if len is 0 discard
 
                     for field in last_frame:  # Iterate over the frame fields
 
@@ -207,8 +226,8 @@ class Sensor_node(Node):
                     self.sensor_publisher.publish(self.sensor_data) #send data to MQTT to store in server
                 except Exception as E:
 
-                    print("ERROR READING THE SENSOR. THIS IS NO GOOD!")
-                    print("The cause of the exception: " + E)
+                    self.get_logger().info("ERROR READING THE SENSOR. THIS IS NO GOOD!")
+                    self.get_logger().info("The cause of the exception: " + E)
                     #self.serial.reset_input_buffer()
 
     def status_suscriber_callback(self, msg):
@@ -245,6 +264,63 @@ class Sensor_node(Node):
         self.status = msg
 
 
+        ######################################### ACTION SENSOR READ DESCRIPTION ############################################
+
+    def sensor_read_accept(self, goal_request):
+        self.get_logger().info(f"Sample requested")
+        #if we are attending another call exit
+        if self.sensor_goal_handle is not None and self.sensor_goal_handle.is_active:
+            self.get_logger().error(f'Sensor Action is busy')
+            return GoalResponse.REJECT
+        return GoalResponse.ACCEPT
+
+    def sensor_read_accepted_callback(self, goal_handle):
+        #we could make a list of goal handles and make a queue of points to go to and accept everything,
+        #for the time being, we will just start executing
+        self.sensor_goal_handle=goal_handle
+        goal_handle.execute() #execute sensor_read_execute_callback
+
+    def sensor_read_cancel(self, goal_handle):
+        """Accept or reject a client request to cancel an action."""
+        self.get_logger().info('Received sensor read cancel request')
+        return CancelResponse.ACCEPT
+
+
+    def sensor_read_execute_callback(self, goal_handle): #TODO: check correct behaviour
+        feedback_msg = SensorSample.Feedback()
+        result=SensorSample.Result()
+        self.sensor_data = Sensor()
+
+        if self.pump_installed:
+            GPIO.output(self.pump_channel, GPIO.HIGH)  # start filling the tank
+            self.get_logger().info("activando bomba")
+            time.sleep(10.0)                          #wait 10 seconds
+        else:
+            for i in range(self.num_samples):
+                self.read_sensor(i, self.num_samples)                        #read smart water
+                time.sleep(self.time_between_samples)
+                if goal_handle.is_cancel_requested:#event mission canceled
+                    #make it loiter around actual position
+                    goal_handle.canceled()
+                    result.finish_flag = "Action cancelled"
+                    feedback_msg.sensor_read=self.sensor_data
+                    response.sensor_reads.append(self.sensor_data)
+                    goal_handle.publish_feedback(feedback_msg)
+                    return result
+        if self.pump_installed:
+            GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
+            self.get_logger().info("deteniendo bomba")
+            
+
+        goal_handle.succeed()
+        result.success = True
+        result.finish_flag = "Normal execution"
+        return result
+
+
+
+    ####################################### END ACTION DEFINITION ############################################
+
 def main(args=None):
     #init ROS2
     rclpy.init(args=args)
@@ -252,7 +328,7 @@ def main(args=None):
         # start a class that servers the services
         sensor_node = Sensor_node()
         # loop the services
-        rclpy.spin(sensor_node)
+        rclpy.spin(sensor_node, executor=MultiThreadedExecutor())
         sensor_node.destroy_node()
     except:
         """

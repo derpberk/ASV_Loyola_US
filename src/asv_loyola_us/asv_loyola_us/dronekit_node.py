@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
-from rclpy.executors import MultiThreadedExecutor
-from rclpy.callback_groups import ReentrantCallbackGroup
+    from rclpy.executors import MultiThreadedExecutor
+    from rclpy.callback_groups import ReentrantCallbackGroup
 #TODO: deprecate dronekit, use pymavlink
 from dronekit import connect, VehicleMode, LocationGlobal
 import numpy as np
@@ -12,13 +12,11 @@ from math import atan2
 from .submodulos.dictionary import dictionary
 import time
 
+from numpy import uint
 #import intefaces
-from asv_interfaces.msg import Status, Nodeupdate
+from asv_interfaces.msg import Status, Nodeupdate, Obstacles
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
-from asv_interfaces.action import Goto
-
-
-modes_str = []
+from asv_interfaces.action import Goto, SensorSample
 
 # This node generates the necessary services for  comunication towards the drone
 #parameters are only read at start
@@ -64,6 +62,8 @@ class Dronekit_node(Node):
         timer_period = 0.5  # seconds
         self.status_publisher = self.create_publisher(Status, 'status', 10)
         self.status_publisher_timer = self.create_timer(timer_period, self.status_publish)
+        self.obstacles_subscriber = self.create_subscription(Obstacles, 'camera_obstacles', self.camera_obstacles_callback, 10)
+
 
     def declare_actions(self):
         self.go_to_server = ActionServer(self, Goto, 'goto', execute_callback=self.goto_execute_callback,
@@ -73,6 +73,7 @@ class Dronekit_node(Node):
                                          callback_group=ReentrantCallbackGroup())
         self.goto_goal_handle = None
         #TODO: if we want to call this server more than once at a time consider using multithread executor in sping and reentrant_callback_group in action servers
+        self.sensor_action_client = ActionClient(self, SensorSample, 'sensor_read') #action client
 
     def __init__(self):
         # start the node
@@ -82,6 +83,7 @@ class Dronekit_node(Node):
         self.parameters()
         self.status = Status()
 
+        self.last_obstacle_distance_sent_ms=0
         # connect to vehicle
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         try:
@@ -92,7 +94,11 @@ class Dronekit_node(Node):
             self.declare_services()
             self.declare_actions()
             self.vehicle.add_message_listener('SYS_STATUS', self.vehicle_status_callback)
-
+            self.cmds = vehicle.commands
+            self.cmds.download()
+            self.cmds.wait_ready()
+            self.home = vehicle.home_location
+            self.get_logger().info(f"Vehicle home location is {self.home}")
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to navio2 was refused")
             self.get_logger().fatal("Drone module is dead")
@@ -340,6 +346,7 @@ class Dronekit_node(Node):
                     #make it loiter around actual position
                     goal_handle.canceled()
                     self.vehicle.mode = VehicleMode("LOITER")
+                    self.get_logger().info('Goto Action canceled')
                     result.finish_flag = "Action cancelled"
                     return result
                 
@@ -355,14 +362,14 @@ class Dronekit_node(Node):
                         self.vehicle.mode = VehicleMode("MANUAL")
                         self.vehicle.disarm()
                         ekf_failed=True
-                    elif counter%30 == 0:
+                    elif ekf_counter%30 == 0:
                             self.get_logger().info(f"System Status: \nmode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
-                            #TODO: include a counter, if we keep in this state for too much time leave
                     if ekf_counter > self.ekf_timeout*10:
                         result.finish_flag = "ekf timeout"
                         self.get_logger().info('EKF timeout, exiting action')
                         goal_handle.abort()
                         return result
+                    ekf_counter+=1
                 
                 elif self.vehicle.mode != VehicleMode("GUIDED"): #vehicle is not in desired mode
                     self.get_logger().warning("asv_mode was changed externally")
@@ -370,6 +377,7 @@ class Dronekit_node(Node):
                         self.get_logger().info("EKF failsafe cleared, resuming mission")
                         self.get_logger().info(f"System Status: mode {self.vehicle.mode.name}, GPS_status: {self.vehicle.gps_0}, System status: {self.vehicle.system_status.state}, System able to arm {self.vehicle.is_armable} ")
                         ekf_failed=False #reset flag
+                        ekf_counter=0
                         self.vehicle.arm() #arm to avoid inconsistent state
                     self.vehicle.mode = VehicleMode("GUIDED") #restore mode
                     self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
@@ -402,6 +410,7 @@ class Dronekit_node(Node):
                 if travelling_counter%30 == 0: #each 3 seconds
                     feedback_msg.distance = self.calculate_distance(path[0])
                     goal_handle.publish_feedback(feedback_msg)
+                    travelling_counter+=1
                 else:
                     travelling_counter+=1
                 time.sleep(0.1)
@@ -413,7 +422,27 @@ class Dronekit_node(Node):
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
-        value=self.call_service(self.take_sample_client, Takesample.Request())
+        self.waiting_for_sensor_read=True
+        self.sensor_action_client.wait_for_server()
+        goal_msg = SensorSample.Goal()
+        self._send_goal_future = self.sensor_action_client.send_goal_async(goal_msg, feedback_callback=self.sensor_feedback_callback)
+        self._send_goal_future.add_done_callback(self.sensor_response)
+        while rclpy.ok() and self.waiting_for_sensor_read:
+            if goal_handle.is_cancel_requested:#event mission canceled
+                    #make it loiter around actual position
+                    goal_handle.canceled()
+                    self.vehicle.mode = VehicleMode("LOITER")
+                    self.get_logger().info('Goto Action canceled')
+                    result.finish_flag = "Action cancelled"
+                    self.cancel_sensor_read()
+                    return result
+                
+            elif self.status.manual_mode:
+                    self.get_logger().warning("manual interruption during mission")
+                    result.finish_flag = "Manual interruption"
+                    self.cancel_sensor_read()
+                    goal_handle.abort()
+                    return result
         #self.get_logger().debug(f'Sample value {value}')
         result.success = True
         result.finish_flag = "Normal execution"
@@ -479,6 +508,87 @@ class Dronekit_node(Node):
     def dictionary(self):
         self.mode_type=dictionary("ASV_MODE")
         
+    
+    """
+        This function forces the stop of a sensor read
+    """   
+    def cancel_sensor_read(self):
+        if self.waiting_for_sensor_read: #if the action was active
+            self.get_logger().info("the asv was taking a sample, canceling")
+            self.sensor_goal_handle.cancel_goal_async()
+        pass
+
+
+    """
+        This function prints the feedback from the goto action
+    """     
+    def sensor_feedback_callback(self, feedback):
+        sensor_read= feedback.feedback.sensor_read #TODO: unused
+
+    """
+        This function is the first answer from the action service, indicates whether the request is accepted or rejected
+    """   
+    def sensor_response(self, future):
+        self.goal_handle = future.result()
+        if not self.goal_handle.accepted:
+            self.get_logger().error('Sensor read rejected :(, something is not working')
+            return
+        self.get_logger().debug('Sensor read accepted :)')
+        self._get_result_future = self.goal_handle.get_result_async()
+        self._get_result_future.add_done_callback(self.go_to_finished)
+
+
+    """
+        This function prints the result once the action finishes
+    """   
+    def sensor_read_finished(self, future):
+        result = future.result().result #this variable is the result specified in the action
+        status = future.result().status # ABORT = 4     CANCELED = 5    CANCEL_GOAL = 2     EXECUTE = 1     SUCCEED = 3     NOT_SPECIFIED = 6
+        status_string= ["0 IS NOT AN STATE", "EXECUTE", "CANCEL_GOAL", "SUCCEEDED", "ABORT", "CANCELED", "NOT SPECIFIED"]
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().debug('Goal succeeded! Result: {0}'.format(result.success))
+        else:
+            self.get_logger().info(f'Sensor read failed with status: {status_string[int(status)]}')
+            self.get_logger().info(f'reason : {result.finish_flag}')           
+       self.waiting_for_sensor_read = False # we indicate that sensor read has finished
+
+    def camera_obstacles_callback(self, msg)
+
+
+        current_time_us = time.time_ns() // 1000
+
+        if current_time_us == self.last_obstacle_distance_sent_ms:
+            # no new frame
+            return
+        self.last_obstacle_distance_sent_ms = current_time_us
+
+        distances=[]
+
+        if len(msg.distance)>72: #max size of array is 72
+            distance=msg.distance[0:72]
+            increment_f=msg.angle[0:72] #angle comes in float, no transformation, must be increment positive (clockwise) 
+        else:
+            distance=msg.distance
+            increment_f=msg.angle
+        for i in distance:
+            distances.append(uint(i*100))#ardupilot needs the distance in cm in a uint16 format
+        angle_offset=0
+
+
+        if angle_offset is None or increment_f is None:
+            progress("Please call set_obstacle_distance_params before continue")
+        else:
+            conn.mav.obstacle_distance_send(
+                current_time_us,    # us Timestamp (UNIX time or time since system boot)
+                0,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
+                distances,          # distances,    uint16_t[72],   cm
+                0,                  # increment,    uint8_t,        deg
+                30,	                # min_distance, uint16_t,       cm
+                2000,               # max_distance, uint16_t,       cm
+                increment_f,	    # increment_f,  float,          deg
+                angle_offset,       # angle_offset, float,          deg
+                12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
+            )
 
 def main(args=None):
     #init ROS2

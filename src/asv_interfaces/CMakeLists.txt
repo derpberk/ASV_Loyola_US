@@ -20,6 +20,7 @@ set(msg_files
   "msg/Samplevalue.msg"
   "msg/Location.msg"
   "msg/Sensor.msg"
+  "msg/Obstacles.msg"
   #"msg/Message2.msg"
   # etc
   )
@@ -43,6 +44,7 @@ set(action_files
   "action/Newmission.action"
   "action/Samplepoint.action"
   "action/Goto.action"
+  "action/SensorSample.action"
   #"action/Action2.action"
    # etc
   )
