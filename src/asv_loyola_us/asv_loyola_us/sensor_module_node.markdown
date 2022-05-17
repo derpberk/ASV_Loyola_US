@@ -9,10 +9,10 @@ layout: page
 
 This is the sensor node of the ASV. 
 
+![diagram](../../../assets/sensors.jpg)
 
 <pre>
 Services
-/<a href="./services/get_sample.html">get_sample</a>  <a href="#get_sample_callback" style="float:right;text-align:right;">get_sample_callback</a>
 /<a href="./services/Sensor_params.html">Sensor_params</a>  <a href="#update_parameters_callback" style="float:right;text-align:right;">update_parameters_callback</a>
 </pre>
 <pre>
@@ -21,7 +21,7 @@ Topics
 </pre>
 <pre>
 Actions
-/
+<a href="./actions/sensor_read.html">sensor_read</a>  <a href="#sensor_read_callback" style="float:right;text-align:right;">sensor_read_action</a>
 </pre>
 
 <pre>
@@ -35,7 +35,8 @@ functions
 <pre>
 variables
 <a id="self.is_frame_ok">is_frame_ok</a>
-<a id="self.samplepoints">samplepoints</a>
+<a id="self.sensor_data">sensor_data</a>
+<a id="waited_time">waited_time</a>
 </pre>
 
 <pre>
@@ -45,29 +46,28 @@ Parameters
 <a href="./parameters/num_samples.html">num_samples</a>
 <a href="./parameters/pump.html">pump</a>
 <a href="./parameters/pump_channel.html">pump_channel</a>
-<a href="./parameters/timeout.html">timeout</a>
+<a href="./parameters/sensor_read_timeout.html">sensor_read_timeout</a>
+<a href="./parameters/timeout.html">timeout</a> 
 <a href="./parameters/time_between_samples.html">time_between_samples</a>
-<a href="./parameters/USB_string.html">USB_string</a>
+<a href="./parameters/USB_string.html">USB_string</a>ç
 </pre>
-
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%% START OF FUNCTION DEFINITIONS AREA %%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GET SAMPLE CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>get_sample_callback() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L80" style="float:right;text-align:right;">code</a></H3>
-<a id="get_sample_callback"></a>
+<a id="sensor_read_callback"></a>
 
-This function is a callback from the service <a href="./services/get_sample.html">/get_sample</a>. It takes the number of samples specified in the <a href="./parameters/num_samples.html">num_samples</a> parameter. 
+This function is a callback from the action <a href="./actions/sensor_read.html">/sensor_read</a>. It takes the number of samples specified in the <a href="./parameters/num_samples.html">num_samples</a> parameter. 
 
 - params
-  - request
-    - debug:
-     - True — Take a debug value
-     - False — Take a real sample from the Smart Water
+  - debug:
+    - True — Take a debug value
+    - False — Take a real sample from the Smart Water
 - output
-  - response
-    - sensor: <a href="./services/get_sample.html">Sensor</a> data type indicating sensor reads
-
+  - sensor_reads: <a href="./services/get_sample.html">Sensor[]</a> data type indicating all sensor reads
+- feedback
+  - sensor_read: <a href="./services/get_sample.html">Sensor</a> data type indicating sensor read
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ SENSOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -75,9 +75,10 @@ This function is a callback from the service <a href="./services/get_sample.html
 <a id="read_sensor"></a>
 
 This function Reads from the serial port of the Smart Water and parses the message into variables.
+it has a timeout indicated in <a href="./parameters/sensor_read_timeout.html">
 
 
-<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ SENSOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPDATE PARAMETERS CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>update_parameters_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L202" style="float:right;text-align:right;">code</a></H3>
 <a id="update_parameters_callback"></a>

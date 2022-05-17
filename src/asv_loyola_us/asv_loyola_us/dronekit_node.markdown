@@ -11,10 +11,6 @@ This node is in charge of the communication with the Raspberry pi
 
 ![diagram](../../../assets/dronekit.jpg)
 
-<FONT COLOR="#ff0000"> TODO:<br>
-- The name of the node will be changed to communication when able to<br>
-- The communication must be translated to pymavlink deprecating dronekit to avoid errors and simplify communication as dronekit is way too much transparent</FONT>
-
 <pre>
 Services
 /<a href="./services/arm_vehicle.html">arm_vehicle</a>  <a href="#arm_vehicle_callback" style="float:right;text-align:right;">arm_vehicle_callback</a>
@@ -36,6 +32,7 @@ functions
 <a href="#arm_vehicle_callback">arm_vehicle_callback(request, response)</a>
 <a href="#change_asv_mode_callback">change_asv_mode_callback(request, response)</a>
 <a href="#calculate_distance">calculate_distance(goal_loc)</a>
+<a href="#camera_obstacle_callback">camera_obstacle_callback(msg)</a>
 <a href="#condition_yaw">condition_yaw(heading, relative=false)</a>
 <a href="#dictionary">dictionary(dictionary)</a>
 <a href="#get_bearing">get_bearing(location2)</a>
@@ -113,6 +110,8 @@ This function is used due to the [issue](https://github.com/diydrones/ardupilot/
   - heading: angle in degrees to take in yaw
   - relative: flag to take the heading value in absolute value or with a relative offset
 
+<FONT COLOR="#ff0000"> TODO:<br>
+- THIS FUNCTION HAS BEEN DEPRECATED IN VERSION 2.0</FONT>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CALCULATE DISTANCE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -237,14 +236,9 @@ Once samplepoint is reached, change into loiter mode and take sample, then retur
 This function returns true if the goal_loc is withing 1.5m of the drone, false otherwise.
 
 - params
-  - current_loc: actual position
   - goal_loc: reference position
 - output
   - True if the waypoint is within 0.5 meters to the target waypoint
-  
-
-<FONT COLOR="#ff0000"> TODO:<br>
-- There is no need to use the current_loc param</FONT>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STATUS PUBLISH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -253,10 +247,21 @@ This function returns true if the goal_loc is withing 1.5m of the drone, false o
 
 This function publishes the [status](./404) (battery, longitude, latitude, yaw, vehicle id, armed_status) at a rate of 2Hz on the topic [/status](./404)
 
-<FONT COLOR="#999900"> WARNING:<br>
-- This will raise an error if the data read from the drone is of different type, the data must be of the type Status() variables need.<br>
-- If data is invalid it will publish a -1 value (value imposible to give normally)</FONT>
 
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STATUS PUBLISH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+
+<H3>camera_obstacle_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/dronekit_node.py#L102" style="float:right;text-align:right;">code</a></H3>
+<a id="camera_obstacle_callback"></a>
+
+This function is suscribed to the topic <a href="/topics/camera_obstacle.html">/camera_obstacle</a>, it parses the message and sends it to ardusub so it includes it in its map and evades obstacles
+
+-params:
+  -msg:
+    - distance: array indicating distance to the obstacle in cm
+    - angle_increment: array indicating the angle occupied by the obstacle
+
+<FONT COLOR="#999900"> WARNING:<br>
+TODO</FONT>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
