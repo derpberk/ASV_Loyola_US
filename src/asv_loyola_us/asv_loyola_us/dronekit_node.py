@@ -1,8 +1,8 @@
 import rclpy
 from rclpy.node import Node
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
-    from rclpy.executors import MultiThreadedExecutor
-    from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import ReentrantCallbackGroup
 #TODO: deprecate dronekit, use pymavlink
 from dronekit import connect, VehicleMode, LocationGlobal
 import numpy as np
@@ -53,6 +53,8 @@ class Dronekit_node(Node):
         #host
         self.arm_vehicle_service = self.create_service(CommandBool, 'arm_vehicle', self.arm_vehicle_callback)
         self.change_ASV_mode_service = self.create_service(ASVmode, 'change_asv_mode', self.change_asv_mode_callback)
+        self.reset_home_service = self.create_service(CommandBool, 'reset_home', self.reset_home_callback)
+
         #client
         self.asv_mission_mode_client = self.create_client(ASVmode, 'change_mission_mode')
         self.take_sample_client = self.create_client(Takesample, 'get_sample')
@@ -95,6 +97,7 @@ class Dronekit_node(Node):
             self.declare_actions()
             self.vehicle.add_message_listener('SYS_STATUS', self.vehicle_status_callback)
             self.cmds = vehicle.commands
+            self.get_logger().info(f"Waiting for initialization")
             self.cmds.download()
             self.cmds.wait_ready()
             self.home = vehicle.home_location
@@ -336,7 +339,7 @@ class Dronekit_node(Node):
             #extract path
             path=path.point_list
         self.vehicle.mode = VehicleMode("GUIDED")
-        self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
+        #self.condition_yaw(self.get_bearing(self.vehicle.location.global_relative_frame, goal_handle.request.samplepoint))
         time.sleep(1)
         while (rclpy.ok()) and (len(path)>0):
             travelling_counter=0 #counter time since going to waypoint
@@ -410,9 +413,8 @@ class Dronekit_node(Node):
                 if travelling_counter%30 == 0: #each 3 seconds
                     feedback_msg.distance = self.calculate_distance(path[0])
                     goal_handle.publish_feedback(feedback_msg)
-                    travelling_counter+=1
-                else:
-                    travelling_counter+=1
+
+                travelling_counter+=1
                 time.sleep(0.1)
             #waypoint reached so go to next one
             if len(path)>1:
@@ -429,12 +431,10 @@ class Dronekit_node(Node):
         self._send_goal_future.add_done_callback(self.sensor_response)
         while rclpy.ok() and self.waiting_for_sensor_read:
             if goal_handle.is_cancel_requested:#event mission canceled
-                    #make it loiter around actual position
-                    goal_handle.canceled()
-                    self.vehicle.mode = VehicleMode("LOITER")
+                    goal_handle.canceled() #acknowledge goto cancelled
                     self.get_logger().info('Goto Action canceled')
                     result.finish_flag = "Action cancelled"
-                    self.cancel_sensor_read()
+                    self.cancel_sensor_read() #stop sensor read
                     return result
                 
             elif self.status.manual_mode:
@@ -550,13 +550,20 @@ class Dronekit_node(Node):
         else:
             self.get_logger().info(f'Sensor read failed with status: {status_string[int(status)]}')
             self.get_logger().info(f'reason : {result.finish_flag}')           
-       self.waiting_for_sensor_read = False # we indicate that sensor read has finished
-
-    def camera_obstacles_callback(self, msg)
+        self.waiting_for_sensor_read = False # we indicate that sensor read has finished
 
 
+
+    """
+    This function is called as a callback from the topic obstacles
+    @params distance, angle_increment:   arrays indicating in each index distance and angle occupied by an obstacle.
+    if distance is greater than 20m then it is considered no obstacle. maximum ammount inpts 72.
+    
+    the data received should be a mean of the distance towards the object in order to achieve less than 72 obstacles in a 180º fov.
+    check https://ardupilot.org/dev/docs/code-overview-object-avoidance.html
+    """
+    def camera_obstacles_callback(self, msg):
         current_time_us = time.time_ns() // 1000
-
         if current_time_us == self.last_obstacle_distance_sent_ms:
             # no new frame
             return
@@ -570,26 +577,29 @@ class Dronekit_node(Node):
         else:
             distance=msg.distance
             increment_f=msg.angle
+
         for i in distance:
             distances.append(uint(i*100))#ardupilot needs the distance in cm in a uint16 format
-        angle_offset=0
+        
+        angle_offset=0 #we will start at 180º, no offset
 
 
-        if angle_offset is None or increment_f is None:
-            progress("Please call set_obstacle_distance_params before continue")
-        else:
-            conn.mav.obstacle_distance_send(
-                current_time_us,    # us Timestamp (UNIX time or time since system boot)
-                0,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
-                distances,          # distances,    uint16_t[72],   cm
-                0,                  # increment,    uint8_t,        deg
-                30,	                # min_distance, uint16_t,       cm
-                2000,               # max_distance, uint16_t,       cm
-                increment_f,	    # increment_f,  float,          deg
-                angle_offset,       # angle_offset, float,          deg
-                12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
-            )
+        msg = self.vehicle.message_factory.obstacle_distance_encode(
+            current_time_us,    # us Timestamp (UNIX time or time since system boot)
+            4,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
+            distances,          # distances,    uint16_t[72],   cm
+            0,                  # increment,    uint8_t,        deg
+            30,	                # min_distance, uint16_t,       cm
+            2000,               # max_distance, uint16_t,       cm
+            increment_f,	    # increment_f,  float,          deg
+            angle_offset,       # angle_offset, float,          deg
+            12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
+        )
+        self.vehicle.send_mavlink(msg)
 
+    def reset_home_callback(self, request, response)
+        self.vehicle.home_location = self.vehicle.location.global_frame
+        
 def main(args=None):
     #init ROS2
     rclpy.init(args=args)

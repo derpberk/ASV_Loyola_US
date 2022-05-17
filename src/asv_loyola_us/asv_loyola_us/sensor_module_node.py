@@ -76,6 +76,7 @@ class Sensor_node(Node):
                 self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
             self.declare_services()
             self.declare_actions()
+            self.get_logger().info("sensor node initialized")
         except ConnectionRefusedError:
             self.get_logger().error(f"Failed to connect to SmartWater module, connection refused")
             self.get_logger().fatal("Sensor module is dead")
@@ -93,54 +94,8 @@ class Sensor_node(Node):
             self.get_logger().error(f"Connection to SmartWater could not be made, unknown error:\n {error}")
             self.get_logger().fatal("Sensor module is dead")
             self.destroy_node()
-        self.get_logger().info("sensor node initialized")
         #declare the services
 
-
-
-    """
-    def get_sample_callback(self, request, response):
-        self.get_logger().info(f"Sample requested")
-        if request.debug:
-            self.get_logger().info(f"The sample will return a debug value")
-            time.sleep(6.0)
-            response.date=str(datetime.now())
-            response.ph=random.random()*8.0
-            response.ph_volt=random.random()*8.0
-            response.ph_temp=15.0+random.random()*10.0
-            response.temperature=15.0+random.random()*10.0
-            response.salinity=random.random()*4.0
-            response.o2_percentage=random.random()*98.0
-            response.conductivity = 20 + random.random()*10
-            response.conductivity_res = 4+  random.random()*10
-            response.oxidation_reduction_potential =  4+  random.random()*10
-        else:
-            if self.pump_installed:
-                GPIO.output(self.pump_channel, GPIO.HIGH)  # start filling the tank
-                self.get_logger().info("activando bomba")
-                time.sleep(10.0)                          #wait 10 seconds
-            else:
-                time.sleep(1.0)
-            for i in range(self.num_samples):
-                self.read_sensor(i, self.num_samples)                        #read smart water
-                time.sleep(self.time_between_samples)
-            if self.pump_installed:
-                GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
-                self.get_logger().info("deteniendo bomba")
-            response.sensor.date=self.sensor_data.date       #return values
-            response.sensor.smart_water_battery = self.sensor_data.smart_water_battery
-            response.sensor.ph_volt = self.sensor_data.ph_volt
-            response.sensor.ph_temp = self.sensor_data.ph_temp
-            response.sensor.ph = self.sensor_data.ph
-            response.sensor.salinity = self.sensor_data.salinity
-            response.sensor.o2_percentage = self.sensor_data.o2_percentage
-            response.sensor.temperature = self.sensor_data.temperature
-            response.sensor.conductivity = self.sensor_data.conductivity
-            response.sensor.conductivity_res = self.sensor_data.conductivity_res
-            response.sensor.oxidation_reduction_potential = self.sensor_data.oxidation_reduction_potential
-        return response
-
-    """
 
     def read_sensor(self, num, max_samples):
         self.get_logger().info(f"Taking sample {num+1} of {max_samples}")
@@ -298,15 +253,18 @@ class Sensor_node(Node):
         else:
             for i in range(self.num_samples):
                 self.read_sensor(i, self.num_samples)                        #read smart water
-                time.sleep(self.time_between_samples)
+                feedback_msg.sensor_read=self.sensor_data
+                response.sensor_reads.append(self.sensor_data)
+                goal_handle.publish_feedback(feedback_msg)
                 if goal_handle.is_cancel_requested:#event mission canceled
                     #make it loiter around actual position
                     goal_handle.canceled()
                     result.finish_flag = "Action cancelled"
-                    feedback_msg.sensor_read=self.sensor_data
-                    response.sensor_reads.append(self.sensor_data)
-                    goal_handle.publish_feedback(feedback_msg)
+                    if self.pump_installed:
+                        GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
+                        self.get_logger().info("deteniendo bomba")
                     return result
+                time.sleep(self.time_between_samples)
         if self.pump_installed:
             GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
             self.get_logger().info("deteniendo bomba")
