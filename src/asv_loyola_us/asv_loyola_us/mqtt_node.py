@@ -36,6 +36,8 @@ class MQTT_node(Node):
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
         self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
         self.load_map_client = self.create_client(CommandStr, 'load_map')
+        self.reset_home_client = self.create_client(CommandBool, 'reset_home')
+
         
 
 
@@ -96,6 +98,7 @@ class MQTT_node(Node):
         self.camera_signal=CommandBool.Request()
         self.update_params=False
         self.read_params=False
+        self.reset_home=None
         self.enable_planner=CommandBool.Request()
         self.sensor_params=SensorParams.Request()
         self.enable_planner.value=True #prestart as no planner
@@ -153,9 +156,11 @@ class MQTT_node(Node):
                 elif self.map_name != None:
                     call_service(self, self.load_map_client, self.map_name)
                     self.map_name=None
+                elif self.reset_home!= None:
+                    call_service(self, self.reset_home_client, self.reset_home)
+                    self.reset_home=None                    
                 self.processing = False
             sleep(0.1)
-
 
     def asv_send_info(self):
         """
@@ -263,6 +268,9 @@ class MQTT_node(Node):
             if "load_map" in message:
                 self.map_name=CommandStr.Request()
                 self.map_name.string=message["load_map"]
+
+            if "reset_home" in message:
+                self.reset_home=CommandBool.Request()
 
     def on_disconnect(self,  client,  __, _):
         sleep(1)

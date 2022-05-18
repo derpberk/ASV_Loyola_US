@@ -597,7 +597,7 @@ class Dronekit_node(Node):
         )
         self.vehicle.send_mavlink(msg)
 
-    def reset_home_callback(self, request, response)
+    def reset_home_callback(self, request, response):
         self.vehicle.home_location = self.vehicle.location.global_frame
         
 def main(args=None):

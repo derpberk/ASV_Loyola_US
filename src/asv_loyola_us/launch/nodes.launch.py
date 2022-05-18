@@ -24,7 +24,7 @@ def generate_launch_description():
     planner = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='planner',
-        name='mission_node',
+        name='planner_node',
         parameters = [config]
     )
 
