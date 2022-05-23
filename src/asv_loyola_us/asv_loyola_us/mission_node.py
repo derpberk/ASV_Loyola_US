@@ -27,8 +27,8 @@ class Mission_node(Node):
         self.mission_filepath = os.path.expanduser(path)
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
-        self.declare_parameter('mqtt_point_timeout', 15)
-        self.mqtt_point_timeout = self.get_parameter('mqtt_point_timeout').get_parameter_value().integer_value
+        self.declare_parameter('simple_goto_timeout', 15)
+        self.simple_goto_timeout = self.get_parameter('simple_goto_timeout').get_parameter_value().integer_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -228,9 +228,9 @@ class Mission_node(Node):
                 #TODO: may be, implement a higher buffer for points
             if self.waiting_for_action == False and self.mqtt_waypoint == None:
                 timeout_counter += 1
-                if timeout_counter > self.mqtt_point_timeout*10:
+                if timeout_counter > self.simple_goto_timeout*10:
                     self.mission_mode = 1
-                    self.get_logger().info(f"No point in { self.mqtt_point_timeout} seconds, going into standby mode")
+                    self.get_logger().info(f"No point in { self.simple_goto_timeout} seconds, going into standby mode")
             else:
                 timeout_counter=0
 

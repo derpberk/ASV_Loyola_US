@@ -1,6 +1,6 @@
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer, CancelResponse, GoalResponse
+from rclpy.action import ActionServer, CancelResponse, GoalResponse, ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 #TODO: deprecate dronekit, use pymavlink
@@ -11,12 +11,16 @@ import traceback
 from math import atan2
 from .submodulos.dictionary import dictionary
 import time
-
+from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle distance information
 from numpy import uint
 #import intefaces
 from asv_interfaces.msg import Status, Nodeupdate, Obstacles
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
 from asv_interfaces.action import Goto, SensorSample
+
+
+import os
+os.environ["MAVLINK20"] = "1"
 
 # This node generates the necessary services for  comunication towards the drone
 #parameters are only read at start
@@ -89,18 +93,18 @@ class Dronekit_node(Node):
         # connect to vehicle
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         try:
-            self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout)
+            self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout, source_system=1, source_component=93)
             self.dictionary()
             self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback)
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
             self.vehicle.add_message_listener('SYS_STATUS', self.vehicle_status_callback)
-            self.cmds = vehicle.commands
+            self.cmds = self.vehicle.commands
             self.get_logger().info(f"Waiting for initialization")
             self.cmds.download()
             self.cmds.wait_ready()
-            self.home = vehicle.home_location
+            self.home = self.vehicle.home_location
             self.get_logger().info(f"Vehicle home location is {self.home}")
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to navio2 was refused")
@@ -479,15 +483,15 @@ class Dronekit_node(Node):
             if all([self.vehicle.channels['5'] == 0, self.vehicle.channels['6'] == 0]):
                 if self.vehicle.mode != VehicleMode("RTL"):
                     self.get_logger().info("seems there is no RC connected", once=True)
-                    self.status.manual_mode = True
+                    self.status.manual_mode = False #override RC if there is no connection
                     #self.vehicle.mode = VehicleMode("RTL")
             #manage RC switch between auto and manual mode
-            if self.status.manual_mode!=(self.vehicle.channels['6']>1200):
+            elif self.status.manual_mode!=(self.vehicle.channels['6']>1200):
                 self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
                 self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
 
             #manage arm when RC in manual
-            if self.status.manual_mode:                
+            elif self.status.manual_mode:                
                 if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
                     self.get_logger().info("manual switching vehicle mode to manual")
                     self.vehicle.mode = VehicleMode("MANUAL")
@@ -499,7 +503,7 @@ class Dronekit_node(Node):
                         self.vehicle.disarm()
                         self.get_logger().info("manual disarm")
         except:
-            self.get_logger().info("rc read failed")
+            pass
 
     def vehicle_status_callback(self, vehicle, name, msg):
         pass
@@ -554,6 +558,7 @@ class Dronekit_node(Node):
 
 
 
+    #TODO: Dronekit is not able to send this message
     """
     This function is called as a callback from the topic obstacles
     @params distance, angle_increment:   arrays indicating in each index distance and angle occupied by an obstacle.
@@ -563,39 +568,38 @@ class Dronekit_node(Node):
     check https://ardupilot.org/dev/docs/code-overview-object-avoidance.html
     """
     def camera_obstacles_callback(self, msg):
-        current_time_us = time.time_ns() // 1000
-        if current_time_us == self.last_obstacle_distance_sent_ms:
-            # no new frame
-            return
-        self.last_obstacle_distance_sent_ms = current_time_us
 
-        distances=[]
+        angle_increment=msg.angle_increment
+
+        distance=[2000 for i in range(72)] #2000 or greater is no obstacle
 
         if len(msg.distance)>72: #max size of array is 72
-            distance=msg.distance[0:72]
-            increment_f=msg.angle[0:72] #angle comes in float, no transformation, must be increment positive (clockwise) 
+            size=72
         else:
-            distance=msg.distance
-            increment_f=msg.angle
+            size=len(msg.distance)
 
-        for i in distance:
-            distances.append(uint(i*100))#ardupilot needs the distance in cm in a uint16 format
-        
-        angle_offset=0 #we will start at 180º, no offset
+        for i in range(size):
+            distance[i]=uint(msg.distance[i])
 
 
-        msg = self.vehicle.message_factory.obstacle_distance_encode(
-            current_time_us,    # us Timestamp (UNIX time or time since system boot)
-            4,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
-            distances,          # distances,    uint16_t[72],   cm
-            0,                  # increment,    uint8_t,        deg
-            30,	                # min_distance, uint16_t,       cm
-            2000,               # max_distance, uint16_t,       cm
-            increment_f,	    # increment_f,  float,          deg
-            angle_offset,       # angle_offset, float,          deg
-            12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
-        )
-        self.vehicle.send_mavlink(msg)
+        msg2 = mavlink2.MAVLink_obstacle_distance_message(
+            0,                      # us Timestamp (UNIX time or time since system boot)
+            3,                      # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
+            distance,               # distances,    uint16_t[72],   cm
+            int(3),                 # increment,    uint8_t,        deg
+            int(30),	            # min_distance, uint16_t,       cm
+            int(2000),              # max_distance, uint16_t,       cm
+            float(1.5),	            # increment_f,  float,          deg #https://mavlink.io/en/messages/common.html#OBSTACLE_DISTANCE
+            float(-54), # angle_offset, float,          deg
+            12                      # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
+            )
+
+        self.get_logger().info(f"{msg2}",once=True)
+        try:
+            self.vehicle.send_mavlink(msg2)
+        except:
+            self.get_logger().info(f'obstacle send failed:{traceback.format_exc()}')    
+
 
     def reset_home_callback(self, request, response):
         self.vehicle.home_location = self.vehicle.location.global_frame

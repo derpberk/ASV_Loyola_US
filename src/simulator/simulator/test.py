@@ -3,70 +3,82 @@
 
 import sys
 
-from mavros_msgs.srv import CommandBool, CommandLong
 import rclpy
 from rclpy.node import Node
 import time
+from pymavlink import mavutil
+from numpy import uint
+from dronekit import connect, VehicleMode, LocationGlobal
 
-def get_result(service, future):
-    while rclpy.ok():
-        rclpy.spin_once(service)
-        if future.done():
-            try:
-                response = future.result()
-            except Exception as e:
-                service.get_logger().info(
-                    'Service call failed %r' % (e,))
-            else:
-                service.get_logger().info(
-                    'Result = %d' %
-                    (response.success))
-            break
+from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle distance information
+
+import os
+os.environ["MAVLINK20"] = "1"
 
 class Test_node(Node):
 
     def __init__(self):
         #we create the test node
         super().__init__('test_node')
+        tipo=0
+
+        if tipo==1:
+            conn = mavutil.mavlink_connection(
+                "tcp:navio.local:5678",
+                autoreconnect = True,
+                source_system = 1,
+                source_component = 93,
+                baud=57600, #921600
+                force_connected=True,
+                dialect = "ardupilotmega",
+            )
+        else:
+            vehicle=connect("tcp:navio.local:5678", timeout=15, source_system=1, source_component=93)
 
 
-        self.arm_client = self.create_client(CommandBool, '/mavros/cmd/arming') #client to arm the robot
-        self.mavlink_client = self.create_client(CommandLong, '/mavros/cmd/command') #client to send commands
+        while rclpy.ok():
+            dist=[200+10*i for i in range(72)]
+            if tipo==1:
 
-        """optional wait for service in case they do not exist
-        while not self.arm_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('service not available, waiting again...')
-        """
+                conn.mav.obstacle_distance_send(
+                    0,    # us Timestamp (UNIX time or time since system boot)
+                    0,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
+                    dist,          # distances,    uint16_t[72],   cm
+                    0,                  # increment,    uint8_t,        deg
+                    30,	    # min_distance, uint16_t,       cm
+                    2000,       # max_distance, uint16_t,       cm
+                    3,	    # increment_f,  float,          deg
+                    0,       # angle_offset, float,          deg
+                    12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
+                )
+                self.get_logger().info(f"msg:\n{dist}",once=True)
+            else:
+                msg=mavlink2.MAVLink_obstacle_distance_message(
+                    0,    # us Timestamp (UNIX time or time since system boot)
+                    3,                  # sensor_type, defined here: https://mavlink.io/en/messages/common.html#MAV_DISTANCE_SENSOR
+                    dist,           # distances,    uint16_t[72],   cm
+                    int(15),                  # increment,    uint8_t,        deg
+                    int(30),	                # min_distance, uint16_t,       cm
+                    int(2000),               # max_distance, uint16_t,       cm
+                    float(10.0),	    # increment_f,  float,          deg #https://mavlink.io/en/messages/common.html#OBSTACLE_DISTANCE
+                    float(-10.0),       # angle_offset, float,          deg
+                    12                  # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
+                    )
+                self.get_logger().info(f"msg:\n{msg}",once=True)
+
+                vehicle.send_mavlink(msg)
+            
+            time.sleep(0.05)
+        
 
 
-    def arm_robot(self,value):
-        req = CommandBool.Request()
-        req.value=value
-        return self.arm_client.call_async(req)
-
-    def setmode(self, value):
-        req=CommandLong.Request()
-        req.broadcast = False
-        req.command = 176
-        req.param1 = 157.0  # mode
-        if value=='GUIDED' or 1:
-            req.param2 = 15.0   #   Custom mode
 
 
-
-
-
-        #req.param2 =    #   Custom mode
-        #req.param3 =    #   Custom submode
-
-        return self.mavlink_client.call_async(req)
 
 def main(args=None):
     rclpy.init(args=args)
     test_node = Test_node()
-    get_result(test_node, test_node.setmode('GUIDED'))
-    time.sleep(1)
-    get_result(test_node, test_node.arm_robot(True))
+    rclpy.spin(test_node)
 
 
     test_node.destroy_node()
