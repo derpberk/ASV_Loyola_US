@@ -62,6 +62,24 @@ It logs changes
 <FONT COLOR="#ff0000"> TODO:<br>
 - use pid instead of variable to check if camera is recording for more assurance</FONT>
 
+<!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CAMERA OBJECT RECOGNITION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
+<H3>Obstacle_Avoidance()<a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/camera_node.py#L62" style="float:right;text-align:right;">code</a></H3>
+<a id="Obstacle_Avoidance"></a>
+
+This function runs in an independent thread.
+
+the object recognition has few params that can be read
+- label
+- confidence
+- id
+- tracking_state
+- position
+- velocity
+- dimensions
+- bounding_box_2d
+- bounding_box
+
+The object is measured and classified, if it corresponds to an obstacle its data is recovered and sent to the topic <a id="camera_obstacle">/camera_obstacle</a> 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
