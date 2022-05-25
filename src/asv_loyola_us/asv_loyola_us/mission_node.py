@@ -226,7 +226,7 @@ class Mission_node(Node):
                 self.go_to(self.mqtt_waypoint) #go to the point
                 self.mqtt_waypoint = None #discard the point
                 #TODO: may be, implement a higher buffer for points
-            if self.waiting_for_action == False and self.mqtt_waypoint == None:
+            if self.waiting_for_action == False and self.mqtt_waypoint == None and self.mission_mode == 4:
                 timeout_counter += 1
                 if timeout_counter > self.simple_goto_timeout*10:
                     self.mission_mode = 1
