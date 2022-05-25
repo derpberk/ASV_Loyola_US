@@ -1,0 +1,9 @@
+uint16 id
+string label
+float64 confidence
+float64[<=3] position
+float64[<=3] dimensions
+float64[<=3] velocity
+float64[<=24] bounding_box
+float64[<=8] bounding_box_2d
+string tracking_state

@@ -3,7 +3,7 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
-from asv_interfaces.msg import Status, Nodeupdate, Location, String
+from asv_interfaces.msg import Status, Nodeupdate, Location, String, Camera, Obstacles
 from asv_interfaces.srv import CommandBool
 from rcl_interfaces.msg import Log
 from action_msgs.msg import GoalStatus
@@ -14,6 +14,7 @@ import traceback
 import pyzed.sl as sl
 from .submodulos.batch_system_handler import *
 import numpy as np
+import threading
 
 class Camera_node(Node):
 
@@ -25,11 +26,15 @@ class Camera_node(Node):
 
     def declare_services(self):
         self.sendinfo = self.create_service(CommandBool, 'camera_recording', self.camera_recording_callback)
+        self.reset_home_service = self.create_service(CommandBool, 'enable_obstacle_avoidance', self.obstacle_avoidance_enable)
+
 
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
+        self.obstacles_publisher = self.create_publisher(Obstacles, 'camera_obstacles', 10)
+
 
     #def declare_actions(self):
 
@@ -60,6 +65,8 @@ class Camera_node(Node):
 
         # Create a Camera object
         self.zed = sl.Camera()
+        self.stop_camera_detection=False
+
 
         # Create a InitParameters object and set configuration parameters
         init_params = sl.InitParameters()
@@ -67,6 +74,7 @@ class Camera_node(Node):
         init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE
         init_params.coordinate_units = sl.UNIT.METER
         init_params.sdk_verbose = False #disable verbose
+        
 
         # Open the camera
         err = self.zed.open(init_params)
@@ -75,41 +83,66 @@ class Camera_node(Node):
             self.destroy_node()
             return
 
-        obj_param = sl.ObjectDetectionParameters()
-        obj_param.enable_tracking=True # Objects will keep the same ID between frames
-        obj_param.image_sync=True
-        obj_param.enable_mask_output=True # Outputs 2D masks over detected objects
-        #obj_param.detection_model=sl.DETECTION_MODEL.CUSTOM_BOX_OBJECTS  #to use our custom data set
+        self.objects = sl.Objects()
+        self.obj_runtime_param = sl.ObjectDetectionRuntimeParameters()
+        self.obj_runtime_param.detection_confidence_threshold = 70
 
-        camera_infos = self.zed.get_camera_information()
+        self.camera_detection_thread = threading.Thread(target=self.camera_perception)
 
-        positional_tracking_param = sl.PositionalTrackingParameters() #load default parameters
-        #positional_tracking_param.set_as_static = True
-        positional_tracking_param.set_floor_as_origin = True
-        self.zed.enable_positional_tracking(positional_tracking_param)
 
-        self.get_logger()
         if self.enable_obstacle_avoidance:
+            obj_param = sl.ObjectDetectionParameters()
+            obj_param.enable_tracking=True # Objects will keep the same ID between frames
+            obj_param.image_sync=True
+            obj_param.enable_mask_output=True # Outputs 2D masks over detected objects
+            #obj_param.detection_model=sl.DETECTION_MODEL.CUSTOM_BOX_OBJECTS  #to use our custom data set
+
+            camera_infos = self.zed.get_camera_information()
+
+            positional_tracking_param = sl.PositionalTrackingParameters() #load default parameters
+            #positional_tracking_param.set_as_static = True
+            positional_tracking_param.set_floor_as_origin = True
+
+            self.zed.enable_positional_tracking(positional_tracking_param)
+
             err = self.zed.enable_object_detection(obj_param)
             if err != sl.ERROR_CODE.SUCCESS :
                 self.get_logger().error("obstacle detenction couldnt be initialized, closing camera")
                 self.zed.close()
+                return
+            self.camera_detection_thread.start()
         else:
             self.get_logger().info("obstacle avoidance not enabled")
-        
-        self.objects = sl.Objects()
-        self.obj_runtime_param = sl.ObjectDetectionRuntimeParameters()
-        self.obj_runtime_param.detection_confidence_threshold = 40
 
-        while self.zed.grab() == sl.ERROR_CODE.SUCCESS:
-            err = self.zed.retrieve_objects(self.objects, self.obj_runtime_param)
-            if self.objects.is_new :
-                obj_array = self.objects.object_list
-                self.get_logger().info(f"{len(obj_array)} Object(s) detected")
-                for objeto in obj_array:
-                    self.get_logger().info(f"object {objeto.id} known as {objeto.label} detected at {objeto.position} with confidence {objeto.confidence} status {objeto.tracking_state}")
-        # Close the camera
-        self.zed.close()
+
+        
+    def obstacle_avoidance_enable(self, request, response):
+        if request.value:
+            obj_param = sl.ObjectDetectionParameters()
+            obj_param.enable_tracking=True # Objects will keep the same ID between frames
+            obj_param.image_sync=True
+            obj_param.enable_mask_output=True # Outputs 2D masks over detected objects
+            #obj_param.detection_model=sl.DETECTION_MODEL.CUSTOM_BOX_OBJECTS  #to use our custom data set
+
+            camera_infos = self.zed.get_camera_information()
+
+            positional_tracking_param = sl.PositionalTrackingParameters() #load default parameters
+            #positional_tracking_param.set_as_static = True
+            positional_tracking_param.set_floor_as_origin = True
+
+            self.zed.enable_positional_tracking(positional_tracking_param)
+
+            err = self.zed.enable_object_detection(obj_param)
+            if err != sl.ERROR_CODE.SUCCESS :
+                self.get_logger().error("obstacle detenction couldnt be initialized")
+                response.success=False
+                return response
+            self.get_logger().info("obstacle avoidance enabled")
+            self.camera_detection_thread.start()
+        else:
+            self.zed.disable_object_detection()
+            self.zed.disable_positional_tracking()
+            self.stop_camera_detection=True
 
 
     def status_suscriber_callback(self, msg):
@@ -138,12 +171,46 @@ class Camera_node(Node):
             self.recording=False
         return response
             
+    def camera_perception(self):
+        while (self.zed.grab() == sl.ERROR_CODE.SUCCESS) and (self.stop_camera_detection == False):
+            err = self.zed.retrieve_objects(self.objects, self.obj_runtime_param)
+            if self.objects.is_new :
+                obj_array = self.objects.object_list
+                #self.get_logger().info(f"{len(obj_array)} Object(s) detected")
+                obstacles=Obstacles()
+                for objeto in obj_array:
+                    obj = Camera()
+                    obj.id = int(objeto.id) 
+                    label=str(repr(objeto.label))
+                    sublabel=str(repr(objeto.sublabel))
+                    self.get_logger().info(f"label: {type(label)}",once=True)
+                    obj.label = label
+                    obj.position = [objeto.position[0], objeto.position[1], objeto.position[2]]
+                    obj.confidence = objeto.confidence
+                    #obj.tracking_state = objeto.tracking_state
+                    self.get_logger().info(f"track: {type(objeto.tracking_state)}",once=True)
+                    obj.dimensions = [objeto.dimensions[0], objeto.dimensions[1], objeto.dimensions[2]]
+                    obj.velocity = [objeto.velocity[0], objeto.velocity[1], objeto.velocity[2]]
+                    for i in range(4):
+                        for j in range(2):
+                            obj.bounding_box_2d.append(objeto.bounding_box_2d[i][j])
+                    for i in range(8):
+                        for j in range(3):
+                            obj.bounding_box.append(objeto.bounding_box[i][j])
+
+                    obstacles.objects.append(obj)
+                obstacles.distance=[1, 2, 3]
+                obstacles.angle_increment=1.5
+                self.obstacles_publisher.publish(obstacles)
+
 
 def main():
     rclpy.init()
     try:
         camera_node = Camera_node()
         rclpy.spin(camera_node)
+        # After finish close the camera
+        camera_node.zed.close()
     except:
         #There has been an error with the program, so we will send the error log to the watchdog
         x = rclpy.create_node('camera_node') #we state what node we are
@@ -160,6 +227,7 @@ def main():
             sleep(0.01) #we wait
         publisher.publish(msg) #we send the message
         x.destroy_node() #we destroy node and finish
+
 
 
 if __name__ == '__main__':

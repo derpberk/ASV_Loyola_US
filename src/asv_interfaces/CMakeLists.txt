@@ -20,7 +20,10 @@ set(msg_files
   "msg/Samplevalue.msg"
   "msg/Location.msg"
   "msg/Sensor.msg"
+  "msg/Threeaxys.msg"
+  "msg/Camera.msg"
   "msg/Obstacles.msg"
+
   #"msg/Message2.msg"
   # etc
   )
