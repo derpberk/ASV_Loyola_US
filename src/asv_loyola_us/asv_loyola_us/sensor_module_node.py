@@ -43,7 +43,6 @@ class Sensor_node(Node):
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
-        self.get_sample = self.create_service(Takesample, 'get_sample', self.get_sample_callback)
         self.update_parameters_server = self.create_service(SensorParams, 'Sensor_params', self.update_parameters_callback)
         
     def declare_topics(self):

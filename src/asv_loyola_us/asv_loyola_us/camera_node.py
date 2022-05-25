@@ -79,7 +79,7 @@ class Camera_node(Node):
         # Open the camera
         err = self.zed.open(init_params)
         if err != sl.ERROR_CODE.SUCCESS:
-            self.get_logger.error("camera couldn't be initialized (impossible to open camera), camera module is ded")
+            self.get_logger().error("camera couldn't be initialized (impossible to open camera), camera module is ded")
             self.destroy_node()
             return
 
