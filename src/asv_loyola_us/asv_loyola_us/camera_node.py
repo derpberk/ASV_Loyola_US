@@ -73,6 +73,7 @@ class Camera_node(Node):
         init_params.camera_resolution = sl.RESOLUTION.HD720  # Use HD720 video mode
         init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE
         init_params.coordinate_units = sl.UNIT.METER
+        #init_params.camera_fps = 30  # Set fps at 30
         init_params.sdk_verbose = False #disable verbose
         
 
@@ -88,6 +89,8 @@ class Camera_node(Node):
         self.obj_runtime_param.detection_confidence_threshold = 70
 
         self.camera_detection_thread = threading.Thread(target=self.camera_perception)
+        self.camera_recording_thread = threading.Thread(target=self.camera_recording)
+
 
 
         if self.enable_obstacle_avoidance:
@@ -143,6 +146,8 @@ class Camera_node(Node):
             self.zed.disable_object_detection()
             self.zed.disable_positional_tracking()
             self.stop_camera_detection=True
+            self.get_logger().info("obstacle avoidance disabled")
+        return response
 
 
     def status_suscriber_callback(self, msg):
@@ -158,16 +163,14 @@ class Camera_node(Node):
                 self.get_logger().info("camera already recording")
                 response.success=False
                 return response #we are already recording
-            self.get_logger().info("started recording")
-            self.recording_instance = start_recording()
             self.recording=True
+            self.camera_recording_thread.start()
         else:
             if not self.recording: #we arent recording
                 response.success=False
                 self.get_logger().info("camera wasnt recording")
                 return response
             self.get_logger().info("stop recording")
-            singint_pid(self.recording_instance)
             self.recording=False
         return response
             
@@ -202,6 +205,25 @@ class Camera_node(Node):
                 obstacles.distance=[1, 2, 3]
                 obstacles.angle_increment=1.5
                 self.obstacles_publisher.publish(obstacles)
+
+    def camera_recording(self):
+        name=datetime.today()
+        name=name.strftime('%Y.%m.%d..%H.%M')
+        name=str("/home/xavier/zed_datasets/recording"+name+".svo")
+        recording_param = sl.RecordingParameters(name, sl.SVO_COMPRESSION_MODE.H264)
+        err = self.zed.enable_recording(recording_param)
+        if err != sl.ERROR_CODE.SUCCESS:
+            self.get_logger().info("camera could not start recording")
+            return #error
+        self.get_logger().info("started recording")
+        runtime = sl.RuntimeParameters()
+        while True:
+            if self.zed.grab(runtime):
+                pass #we will enter this if each new frame
+            if self.recording==False:
+                self.zed.disable_recording()
+                return
+                
 
 
 def main():

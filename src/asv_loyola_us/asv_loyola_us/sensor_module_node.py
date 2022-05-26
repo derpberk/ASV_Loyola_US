@@ -13,7 +13,7 @@ import Jetson.GPIO as GPIO
 from datetime import datetime
 from .submodulos.call_service import call_service #to call services
 import traceback
-
+from rclpy.action import ActionServer, CancelResponse, GoalResponse, ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 
@@ -55,7 +55,7 @@ class Sensor_node(Node):
                                          handle_accepted_callback=self.sensor_read_accepted_callback,
                                          cancel_callback=self.sensor_read_cancel,
                                          callback_group=ReentrantCallbackGroup())
-        self.goto_goal_handle = None
+        self.sensor_goal_handle = None
 
 
     def __init__(self):
@@ -70,6 +70,7 @@ class Sensor_node(Node):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
+        self.status=Status()
         try:
             if self.DEBUG == False:
                 self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
@@ -96,8 +97,7 @@ class Sensor_node(Node):
         #declare the services
 
 
-    def read_sensor(self, num, max_samples):
-        self.get_logger().info(f"Taking sample {num+1} of {max_samples}")
+    def read_sensor(self):
         
         waited_time=0
         is_frame_ok = False  # While a frame hasnt been correctly read #
@@ -249,28 +249,27 @@ class Sensor_node(Node):
             GPIO.output(self.pump_channel, GPIO.HIGH)  # start filling the tank
             self.get_logger().info("activando bomba")
             time.sleep(10.0)                          #wait 10 seconds
-        else:
-            for i in range(self.num_samples):
-                self.read_sensor(i, self.num_samples)                        #read smart water
-                feedback_msg.sensor_read=self.sensor_data
-                response.sensor_reads.append(self.sensor_data)
-                goal_handle.publish_feedback(feedback_msg)
-                if goal_handle.is_cancel_requested:#event mission canceled
-                    #make it loiter around actual position
-                    goal_handle.canceled()
-                    result.finish_flag = "Action cancelled"
-                    if self.pump_installed:
-                        GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
-                        self.get_logger().info("deteniendo bomba")
-                    return result
-                time.sleep(self.time_between_samples)
+            
+        for i in range(self.num_samples):
+            self.get_logger().info(f"taking sample {i+1} of {self.num_samples}")
+            self.read_sensor()                        #read smart water
+            feedback_msg.sensor_read=self.sensor_data
+            result.sensor_reads.append(self.sensor_data)
+            goal_handle.publish_feedback(feedback_msg)
+            if goal_handle.is_cancel_requested:#event mission canceled
+                #make it loiter around actual position
+                goal_handle.canceled()
+                result.finish_flag = "Action cancelled"
+                if self.pump_installed:
+                    GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
+                    self.get_logger().info("deteniendo bomba")
+                goal_handle.abort()
+                return result
+            time.sleep(self.time_between_samples)
         if self.pump_installed:
             GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
             self.get_logger().info("deteniendo bomba")
-            
-
         goal_handle.succeed()
-        result.success = True
         result.finish_flag = "Normal execution"
         return result
 
