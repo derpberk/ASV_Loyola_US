@@ -14,7 +14,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
         (os.path.join('share', package_name, "config"), glob('config/*.yaml')),
-        (os.path.join('share', package_name, "config"), ['config/'+'rviz_config.rviz']),
+        (os.path.join('share', package_name, "config"), glob('config/*.rviz')),
     ],
     install_requires=['setuptools'],
     maintainer='alejandro',
@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'test = simulator.test:main',
             'dummy_publisher = simulator.dummy_publisher:main',
+            'radar_ploter = simulator.radar_ploter:main',
         ],
     },
 )

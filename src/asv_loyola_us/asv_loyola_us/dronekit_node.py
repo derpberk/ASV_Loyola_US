@@ -589,7 +589,7 @@ class Dronekit_node(Node):
             int(3),                 # increment,    uint8_t,        deg
             int(30),	            # min_distance, uint16_t,       cm
             int(2000),              # max_distance, uint16_t,       cm
-            float(1.5),	            # increment_f,  float,          deg #https://mavlink.io/en/messages/common.html#OBSTACLE_DISTANCE
+            float(angle_increment),	            # increment_f,  float,          deg #https://mavlink.io/en/messages/common.html#OBSTACLE_DISTANCE
             float(-54), # angle_offset, float,          deg
             12                      # MAV_FRAME, vehicle-front aligned: https://mavlink.io/en/messages/common.html#MAV_FRAME_BODY_FRD    
             )

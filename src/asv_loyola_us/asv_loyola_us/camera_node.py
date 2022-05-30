@@ -15,6 +15,7 @@ import pyzed.sl as sl
 from .submodulos.batch_system_handler import *
 import numpy as np
 import threading
+from math import atan2, degrees
 
 class Camera_node(Node):
 
@@ -175,23 +176,31 @@ class Camera_node(Node):
         return response
             
     def camera_perception(self):
+        self.get_logger().info("object avoidance enabled")
         while (self.zed.grab() == sl.ERROR_CODE.SUCCESS) and (self.stop_camera_detection == False):
             err = self.zed.retrieve_objects(self.objects, self.obj_runtime_param)
+            if err != sl.ERROR_CODE.SUCCESS :
+                self.get_logger().error("objects retrieval failed")
+                continue
+
             if self.objects.is_new :
                 obj_array = self.objects.object_list
                 #self.get_logger().info(f"{len(obj_array)} Object(s) detected")
                 obstacles=Obstacles()
-                for objeto in obj_array:
+                obstacles.angle_increment=1.5 # we will cover an area of 110º (camera aperture) starting from -54 to 54º with an increment of 1.5 degrees as we can send at most 72 values
+                obstacles.distance=[2000 for i in range(72)] #2000 or greater is no obstacle
+                for objeto in obj_array: #we will store everything of the object
                     obj = Camera()
                     obj.id = int(objeto.id) 
                     label=str(repr(objeto.label))
                     sublabel=str(repr(objeto.sublabel))
-                    self.get_logger().info(f"label: {type(label)}",once=True)
+                    #self.get_logger().info(f"label: {label}, sublabel {sublabel}",once=True)
                     obj.label = label
                     obj.position = [objeto.position[0], objeto.position[1], objeto.position[2]]
+                    #self.get_logger().info(f"pos: {[objeto.position[0], objeto.position[1], objeto.position[2]]}")
                     obj.confidence = objeto.confidence
                     #obj.tracking_state = objeto.tracking_state
-                    self.get_logger().info(f"track: {type(objeto.tracking_state)}",once=True)
+                    #self.get_logger().info(f"track: {objeto.tracking_state}",once=True)
                     obj.dimensions = [objeto.dimensions[0], objeto.dimensions[1], objeto.dimensions[2]]
                     obj.velocity = [objeto.velocity[0], objeto.velocity[1], objeto.velocity[2]]
                     for i in range(4):
@@ -200,10 +209,19 @@ class Camera_node(Node):
                     for i in range(8):
                         for j in range(3):
                             obj.bounding_box.append(objeto.bounding_box[i][j])
-
                     obstacles.objects.append(obj)
-                obstacles.distance=[1, 2, 3]
-                obstacles.angle_increment=1.5
+
+                    #for obstacle detection we apply pythagoras theorem
+
+                    minangle=degrees(atan2(objeto.position[0]-objeto.dimensions[0]/2,objeto.position[2]))
+                    maxangle=degrees(atan2(objeto.position[0]+objeto.dimensions[0]/2,objeto.position[2]))
+                    #self.get_logger().info(f"{label}, {sublabel} , angles: {[minangle, maxangle]}")
+                    if abs(minangle)>55 or maxangle>55:
+                        self.get_logger().error("object trepassed camera limits")
+                    else:
+                        for i in range(int((53+minangle)/1.5),int((53+maxangle)/1.5)):
+                            if obstacles.distance[i]>int(objeto.position[2]*100):
+                                obstacles.distance[i]=int(objeto.position[2]*100)
                 self.obstacles_publisher.publish(obstacles)
 
     def camera_recording(self):
@@ -232,9 +250,12 @@ def main():
         camera_node = Camera_node()
         rclpy.spin(camera_node)
         # After finish close the camera
+        camera_node.get_logger().info("normal finish")
         camera_node.zed.close()
     except:
         #There has been an error with the program, so we will send the error log to the watchdog
+        zed=sl.Camera()
+        zed.close()
         x = rclpy.create_node('camera_node') #we state what node we are
         publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message

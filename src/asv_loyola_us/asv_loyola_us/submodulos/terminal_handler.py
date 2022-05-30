@@ -68,7 +68,7 @@ def show_ps():
             pass
 
 def kill_ros2():
-    processes=["mission", "mqtt", "drone", "sensors", "watchdog", "_ros2_daemon", "dummy_publisher", "camera"]
+    processes=["mission", "mqtt", "drone", "sensors", "watchdog", "_ros2_daemon", "dummy_publisher", "camera","planner"]
     for proc in psutil.process_iter():
         try:
             # Check if process name contains the given name string.
