@@ -6,13 +6,12 @@ from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Camera, Obstacles
 from asv_interfaces.srv import CommandBool
 from rcl_interfaces.msg import Log
-from action_msgs.msg import GoalStatus
 from .submodulos.call_service import call_service
 from .submodulos.terminal_handler import start_recording, singint_pid
 from datetime import datetime
 import traceback
 import pyzed.sl as sl
-from .submodulos.batch_system_handler import *
+import cv2
 import numpy as np
 import threading
 from math import atan2, degrees
@@ -219,10 +218,12 @@ class Camera_node(Node):
                     if abs(minangle)>55 or maxangle>55:
                         self.get_logger().error("object trepassed camera limits")
                     else:
-                        for i in range(int((53+minangle)/1.5),int((53+maxangle)/1.5)):
+                        for i in range(int((53+minangle)/1.5),int((53+maxangle)/1.5)):                        
                             if obstacles.distance[i]>int(objeto.position[2]*100):
                                 obstacles.distance[i]=int(objeto.position[2]*100)
+                        self.get_logger().error("object trepassed camera limits")
                 self.obstacles_publisher.publish(obstacles)
+        
 
     def camera_recording(self):
         name=datetime.today()
@@ -248,10 +249,11 @@ def main():
     rclpy.init()
     try:
         camera_node = Camera_node()
-        rclpy.spin(camera_node)
+        rclpy.spin(camera_node, executor=MultiThreadedExecutor())
         # After finish close the camera
         camera_node.get_logger().info("normal finish")
         camera_node.zed.close()
+        camera_node.destroy_node()
     except:
         #There has been an error with the program, so we will send the error log to the watchdog
         zed=sl.Camera()
