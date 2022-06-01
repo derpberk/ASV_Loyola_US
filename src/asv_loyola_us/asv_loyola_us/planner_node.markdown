@@ -11,7 +11,7 @@ This node is in charge of calculating a path for the ASV to move
 
 
 <FONT COLOR="#ff0000"> TODO:<br>
-- Use maps with cost instead of binnary, ponder other planners a part from A_star</FONT>
+- Use maps with cost instead of binnary, ponder other planners different from A_star</FONT>
 
 <pre>
 Services
@@ -57,7 +57,7 @@ Parameters
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ENABLE PLANNER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>enable_planning_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L76" style="float:right;text-align:right;">code</a></H3>
+<H3>enable_planning_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L80" style="float:right;text-align:right;">code</a></H3>
 <a id="enable_planning_callback"></a>
 
 This function enables or disables planning
@@ -70,7 +70,7 @@ This function enables or disables planning
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% CALCULATE PATH CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>calculate_path_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L87" style="float:right;text-align:right;">code</a></H3>
+<H3>calculate_path_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L91" style="float:right;text-align:right;">code</a></H3>
 <a id="calculate_path_callback"></a>
 
 This function calculates the path towards a point if planner is enabled, returns destination if planner is not enabled (logs time spent calculating path)
@@ -93,13 +93,14 @@ Before calculating the path it takes into account the following things
 If there is no path return false
 Otherwise return path and True
 
+The planner is well commented in <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/submodulos/A_star.py" style="float:right;text-align:right;">A_Star</a></H3>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LOAD MAP CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>load_map_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/planner_node.py#L67" style="float:right;text-align:right;">code</a></H3>
 <a id="load_map_callback"></a>
 
-This function loads a map inside the planner if map exists
+This function loads a map inside the planner if map exists, returns response.success = False if load fails 
 
 - request:
   - file_name: (str) string containing the name of the map
@@ -107,9 +108,6 @@ This function loads a map inside the planner if map exists
   - success: (Bool) True upon success
 
 You can check available maps in [maps section](../../../maps.html)
-
-<FONT COLOR="#ff0000"> TODO:<br>
-- Add logs</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

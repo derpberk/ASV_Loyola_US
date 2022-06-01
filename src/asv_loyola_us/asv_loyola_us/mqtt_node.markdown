@@ -52,9 +52,6 @@ functions
 <a href="#status_suscriber_callback">status_suscriber_callback(msg)</a>
 </pre>
 
-
-
-
 <pre>
 variables
 <a id="self.processing">processing</a>
@@ -76,6 +73,7 @@ variables
 Parameters
 <a href="./parameters/vehicle_id.html">vehicle_id</a>
 <a href="./parameters/mqtt_addr.html">mqtt_addr</a>
+<a href="./parameters/internet_loss_timeout.html">internet_loss_timeout</a>
 </pre>
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%% START OF FUNCTION DEFINITIONS AREA %%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -92,7 +90,8 @@ This function is executed periodically each 0.5 seconds by a timer, it pubblishe
 - Arm status
 - Mission mode
 - ASV mode
-
+- EKF_status
+- Manual_switch_status
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DESTINATION SUSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -103,13 +102,15 @@ This function is a suscriber of /<a href="./topics/destination.html">destination
 - vehicle number
 - location
 
+The server interprets this data as the place where to put a red circle, indicating the point where the ASV wants to take a sample
+
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LOG SUSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
 <H3>log_subscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L195" style="float:right;text-align:right;">code</a></H3>
 <a id="log_subscriber_callback"></a>
 
-This function is a suscriber of /<a href="./topics/rosout.html">rosout</a> topic, it sends a mqtt message to the topic log indicating:
+This function is a suscriber of /<a href="./topics/rosout.html">rosout</a> topic, it sends a mqtt message to the topic "log" indicating:
 - vehicle number
 - origin node
 - time of the message

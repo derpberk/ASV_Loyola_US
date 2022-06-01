@@ -60,6 +60,11 @@ it will publish the error in /rosout and store it in the error list
 - managed variables
   - <a href="#error_list">error_list(msg)</a>
 
+<FONT COLOR="#ff0000"> TODO:
+- it must act and call services, restart nodes or system according to defined routines to fix errors (it must be able to OTA, record version and log data not logged in ros logs (you can observe it in the /rosout topic (for example, line parent function etc)))
+- if drone doesnt answer for long enough it will automatically return to a previous working version
+</FONT>
+
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ERROR  LOG PUBLISH %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -67,7 +72,10 @@ it will publish the error in /rosout and store it in the error list
 <H3>error_log_publish() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/1265f7548ce48155cd95fefedaae14bf958d1361/src/asv_loyola_us/asv_loyola_us/watchdog_node.py#L63" style="float:right;text-align:right;">code</a></H3>
 <a id="error_log_publish"></a>
 
-Once someone subscribes to the [/error](./404) topic, it will publish all the errors stored in the topic
+Once someone subscribes to the [/error](./404) topic, it will publish all the errors stored in the topic 
+
+<FONT COLOR="#ff0000"> TODO:
+- This has been deprecated as this information is carried via MQTT</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARSE TIME %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
@@ -88,7 +96,7 @@ To clean the code, it calculates the current time (UTC+1)
 Parses the error to make it easier to read
 
 <FONT COLOR="#ff0000"> TODO:<br>
-- In development </FONT>
+- In development, should also be used to classify errors </FONT>
 
 
 
@@ -100,7 +108,7 @@ Parses the error to make it easier to read
 Increases the counter of seconds a node has not answered by 1, and raises a subrutine if the number of seconds is higher than X
 
 <FONT COLOR="#ff0000"> TODO:<br>
-- In development </FONT>
+- In development, used to check if a node is blocked </FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% WATCHDOG  CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->

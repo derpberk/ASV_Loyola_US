@@ -36,6 +36,7 @@ functions
 variables
 <a id="self.is_frame_ok">is_frame_ok</a>
 <a id="self.sensor_data">sensor_data</a>
+<a id="self.sensor_goal_handle">sensor_goal_handle</a>
 <a id="waited_time">waited_time</a>
 </pre>
 
@@ -55,7 +56,7 @@ Parameters
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% GET SAMPLE CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>get_sample_callback() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L80" style="float:right;text-align:right;">code</a></H3>
+<H3>get_sample_callback() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L223" style="float:right;text-align:right;">code</a></H3>
 <a id="sensor_read_callback"></a>
 
 This function is a callback from the action <a href="./actions/sensor_read.html">/sensor_read</a>. It takes the number of samples specified in the <a href="./parameters/num_samples.html">num_samples</a> parameter. 
@@ -69,18 +70,32 @@ This function is a callback from the action <a href="./actions/sensor_read.html"
 - feedback
   - sensor_read: <a href="./services/get_sample.html">Sensor</a> data type indicating sensor read
 
+As it is an action it has the structure of one <a id="../../asv_interfaces/asv_interfaces.html">check guide if needed</a>. The acknowledge and accept phase are just a log. The execution phase calls read sensor.
+
+If specified it will also activate the pump when needed.
+
+after each read it will check if it has been canceled
+
+<FONT COLOR="#ff0000"> TODO:<br>
+- If ever needed more real time, send goal_handle as argument to <a href="#read_sensor">read_sensor()</a> or execute it in a thread </FONT>
+
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% READ SENSOR %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>read_sensor() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L120" style="float:right;text-align:right;">code</a></H3>
+<H3>read_sensor() <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L100" style="float:right;text-align:right;">code</a></H3>
 <a id="read_sensor"></a>
 
-This function Reads from the serial port of the Smart Water and parses the message into variables.
+This function Reads from the serial port of the Smart Water and parses the message into <a href="self.sensor_data">sensor_data</a>.
 it has a timeout indicated in <a href="./parameters/sensor_read_timeout.html">
+It also checks whether the value read is correct.
+
+After a read it will publish it to <a href="./services/sensors.html">/sensors</a> topic, so that MQTT sends it to server.
+
+If a manual iterruption occurs it will exit
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% UPDATE PARAMETERS CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>update_parameters_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L202" style="float:right;text-align:right;">code</a></H3>
+<H3>update_parameters_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L190" style="float:right;text-align:right;">code</a></H3>
 <a id="update_parameters_callback"></a>
 
 This function updates the value of the parameters logging changes
@@ -101,7 +116,7 @@ This function updates the value of the parameters logging changes
   
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% STATUS SUBSCRIBER CALLBACK %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
-<H3>status_suscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L310" style="float:right;text-align:right;">code</a></H3>
+<H3>status_suscriber_callback(msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/sensor_module_node.py#L187" style="float:right;text-align:right;">code</a></H3>
 <a id="status_suscriber_callback"></a>
 
 This function is a suscriber of /<a href="./topics/status.html">status</a> topic, it stores the variables indicating the status of the drone

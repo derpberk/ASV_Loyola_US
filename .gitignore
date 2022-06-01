@@ -19,3 +19,4 @@ mav.tlog
 mav.tlog.raw
 src/asv_loyola_us/asv_loyola_us/submodulos/__pycache__/
 src/asv_loyola_us/asv_loyola_us/__pycache__/
+*.pyc
