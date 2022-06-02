@@ -34,6 +34,8 @@ MQTT messages
 /<a href="./MQTT_messages/read_params.html">read_params</a> 
 /<a href="./MQTT_messages/start_recording.html">start_recording</a> 
 /<a href="./MQTT_messages/stop_recording.html">stop_recording</a> 
+/<a href="./MQTT_messages/obstacle_avoidance.html">obstacle_avoidance</a> 
+/<a href="./MQTT_messages/reset_home.html">reset_home</a> 
 </pre>
 
 <pre>
@@ -158,7 +160,7 @@ It uses a variable <a id="self.processing">processing</a>  to avoid massive inpu
 <H3>on_disconnect(_client, _, msg) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mqtt_node.py#L130" style="float:right;text-align:right;">code</a></H3>
 <a id="on_disconnect"></a>
 
-This function logs if MQTT connection closes and internet status
+This function logs if MQTT connection closes and internet status (no action required as loop_forever() is enabled (connection is automatically recovered))
 
 -Args:
  - _client: Client object
@@ -200,8 +202,6 @@ This function is a suscriber of /<a href="./topics/sensors.html">destination</a>
 - Temperature
 - Conductivity
 - Oxidation Reduction Potential
-
-
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% SHUTDOWN ASV %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
