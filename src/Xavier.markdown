@@ -17,3 +17,11 @@ To accomplish the requirements we have created 3 packages.
 - [Simulator](./simulator/visualizer.html) emulates some sensors for debug procedures
 
 The system runs a [service at startup](./startup.html) to be able to initialize the drone remotely.
+
+
+- Introduction to python
+- Introduction to ardupilot
+- Introduction to dronekit
+- Introduction to Ros2
+- Ros2 second steps
+- map creation

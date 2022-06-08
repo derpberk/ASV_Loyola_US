@@ -66,7 +66,14 @@ variables
 Parameters
 <a href="./parameters/mission_filepath.html">mission_filepath</a>
 <a href="./parameters/debug.html">debug</a>
+<a href="./parameters/simple_goto_timeout.html">simple_goto_timeout</a>
 </pre>
+
+
+<FONT COLOR="#0000ff"> Future ideas:<br>
+- buffer of MQTT samplepoints printing them in the server, to create mission (on the air)<br>
+</FONT>
+
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%% START OF FUNCTION DEFINITIONS AREA %%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -86,7 +93,7 @@ This function calls the service [arm_vehicle](./404) to arm the vehicle
 <H3>cancel_movement_callback(request, response) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L461" style="float:right;text-align:right;">code</a></H3> 
 <a id="cancel_movement_callback"></a>
 
-This function is a callback from the service /cancel_movement
+This function is a callback from the service [/cancel_movement](./404)
 This function forces the stop of the drone and deletes the destination point, returning the drone to standby mode
 
 
@@ -99,7 +106,7 @@ This function forces the stop of the drone and deletes the destination point, re
 <H3>change_ASV_mode(mode) <a href="https://github.com/AloePacci/ASV_Loyola_US/blob/main/src/asv_loyola_us/asv_loyola_us/mission_node.py#L383" style="float:right;text-align:right;">code</a></H3>
 <a id="change_ASV_mode"></a>
 
-this function calls the service [change_asv_mode](./404) to change the mode in which the ardupilot is working
+this function calls the service /[change_asv_mode](./404) to change the mode in which the ardupilot is working
 
 - params
   - mode : value (int or string) of the mode we want the pilot to change into (example: "GUIDED")
@@ -127,7 +134,6 @@ This function is called at the start of each state of the state machine, its use
 <a id="close_asv_callback"></a>
 
 This function is a callback from service /close_asv
-this function is not used, it should be better developed
 This functions turns off the ASV safelly, killing the node
 Args:
     bool always true to turn off the vehicle
@@ -137,6 +143,7 @@ Returns:
 <FONT COLOR="#ff0000"> TODO:<br>
 - close the ASV safelly<br>
 - may be use as input a value that will try to close it, and other that will force it
+- This function is not used, and close is forced in MQTT
 </FONT>
 
 

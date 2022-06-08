@@ -213,6 +213,10 @@ this function is callable through MQTT even if ros2 crashes as it is executed in
 
 Stops ASV status update, sends info about shutting ros2 to server and waits 2 seconds for other logs to happen, afterwards it hard closes Ros2 and makes <a href=../../startup.html>startup</a> to start again
 
+<FONT COLOR="#ff0000"> TODO:<br>
+- If Dronekit or mission node crashes the state of the drone will be unknown, ardupilot may be heading to a different direction.
+For more security in the future this must be promoted by watcdog node to regain control of the vehicle and force close it in a secure state before hard reset ros
+</FONT>
 
 
 <!-- %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% PARAMS READ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
