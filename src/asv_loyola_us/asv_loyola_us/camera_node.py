@@ -95,11 +95,19 @@ class Camera_node(Node):
         init_params.sdk_verbose = True #disable verbose
 
         # Open the camera
-        err = self.zed.open(init_params)
-        if err != sl.ERROR_CODE.SUCCESS:
-            self.get_logger().error("camera couldn't be initialized (impossible to open camera), camera module is ded")
+        try:
+            err = self.zed.open(init_params)
+            if err != sl.ERROR_CODE.SUCCESS:
+                self.get_logger().error(f"camera couldn't be initialized:{err}")
+                self.get_logger().fatal("Camera module is dead")
+                self.destroy_node()
+                return
+        except:
+            error = traceback.format_exc()
+            self.get_logger().error(f"Connection to camera could not be made, unknown error:\n {error}")
+            self.get_logger().fatal("Camera module is dead")
             self.destroy_node()
-            return
+            
 
         #enable positional tracking
         positional_tracking_param = sl.PositionalTrackingParameters() #load default parameters
@@ -206,30 +214,10 @@ class Camera_node(Node):
         
     def obstacle_avoidance_enable(self, request, response):
         if request.value:
-            obj_param = sl.ObjectDetectionParameters()
-            obj_param.enable_tracking=True # Objects will keep the same ID between frames
-            obj_param.image_sync=True
-            obj_param.enable_mask_output=True # Outputs 2D masks over detected objects
-            #obj_param.detection_model=sl.DETECTION_MODEL.CUSTOM_BOX_OBJECTS  #to use our custom data set
-
-            camera_infos = self.zed.get_camera_information()
-
-            positional_tracking_param = sl.PositionalTrackingParameters() #load default parameters
-            #positional_tracking_param.set_as_static = True
-            positional_tracking_param.set_floor_as_origin = True
-
-            self.zed.enable_positional_tracking(positional_tracking_param)
-
-            err = self.zed.enable_object_detection(obj_param)
-            if err != sl.ERROR_CODE.SUCCESS :
-                self.get_logger().error("obstacle detenction couldnt be initialized")
-                response.success=False
-                return response
             self.get_logger().info("obstacle avoidance enabled")
+            self.stop_camera_detection=False
             self.camera_detection_thread.start()
         else:
-            self.zed.disable_object_detection()
-            self.zed.disable_positional_tracking()
             self.stop_camera_detection=True
             self.get_logger().info("obstacle avoidance disabled")
         return response
@@ -357,7 +345,7 @@ class Camera_node(Node):
 
         self.get_logger().info("Network initialized")
 
-        while rclpy.ok():
+        while rclpy.ok() and self.stop_camera_detection==False:
             if self.run_signal:
                 self.lock.acquire()
                 img, ratio, pad = self.img_preprocess(self.image_net, device, half, imgsz)
