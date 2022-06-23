@@ -335,10 +335,11 @@ class Dronekit_node(Node):
         #if there is no path, go directly to destination
         if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner")
-            result.finish_flag = "Planner couldn't calculate point"
-            goal_handle.abort()
-            return result
-            #path=[goal_handle.request.samplepoint]
+            #result.finish_flag = "Planner couldn't calculate point"
+            #goal_handle.abort()
+            #return result
+            self.get_logger().info("going to point without planner")
+            path=[goal_handle.request.samplepoint] #TODO: decide whether to go directly to point or cancel action
         else:
             #extract path
             path=path.point_list

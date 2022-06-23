@@ -214,11 +214,11 @@ class Mission_node(Node):
         # but it administrates a buffer of 1 MQTT message due to code flow
         elif self.mission_mode == 4: 
             if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+                self.timeout_simple_counter=0
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode")
                     self.mission_mode=0
                 else:
-                    timeout_counter=0
                     self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
                     self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
@@ -227,12 +227,12 @@ class Mission_node(Node):
                 self.mqtt_waypoint = None #discard the point
                 #TODO: may be, implement a higher buffer for points
             if self.waiting_for_action == False and self.mqtt_waypoint == None and self.mission_mode == 4:
-                timeout_counter += 1
-                if timeout_counter > self.simple_goto_timeout*10:
+                self.timeout_simple_counter += 1
+                if self.timeout_simple_counter > self.simple_goto_timeout*10:
                     self.mission_mode = 1
                     self.get_logger().info(f"No point in { self.simple_goto_timeout} seconds, going into standby mode")
             else:
-                timeout_counter=0
+                self.timeout_simple_counter=0
 
 
 

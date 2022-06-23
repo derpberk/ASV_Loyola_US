@@ -100,5 +100,5 @@ def generate_launch_description():
         mqtt,
         sensors,
         planner,
-        camera,
+        #camera,
     ])

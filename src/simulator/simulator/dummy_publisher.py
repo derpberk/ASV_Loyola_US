@@ -117,6 +117,7 @@ class Dronekit_node(Node):
         self.status.battery=100.0
         self.status.armed = self.armed
         self.status.vehicle_id = self.vehicle_id
+        self.status.ekf_ok=True
         asv_mode= str(self.mode)
         self.status.asv_mode=asv_mode[12:]
         self.status_publisher.publish(self.status)
@@ -306,7 +307,8 @@ class Dronekit_node(Node):
         self.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
-        value=self.call_service(self.take_sample_client, Takesample.Request())
+        #value=self.call_service(self.take_sample_client, Takesample.Request())
+        time.sleep(2)
         #self.get_logger().debug(f'Sample value {value}')
         result=Goto.Result()
         result.success = True
