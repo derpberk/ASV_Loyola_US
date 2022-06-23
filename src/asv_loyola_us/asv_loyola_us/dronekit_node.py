@@ -14,7 +14,7 @@ import time
 from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle distance information
 from numpy import uint
 #import intefaces
-from asv_interfaces.msg import Status, Nodeupdate, Camera, Obstacles
+from asv_interfaces.msg import Status, Nodeupdate, Camera, Obstacles, Location
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
 from asv_interfaces.action import Goto, SensorSample
 
@@ -64,11 +64,13 @@ class Dronekit_node(Node):
         self.take_sample_client = self.create_client(Takesample, 'get_sample')
         self.calculate_path_client = self.create_client(Newpoint, 'calculate_path')
 
+
     def declare_topics(self):
         timer_period = 0.5  # seconds
         self.status_publisher = self.create_publisher(Status, 'status', 10)
         self.status_publisher_timer = self.create_timer(timer_period, self.status_publish)
         self.obstacles_subscriber = self.create_subscription(Obstacles, 'camera_obstacles', self.camera_obstacles_callback, 10)
+        self.waypoints_publisher = self.create_publisher(Location, 'waypoint_mark', 10)
 
 
     def declare_actions(self):
@@ -349,6 +351,11 @@ class Dronekit_node(Node):
         while (rclpy.ok()) and (len(path)>0):
             travelling_counter=0 #counter time since going to waypoint
             self.vehicle.simple_goto(LocationGlobal(path[0].lat, path[0].lon, 0.0))
+            if len(path)>1:
+                location1= Location()
+                location1.lat=path[0].lat
+                location1.lon=path[0].lon
+                self.waypoints_publisher.publish(location1)
             while rclpy.ok() and not self.reached_position(path[0]): #while we reach the goal, check for events
                 if goal_handle.is_cancel_requested:#event mission canceled
                     #make it loiter around actual position

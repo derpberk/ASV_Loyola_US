@@ -13,7 +13,7 @@ from .submodulos.dictionary import dictionary
 import time
 
 #import intefaces
-from asv_interfaces.msg import Status, Nodeupdate
+from asv_interfaces.msg import Status, Nodeupdate, Location
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
 from asv_interfaces.action import Goto
 
@@ -50,6 +50,7 @@ class Dronekit_node(Node):
         timer_period = 0.5  # seconds
         self.status_publisher = self.create_publisher(Status, 'status', 10)
         self.status_publisher_timer = self.create_timer(timer_period, self.status_publish)
+        self.waypoints_publisher = self.create_publisher(Location, 'waypoint_mark', 10)
 
     def declare_actions(self):
         self.go_to_server = ActionServer(self, Goto, 'goto', execute_callback=self.goto_execute_callback,
@@ -267,6 +268,11 @@ class Dronekit_node(Node):
         self.mode = VehicleMode("GUIDED")
         time.sleep(1)
         while (rclpy.ok()) and (len(path)>0):
+            if len(path)>1:
+                location1= Location()
+                location1.lat=path[0].lat
+                location1.lon=path[0].lon
+                self.waypoints_publisher.publish(location1)
             counter2=3
             while rclpy.ok() and counter2>0:
                 if goal_handle.is_cancel_requested:

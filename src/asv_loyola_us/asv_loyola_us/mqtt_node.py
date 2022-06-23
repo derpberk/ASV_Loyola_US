@@ -47,6 +47,7 @@ class MQTT_node(Node):
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
         self.destination_subscriber = self.create_subscription(Location, 'destination', self.destination_subscriber_callback, 10)
         self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
+        self.waypoints_subscriber = self.create_subscription(Location, 'waypoint_mark',self.waypoint_mark_subscriber_callback, 10)
 
     #def declare_actions(self):
 
@@ -335,6 +336,14 @@ class MQTT_node(Node):
             "Longitude": msg.lon,
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="destination")  # Send the MQTT message
+
+    def waypoint_mark_subscriber_callback(self, msg):
+        message = json.dumps({
+            "veh_num": self.vehicle_id,
+            "Latitude": msg.lat,
+            "Longitude": msg.lon,
+        })  # Must be a JSON format file.
+        self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
     def sensors_subscriber_callback(self, msg):
 
