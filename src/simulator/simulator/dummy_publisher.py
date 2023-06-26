@@ -9,7 +9,7 @@ import numpy as np
 import pymavlink
 import traceback
 from math import atan2
-from .submodulos.dictionary import dictionary
+from .dictionary import dictionary
 import time
 
 #import intefaces

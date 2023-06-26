@@ -6,7 +6,7 @@ import signal
 import psutil
 
 class MQTT(object):
-    def __init__(self, name, addr='127.0.0.1', port=1883, timeout=60, topics2suscribe=None, on_message=None, on_disconnect=None):
+    def __init__(self, name, addr='bender.us.es', port=1883, timeout=60, topics2suscribe=None, on_message=None, on_disconnect=None,user=None,password=None):
 
         self.client = mqtt.Client(name)
 
@@ -23,12 +23,12 @@ class MQTT(object):
         else:
             self.on_disconnect = on_disconnect
         # Con esto se puede mejorar la seguridad del MQTT si el broker esta configurado para eso
-        # self.client.username_pw_set("", "")
+        self.client.username_pw_set(user, password)
 
         self._mqtt_thread = threading.Thread(target=self.mqtt_thread, args=(addr, port, timeout,))
         self._mqtt_thread.start()
 
-    def mqtt_thread(self, addr='127.0.0.1', port=1883, timeout=60):
+    def mqtt_thread(self, addr='bender.us.es', port=1883, timeout=60):
         self.client.on_connect = self.on_connect
         self.client.on_message = self.onmessage
         self.client.on_disconnect = self.on_disconnect

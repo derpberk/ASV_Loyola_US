@@ -23,8 +23,13 @@ class MQTT_node(Node):
         self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
         self.declare_parameter('internet_loss_timeout', 30)
         self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
-        self.declare_parameter('mqtt_addr', "127.0.0.1")
+        self.declare_parameter('mqtt_addr', "bender.us.es")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
+        self.declare_parameter('mqtt_user', "asv1")
+        self.mqtt_user = self.get_parameter('mqtt_user').get_parameter_value().string_value
+        self.declare_parameter('mqtt_password', "azkenmuga")
+        self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
+        
 
     def declare_services(self):
         self.sendinfo = self.create_service(CommandBool, 'MQTT_send_info', self.sendinfo_callback)
@@ -65,7 +70,7 @@ class MQTT_node(Node):
         #start MQTT Connection
         try:
             self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
-            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
+            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect,user=self.mqtt_user,password=self.mqtt_password)
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to MQTT server was refused")
             self.get_logger().fatal("MQTT module is dead")

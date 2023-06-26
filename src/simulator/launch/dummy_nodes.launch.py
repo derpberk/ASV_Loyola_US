@@ -92,13 +92,26 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    database= launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='database',
+        emulate_tty=True,
+        output='screen',
+        name='database_node',
+        prefix=['stdbuf -o L'],
+        parameters = [config]
+    )
+
+    
 
     return launch.LaunchDescription([
         mission,
         watchdog,
-        dummy_publisher,
+        #dummy_publisher,
         mqtt,
         sensors,
         planner,
+        database,
+        drone
         #camera,
     ])

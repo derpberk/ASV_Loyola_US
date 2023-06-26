@@ -97,7 +97,7 @@ class Dronekit_node(Node):
         try:
             self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout, source_system=1, source_component=93)
             self.dictionary()
-            self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback)
+            self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback_debug)
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
@@ -483,6 +483,8 @@ class Dronekit_node(Node):
                     return response
                 break
 
+    def rc_read_callback_debug(self):
+        self.get_logger().info("RC debug")
 
     def rc_read_callback(self):
         #if there is no RC return home
@@ -493,10 +495,13 @@ class Dronekit_node(Node):
                     self.get_logger().info("seems there is no RC connected", once=True)
                     self.status.manual_mode = False #override RC if there is no connection
                     #self.vehicle.mode = VehicleMode("RTL")
+                    self.vehicle.mode = VehicleMode("GUIDED")
             #manage RC switch between auto and manual mode
             elif self.status.manual_mode!=(self.vehicle.channels['6']>1200):
-                self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
-                self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
+                #self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
+                # self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
+                self.status.manual_mode= False
+                # self.vehicle.mode = VehicleMode("GUIDED")
 
             #manage arm when RC in manual
             elif self.status.manual_mode:                

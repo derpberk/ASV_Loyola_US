@@ -2,7 +2,18 @@
   ros__parameters:
     debug: true
     vehicle_ip: '127.0.0.1:14550'
-    mqtt_addr: 'dronesloyolaus.eastus.cloudapp.azure.com'
+    #vehicle_ip: '127.0.0.1:5760'
+    
+#mqtt,user,password,addr
+####################################################
+
+
+
+
+
+###################################################
+  
+
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
     vehicle_id: 3

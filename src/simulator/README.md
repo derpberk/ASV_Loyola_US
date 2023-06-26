@@ -2,5 +2,3 @@ To use this packet you need to have installed Ardupilot SITL https://ardupilot.o
 
 git clone https://github.com/mavlink/mavlink-gbp-release.git --branch release/foxy/mavlink mavlink
 
-ros2 run mavros mavros_node --ros-args --params-file mavros_param.yaml 
-
