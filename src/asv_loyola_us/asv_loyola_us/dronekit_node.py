@@ -50,6 +50,8 @@ class Dronekit_node(Node):
         self.arm_timeout = self.get_parameter('arm_timeout').get_parameter_value().integer_value
         self.declare_parameter('travelling_timeout', 60)
         self.travelling_timeout = self.get_parameter('travelling_timeout').get_parameter_value().integer_value
+        self.declare_parameter('debug', False)
+        self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -97,7 +99,7 @@ class Dronekit_node(Node):
         try:
             self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout, source_system=1, source_component=93)
             self.dictionary()
-            self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback_debug)
+            self.rc_read_timer=self.create_timer(0.1, self.rc_read_callback)
             self.declare_topics()
             self.declare_services()
             self.declare_actions()
@@ -483,40 +485,38 @@ class Dronekit_node(Node):
                     return response
                 break
 
-    def rc_read_callback_debug(self):
-        self.get_logger().info("RC debug")
+    # def rc_read_callback_debug(self):
+    #     self.get_logger().info("RC debug")
 
     def rc_read_callback(self):
-        #if there is no RC return home
-        try:
-            #manage no RC detected
-            if all([self.vehicle.channels['5'] == 0, self.vehicle.channels['6'] == 0]):
-                if self.vehicle.mode != VehicleMode("RTL"):
-                    self.get_logger().info("seems there is no RC connected", once=True)
-                    self.status.manual_mode = False #override RC if there is no connection
-                    #self.vehicle.mode = VehicleMode("RTL")
-                    self.vehicle.mode = VehicleMode("GUIDED")
-            #manage RC switch between auto and manual mode
-            elif self.status.manual_mode!=(self.vehicle.channels['6']>1200):
-                #self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
-                # self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
-                self.status.manual_mode= False
-                # self.vehicle.mode = VehicleMode("GUIDED")
+        if self.DEBUG==False:
+            #if there is no RC return home
+            try:
+                #manage no RC detected
+                if all([self.vehicle.channels['5'] == 0, self.vehicle.channels['6'] == 0]):
+                    if self.vehicle.mode != VehicleMode("RTL"):
+                        self.get_logger().info("seems there is no RC connected", once=True)
+                        self.status.manual_mode = False #override RC if there is no connection
+                        #self.vehicle.mode = VehicleMode("RTL")
+                #manage RC switch between auto and manual mode
+                elif self.status.manual_mode!=(self.vehicle.channels['6']>1200):
+                    self.get_logger().info("manual interruption" if self.vehicle.channels['6']>1200 else "automatic control regained")
+                    self.status.manual_mode=bool(self.vehicle.channels['6']>1200)
 
-            #manage arm when RC in manual
-            elif self.status.manual_mode:                
-                if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
-                    self.get_logger().info("manual switching vehicle mode to manual")
-                    self.vehicle.mode = VehicleMode("MANUAL")
-                if self.vehicle.armed!=(self.vehicle.channels['5']>1200):
-                    if self.vehicle.channels['5']>1200:
-                        self.vehicle.arm()
-                        self.get_logger().info("manual arm")
-                    else:
-                        self.vehicle.disarm()
-                        self.get_logger().info("manual disarm")
-        except:
-            pass
+                #manage arm when RC in manual
+                elif self.status.manual_mode:                
+                    if self.vehicle.mode != VehicleMode("MANUAL") : #vehicle is not in desired mode
+                        self.get_logger().info("manual switching vehicle mode to manual")
+                        self.vehicle.mode = VehicleMode("MANUAL")
+                    if self.vehicle.armed!=(self.vehicle.channels['5']>1200):
+                        if self.vehicle.channels['5']>1200:
+                            self.vehicle.arm()
+                            self.get_logger().info("manual arm")
+                        else:
+                            self.vehicle.disarm()
+                            self.get_logger().info("manual disarm")
+            except:
+                pass
 
     def vehicle_status_callback(self, vehicle, name, msg):
         pass

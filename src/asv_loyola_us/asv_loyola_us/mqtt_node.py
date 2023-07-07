@@ -23,11 +23,11 @@ class MQTT_node(Node):
         self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
         self.declare_parameter('internet_loss_timeout', 30)
         self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
-        self.declare_parameter('mqtt_addr', "bender.us.es")
+        self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
-        self.declare_parameter('mqtt_user', "asv1")
+        self.declare_parameter('mqtt_user', "user")
         self.mqtt_user = self.get_parameter('mqtt_user').get_parameter_value().string_value
-        self.declare_parameter('mqtt_password', "azkenmuga")
+        self.declare_parameter('mqtt_password', "password")
         self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
         
 

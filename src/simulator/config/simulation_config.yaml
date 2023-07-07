@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    debug: true
+    debug: True
     vehicle_ip: '127.0.0.1:14550'
     #vehicle_ip: '127.0.0.1:5760'
     

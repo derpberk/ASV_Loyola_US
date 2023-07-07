@@ -9,13 +9,14 @@ from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 from asv_interfaces.action import SensorSample
 
-import Jetson.GPIO as GPIO
+# import Jetson.GPIO as GPIO
 from datetime import datetime
 from .submodulos.call_service import call_service #to call services
 import traceback
 from rclpy.action import ActionServer, CancelResponse, GoalResponse, ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
+import random
 
 class Sensor_node(Node):
 
@@ -66,9 +67,10 @@ class Sensor_node(Node):
         self.parameters()
 
         self.declare_topics()
-
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.pump_channel, GPIO.OUT)
+        if self.DEBUG== False:
+            import Jetson.GPIO as GPIO
+            GPIO.setmode(GPIO.BOARD)
+            GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
         self.status=Status()
         try:
@@ -154,26 +156,34 @@ class Sensor_node(Node):
                             sensor_str = data[0]
                             sensor_val = float(data[1])
 
-                            if sensor_str == "SAMPLE_NUM":
-                                self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
-                            if sensor_str == "BAT":
-                                self.get_logger().debug(f"Found Battery {sensor_val}")
-                                self.sensor_data.smart_water_battery = sensor_val
-                            if sensor_str == "WT":
-                                self.get_logger().debug(f"Found temperature {sensor_val}")
-                                self.sensor_data.temperature = sensor_val
-                            if sensor_str == "PH":
-                                self.get_logger().debug(f"Found ph value {sensor_val}")
-                                self.sensor_data.ph = sensor_val
-                            if sensor_str == "DO":
-                                self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
-                                self.sensor_data.o2 = sensor_val
-                            if sensor_str == "COND":
-                                self.get_logger().debug(f"Found Conductivity {sensor_val}")
-                                self.sensor_data.conductivity = sensor_val
-                            if sensor_str == "ORP":
-                                self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
-                                self.sensor_data.oxidation_reduction_potential = sensor_val
+                            if self.DEBUG:
+                                self.sensor_data.smart_water_battery = random.uniform(1,100)
+                                self.sensor_data.temperature = random.uniform(1,100)
+                                self.sensor_data.ph = random.uniform(1,40)
+                                self.sensor_data.o2 = random.uniform(1,30)
+                                self.sensor_data.conductivity = random.uniform(1,20)
+                                self.sensor_data.oxidation_reduction_potential = random.uniform(1,10)
+                            else:
+                                if sensor_str == "SAMPLE_NUM":
+                                    self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
+                                if sensor_str == "BAT":
+                                    self.get_logger().debug(f"Found Battery {sensor_val}")
+                                    self.sensor_data.smart_water_battery = sensor_val
+                                if sensor_str == "WT":
+                                    self.get_logger().debug(f"Found temperature {sensor_val}")
+                                    self.sensor_data.temperature = sensor_val
+                                if sensor_str == "PH":
+                                    self.get_logger().debug(f"Found ph value {sensor_val}")
+                                    self.sensor_data.ph = sensor_val
+                                if sensor_str == "DO":
+                                    self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
+                                    self.sensor_data.o2 = sensor_val
+                                if sensor_str == "COND":
+                                    self.get_logger().debug(f"Found Conductivity {sensor_val}")
+                                    self.sensor_data.conductivity = sensor_val
+                                if sensor_str == "ORP":
+                                    self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
+                                    self.sensor_data.oxidation_reduction_potential = sensor_val
 
                     is_frame_ok = True
                     self.sensor_data.date = str(datetime.now())

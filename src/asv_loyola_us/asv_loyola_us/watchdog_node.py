@@ -32,9 +32,27 @@ class Watchdog_node(Node):
         self.error_list=[]
         self.last_error_subscriber_number=0
         self.watchdog_timer = self.create_timer(watchdog_timer, self.watchdog_timer_function)
-        aux=datetime.today()       
-        name=str("/home/xavier/ASV_Status_Log/"+ aux.strftime("%m.%d.%Y..%H.%M") + ".txt")
-        self.status_file= open(name ,"w")
+        aux=datetime.today()
+               
+        
+
+        # Ruta de la carpeta
+        folder_path = "/home/aceti/ASV_Status_Log/"
+
+        # Verificar si la carpeta existe
+        if not os.path.exists(folder_path):
+            # Crear la carpeta si no existe
+            os.makedirs(folder_path)
+
+        # Nombre completo del archivo con la ruta
+        file_name = os.path.join(folder_path, aux.strftime("%m.%d.%Y..%H.%M") + ".txt")
+
+        # Abrir el archivo en modo escritura
+        self.status_file = open(file_name, "w")
+
+
+
+
 
     def error_callback(self,msg):
         error = "there has been an error in node: \'%s\' at time %s\n\n%s" % (msg.node, datetime.utcfromtimestamp(self.get_clock().now().seconds_nanoseconds()[0]+3600).strftime('%Y-%m-%d %H:%M:%S'), self.parse_error(msg.message))
