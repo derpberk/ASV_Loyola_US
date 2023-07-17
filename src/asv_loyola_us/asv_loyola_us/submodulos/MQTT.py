@@ -6,7 +6,7 @@ import signal
 import psutil
 
 class MQTT(object):
-    def __init__(self, name, addr='adress', port=1883, timeout=60, topics2suscribe=None, on_message=None, on_disconnect=None,user=None,password=None):
+    def __init__(self, name, addr='bender.us.es', port=1883, timeout=60, topics2suscribe=None, on_message=None, on_disconnect=None,user=None,password=None):
 
         self.client = mqtt.Client(name)
 
@@ -28,7 +28,7 @@ class MQTT(object):
         self._mqtt_thread = threading.Thread(target=self.mqtt_thread, args=(addr, port, timeout,))
         self._mqtt_thread.start()
 
-    def mqtt_thread(self, addr='adress', port=1883, timeout=60):
+    def mqtt_thread(self, addr='abender.us.es', port=1883, timeout=60):
         self.client.on_connect = self.on_connect
         self.client.on_message = self.onmessage
         self.client.on_disconnect = self.on_disconnect

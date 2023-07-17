@@ -95,6 +95,8 @@ class Dronekit_node(Node):
 
         self.last_obstacle_distance_sent_ms=0
         # connect to vehicle
+        if self.DEBUG:
+            self.get_logger().warning("Debug mode enabled")
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
         try:
             self.vehicle = connect(self.vehicle_ip, timeout=self.connect_timeout, source_system=1, source_component=93)

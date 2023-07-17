@@ -7,6 +7,10 @@
 #mqtt,user,password,addr
 ####################################################
 
+    mqtt_addr: "bender.us.es"
+    mqtt_user: 'asv1'
+    mqtt_password: 'azkenmuga'
+    # mqtt_addr: '127.0.0.1:1883'
 
 
 

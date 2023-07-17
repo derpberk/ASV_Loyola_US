@@ -23,6 +23,7 @@ set(msg_files
   "msg/Threeaxys.msg"
   "msg/Camera.msg"
   "msg/Obstacles.msg"
+  "msg/Sonar.msg"
 
   #"msg/Message2.msg"
   # etc
@@ -39,6 +40,7 @@ set(srv_files
   "srv/CommandStr.srv"
   "srv/PlannerParams.srv"
   "srv/SensorParams.srv"
+  "srv/SonarService.srv"
   #"srv/Service2.srv"
    # etc
   )

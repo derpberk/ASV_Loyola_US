@@ -9,6 +9,8 @@ from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 from asv_interfaces.action import SensorSample
 
+
+
 # import Jetson.GPIO as GPIO
 from datetime import datetime
 from .submodulos.call_service import call_service #to call services
@@ -40,12 +42,12 @@ class Sensor_node(Node):
         self.sensor_read_timeout = self.get_parameter('sensor_read_timeout').get_parameter_value().integer_value
         self.declare_parameter('time_between_samples', 0.5)
         self.time_between_samples = self.get_parameter('time_between_samples').get_parameter_value().double_value
-
-
+        
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
         self.update_parameters_server = self.create_service(SensorParams, 'Sensor_params', self.update_parameters_callback)
         
+
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.sensor_publisher = self.create_publisher(Sensor, 'sensors', 10)
@@ -62,11 +64,13 @@ class Sensor_node(Node):
     def __init__(self):
         #start the node
         super().__init__('sensor_node')
-
+        
         #declare parameter of drone IP
         self.parameters()
 
         self.declare_topics()
+        if self.DEBUG:
+            self.get_logger().warning("Debug mode enabled")
         if self.DEBUG== False:
             import Jetson.GPIO as GPIO
             GPIO.setmode(GPIO.BOARD)
@@ -97,6 +101,9 @@ class Sensor_node(Node):
             self.get_logger().fatal("Sensor module is dead")
             self.destroy_node()
         #declare the services
+        
+
+    
 
 
     def read_sensor(self):
@@ -156,34 +163,39 @@ class Sensor_node(Node):
                             sensor_str = data[0]
                             sensor_val = float(data[1])
 
-                            if self.DEBUG:
+                            
+                            
+                            if sensor_str == "SAMPLE_NUM":
+                                self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
+                            if sensor_str == "BAT":
+                                self.get_logger().debug(f"Found Battery {sensor_val}")
+                                self.sensor_data.smart_water_battery = sensor_val
+                            if sensor_str == "WT":
+                                self.get_logger().debug(f"Found temperature {sensor_val}")
+                                self.sensor_data.temperature = sensor_val
+                            if sensor_str == "PH":
+                                self.get_logger().debug(f"Found ph value {sensor_val}")
+                                self.sensor_data.ph = sensor_val
+                            if sensor_str == "DO":
+                                self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
+                                self.sensor_data.o2 = sensor_val
+                            if sensor_str == "COND":
+                                self.get_logger().debug(f"Found Conductivity {sensor_val}")
+                                self.sensor_data.conductivity = sensor_val
+                            if sensor_str == "ORP":
+                                self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
+                                self.sensor_data.oxidation_reduction_potential = sensor_val
+                        if self.DEBUG:
                                 self.sensor_data.smart_water_battery = random.uniform(1,100)
+                                self.get_logger().info(f"Found SAMPLE_NUM {self.sensor_data.smart_water_battery}")
                                 self.sensor_data.temperature = random.uniform(1,100)
                                 self.sensor_data.ph = random.uniform(1,40)
                                 self.sensor_data.o2 = random.uniform(1,30)
                                 self.sensor_data.conductivity = random.uniform(1,20)
                                 self.sensor_data.oxidation_reduction_potential = random.uniform(1,10)
-                            else:
-                                if sensor_str == "SAMPLE_NUM":
-                                    self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
-                                if sensor_str == "BAT":
-                                    self.get_logger().debug(f"Found Battery {sensor_val}")
-                                    self.sensor_data.smart_water_battery = sensor_val
-                                if sensor_str == "WT":
-                                    self.get_logger().debug(f"Found temperature {sensor_val}")
-                                    self.sensor_data.temperature = sensor_val
-                                if sensor_str == "PH":
-                                    self.get_logger().debug(f"Found ph value {sensor_val}")
-                                    self.sensor_data.ph = sensor_val
-                                if sensor_str == "DO":
-                                    self.get_logger().debug(f"Found Disolved Oxygen {sensor_val}")
-                                    self.sensor_data.o2 = sensor_val
-                                if sensor_str == "COND":
-                                    self.get_logger().debug(f"Found Conductivity {sensor_val}")
-                                    self.sensor_data.conductivity = sensor_val
-                                if sensor_str == "ORP":
-                                    self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
-                                    self.sensor_data.oxidation_reduction_potential = sensor_val
+                        
+                        
+                    
 
                     is_frame_ok = True
                     self.sensor_data.date = str(datetime.now())
