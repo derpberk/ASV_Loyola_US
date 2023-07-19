@@ -38,8 +38,19 @@ class Dronekit_node(Node):
 
     #his functions defines and assigns value to the parameters
     def parameters(self):
+
+        self.declare_parameter('debug', False)
+        self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+
+
         self.declare_parameter('vehicle_ip', 'tcp:navio.local:5678')
-        self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
+        self.declare_parameter('debug_vehicle_ip', 'tcp:127.0.0.1:5760')
+
+        if self.DEBUG:
+            self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
+        else:
+            self.vehicle_ip = self.get_parameter('debug_vehicle_ip').get_parameter_value().string_value
+
         self.declare_parameter('connect_timeout', 15)
         self.connect_timeout = self.get_parameter('connect_timeout').get_parameter_value().integer_value
         self.declare_parameter('max_distance', 5000)
@@ -50,8 +61,8 @@ class Dronekit_node(Node):
         self.arm_timeout = self.get_parameter('arm_timeout').get_parameter_value().integer_value
         self.declare_parameter('travelling_timeout', 60)
         self.travelling_timeout = self.get_parameter('travelling_timeout').get_parameter_value().integer_value
-        self.declare_parameter('debug', False)
-        self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+        
+        
 
 
     #this function declares the services, its only purpose is to keep code clean
@@ -294,6 +305,9 @@ class Dronekit_node(Node):
     ######################################### ACTION GOTO DESCRIPTION ############################################
 
     def goto_accept(self, goal_request):
+        # This callback can optionally be implemented, and is called when a new goal is requested.
+        # Here we check if we can accept the goal or not, based on the current state of the system.
+
         self.get_logger().info(f'Action call received')
         #if we are attending another call exit
         if self.goto_goal_handle is not None and self.goto_goal_handle.is_active:
@@ -307,18 +321,25 @@ class Dronekit_node(Node):
         if self.status.manual_mode:
             self.get_logger().error(f'RC in manual mode, action rejected')
             return GoalResponse.REJECT
+        if self.calculate_distance(goal_request.samplepoint)> self.max_distance:
+            self.get_logger().error(f'we are too far away from the destination point {self.calculate_distance(goal_request.samplepoint)}m, cancelling action')
+            return GoalResponse.REJECT
         self.get_logger().info(f'Action accepted')
         return GoalResponse.ACCEPT
 
+
+
     def goto_accepted_callback(self, goal_handle):
-        #we could make a list of goal handles and make a queue of points to go to and accept everything,
-        #for the time being, we will just start executing
+        # This callback is called when the action server has accepted the client request to begin a new goal.
+        """
         self.goto_goal_handle=goal_handle
-        if self.calculate_distance(goal_handle.request.samplepoint)>self.max_distance:
+        if self.calculate_distance(goal_handle.request.samplepoint)> self.max_distance:
             self.get_logger().warning(f'we are too far away from the destination point {self.calculate_distance(goal_handle.request.samplepoint)}m, cancelling action')
-            result.finish_flag = "Point too far away"
+            #result.finish_flag = "Point too far away"
             goal_handle.abort()
             return Goto.Result()
+        """
+        self.get_logger().info(f'Executing action: The mission has been accepted and is being processed')
         goal_handle.execute() #execute goto_execute_callback
 
     def goto_cancel(self, goal_handle):
