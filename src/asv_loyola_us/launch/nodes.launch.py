@@ -56,6 +56,7 @@ def generate_launch_description():
         parameters = [config]
     )
 
+
     camera = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='camera',
@@ -72,5 +73,5 @@ def generate_launch_description():
         mqtt,
         sensors,
         planner,
-        camera,
+        #camera,
     ])
