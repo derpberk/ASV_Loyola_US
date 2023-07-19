@@ -37,7 +37,7 @@ class Watchdog_node(Node):
         
 
         # Ruta de la carpeta
-        folder_path = "/home/aceti/ASV_Status_Log/"
+        folder_path ="~/ASV_Loyola_US/logs/"
 
         # Verificar si la carpeta existe
         if not os.path.exists(folder_path):
