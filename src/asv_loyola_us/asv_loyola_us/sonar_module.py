@@ -4,13 +4,14 @@ import rclpy
 from rclpy.node import Node
 import serial
 import serial.tools.list_ports
-from asv_interfaces.msg import Sonar, Nodeupdate
+from asv_interfaces.msg import Sonar, Nodeupdate, Status
 import threading
 from std_msgs.msg import Float32
 import time
 import traceback
 from rclpy.executors import MultiThreadedExecutor
 import random
+from math import exp, sin, cos
 
 class Sonar_node(Node):
     def parameters(self):
@@ -24,15 +25,20 @@ class Sonar_node(Node):
         timer_period = 0.5  # seconds
         self.sonar_publisher = self.create_publisher(Sonar, 'sonar', 10)
         self.sonar_publisher_timer = self.create_timer(timer_period, self.sonar_publish)
-        
+        self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
+
     def __init__(self):
         super().__init__("sonar_service")
         self.parameters()
         self.declare_topics()
+        self.status=Status()
         self.sonar=Sonar()
+        
         self.remembered_port = None
         self.ping_device = None
         self.ping_thread = None
+        self.data0= None
+        self.data1= None
         # self.declare_parameter('serial_number', "DM00R2J8")
         # self.service = self.create_service(Sonar, "sonar", self.sonar_callback)
         if self.DEBUG==False:
@@ -92,6 +98,9 @@ class Sonar_node(Node):
                 response.success = False
                 self.get_logger().info("Sonar not working")
         return response
+    
+    def status_suscriber_callback(self, msg):
+        self.status = msg
 
     def sonar_publish(self):
         if self.ping_device: #Si estamos concetados realizamos el checkeo
@@ -105,7 +114,12 @@ class Sonar_node(Node):
                 #     f"Result of check {self.sonar}"
                 # )
         if self.DEBUG:
-            self.sonar.sonar=random.uniform(1,100)
+            
+            self.data0=self.status.lat
+            self.data1=self.status.lon
+            self.sonar.sonar= cos(self.data0)+sin(self.data1)
+            
+
         self.sonar_publisher.publish(self.sonar)
         
 

@@ -8,7 +8,7 @@ import random
 from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 from asv_interfaces.action import SensorSample
-
+from math import exp, sin, cos, tan, tanh,sinh,cosh
 
 
 # import Jetson.GPIO as GPIO
@@ -186,13 +186,13 @@ class Sensor_node(Node):
                                 self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
                                 self.sensor_data.oxidation_reduction_potential = sensor_val
                         if self.DEBUG:
-                                self.sensor_data.smart_water_battery = random.uniform(1,100)
-                                self.get_logger().info(f"Found SAMPLE_NUM {self.sensor_data.smart_water_battery}")
-                                self.sensor_data.temperature = random.uniform(1,100)
-                                self.sensor_data.ph = random.uniform(1,40)
-                                self.sensor_data.o2 = random.uniform(1,30)
-                                self.sensor_data.conductivity = random.uniform(1,20)
-                                self.sensor_data.oxidation_reduction_potential = random.uniform(1,10)
+                                self.sensor_data.smart_water_battery = sin(self.status.lon+self.status.lat)
+                                
+                                self.sensor_data.temperature = cos(self.status.lon+self.status.lat)
+                                self.sensor_data.ph = tan(self.status.lon+self.status.lat)
+                                self.sensor_data.o2 = cosh(self.status.lon+self.status.lat)
+                                self.sensor_data.conductivity = sinh(self.status.lon+self.status.lat)
+                                self.sensor_data.oxidation_reduction_potential = exp(self.status.lon+self.status.lat)
                         
                         
                     
