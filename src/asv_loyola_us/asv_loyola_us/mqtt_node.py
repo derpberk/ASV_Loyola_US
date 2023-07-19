@@ -374,7 +374,7 @@ class MQTT_node(Node):
 
         z = { "veh_num": self.vehicle_id,
             "date": msg.date,
-            
+            "sonar":self.sonar.sonar,
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
         }  # Must be a JSON format file.

@@ -10,11 +10,15 @@ from std_msgs.msg import Float32
 import time
 import traceback
 from rclpy.executors import MultiThreadedExecutor
+import random
 
 class Sonar_node(Node):
     def parameters(self):
         self.declare_parameter('serial_number', "DM00R2J8")
         self.serial_number = self.get_parameter('serial_number').get_parameter_value().string_value
+        self.declare_parameter('debug', False)
+        self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+        
 
     def declare_topics(self):
         timer_period = 0.5  # seconds
@@ -31,8 +35,10 @@ class Sonar_node(Node):
         self.ping_thread = None
         # self.declare_parameter('serial_number', "DM00R2J8")
         # self.service = self.create_service(Sonar, "sonar", self.sonar_callback)
-        self.port_monitor_thread = threading.Thread(target=self.monitor_usb_port, daemon=True)
-        self.port_monitor_thread.start()
+        if self.DEBUG==False:
+        
+            self.port_monitor_thread = threading.Thread(target=self.monitor_usb_port, daemon=True)
+            self.port_monitor_thread.start()
 
 
 
@@ -94,10 +100,12 @@ class Sonar_node(Node):
                         #confirmamos que esta fincionando
                 self.sonar.sonar=float(data["distance"])
                 
-                self.get_logger().info("Sonar send data")
-                self.get_logger().info(
-                    f"Result of check {self.sonar}"
-                )
+                # self.get_logger().info("Sonar send data")
+                # self.get_logger().info(
+                #     f"Result of check {self.sonar}"
+                # )
+        if self.DEBUG:
+            self.sonar.sonar=random.uniform(1,100)
         self.sonar_publisher.publish(self.sonar)
         
 

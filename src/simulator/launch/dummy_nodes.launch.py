@@ -110,7 +110,7 @@ def generate_launch_description():
         watchdog,
         #dummy_publisher,
         mqtt,
-        #sensors,
+        sensors,
         planner,
         drone,
         #camera,
