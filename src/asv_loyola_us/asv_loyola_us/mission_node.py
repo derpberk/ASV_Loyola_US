@@ -240,7 +240,7 @@ class Mission_node(Node):
         # but it administrates a buffer of 1 MQTT message due to code flow
         elif self.mission_mode == 4: 
             
-            if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+            if self.change_current_mission_mode(self.mission_mode): # the contents of this if will only be executed once
                 self.timeout_simple_counter=0
 
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode

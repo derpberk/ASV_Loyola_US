@@ -358,7 +358,7 @@ class Dronekit_node(Node):
         #Calculate Path
         destination=Newpoint.Request()
         destination.new_point=goal_handle.request.samplepoint
-        path=self.call_service(self.calculate_path_client,destination)
+        path=self.call_service(self.calculate_path_client, destination)
         #if there is no path, go directly to destination
         if path==False or path.success==False:
             self.get_logger().error("something went wrong with path planner")
