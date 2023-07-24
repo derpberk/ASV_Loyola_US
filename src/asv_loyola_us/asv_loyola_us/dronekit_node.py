@@ -461,9 +461,15 @@ class Dronekit_node(Node):
         self.vehicle.mode = VehicleMode("LOITER")
         goal_handle.succeed()
         self.get_logger().info('Goal reached, waiting for sample')
-        self.waiting_for_sensor_read=True
+
+        if self.DEBUG:
+            self.waiting_for_sensor_read = False
+        else:
+            self.waiting_for_sensor_read = True
+
         self.sensor_action_client.wait_for_server()
         goal_msg = SensorSample.Goal()
+
         self._send_goal_future = self.sensor_action_client.send_goal_async(goal_msg, feedback_callback=self.sensor_feedback_callback)
         self._send_goal_future.add_done_callback(self.sensor_response)
         while rclpy.ok() and self.waiting_for_sensor_read:
