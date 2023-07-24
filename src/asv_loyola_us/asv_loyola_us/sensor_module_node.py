@@ -117,6 +117,10 @@ class Sensor_node(Node):
             if waited_time >= self.sensor_read_timeout:
                 self.get_logger().error(f"waited for sensor read for too long, skipping sensor read")
                 break
+
+            if self.DEBUG:
+                self.get_logger().info(f"DEBUG MODE: generating random sensor data")
+                break
                 
             waited_time+=0.5 # add time to wait
 
@@ -137,8 +141,7 @@ class Sensor_node(Node):
                     self.get_logger().debug(f"read: {bytes}")
                     frames = bytes.split('<=>')  # Frame separator
 
-                    last_frame = frames[-1].split('#')[
-                    :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
+                    last_frame = frames[-1].split('#')[ :-1]  # Select the last frame, parse the fields (#) and discard the last value (EOF)
                     self.get_logger().debug(f"sensor read: {last_frame}")
                     try:
                         if len(last_frame)<4: #we read an almost empty frame, this is weird
@@ -258,10 +261,18 @@ class Sensor_node(Node):
             
         for i in range(self.num_samples):
             self.get_logger().info(f"taking sample {i+1} of {self.num_samples}")
-            self.read_sensor()                        #read smart water
+
+            if not self.DEBUG:
+                self.get_logger().info(f"reading sensor")
+                self.read_sensor()                        #read smart water
+            else:
+                self.get_logger().info(f"DEBUG MODE: Skipping sensor read")
+                break
+
             feedback_msg.sensor_read=self.sensor_data
             result.sensor_reads.append(self.sensor_data)
             goal_handle.publish_feedback(feedback_msg)
+
             if goal_handle.is_cancel_requested:#event mission canceled
                 #make it loiter around actual position
                 goal_handle.canceled()
@@ -269,6 +280,7 @@ class Sensor_node(Node):
 
                 goal_handle.abort()
                 return result
+
             time.sleep(self.time_between_samples)
 
         goal_handle.succeed()

@@ -44,8 +44,6 @@ class MQTT_node(Node):
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
-        
-
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
@@ -125,12 +123,12 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message)  # Send the MQTT message
         
-
-
-
+        # declare topics
         self.declare_topics()
+
         while rclpy.ok():
-            rclpy.spin_once(self)
+            rclpy.spin_once(self)  # wait for callback
+
             if self.processing == True: #we have something to do
                 sleep(0.01) # wait in case something needs to be done in another thread
                 if self.cancel_movement != -1: #we need to load a mission

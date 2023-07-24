@@ -236,29 +236,36 @@ class Mission_node(Node):
                 self.get_logger().info(f"vehicle in \'MANUAL\' mode")
 
         # Simple GO-TO
-        #This mode is basically STANDBY
+        # This mode is basically STANDBY
         # but it administrates a buffer of 1 MQTT message due to code flow
         elif self.mission_mode == 4: 
+            
             if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
                 self.timeout_simple_counter=0
+
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
-                    self.get_logger().info("The vehicle is not able to go into automatic mode")
-                    self.mission_mode=0
+                    self.get_logger().info("The vehicle is not able to go into automatic mode due to EKF problems")
+                    self.mission_mode = 0
                 else:
                     self.change_ASV_mode("LOITER")
                     self.arm_vehicle(True)
                     self.get_logger().info("vehicle in \'SIMPLE POINT\' mode")
+
             if self.mqtt_waypoint is not None and not self.waiting_for_action: #if we have a point and we are not busy
-                self.go_to(self.mqtt_waypoint) #go to the point
-                self.mqtt_waypoint = None #discard the point
-                #TODO: may be, implement a higher buffer for points
+
+                self.go_to(self.mqtt_waypoint) # go to the point
+                self.mqtt_waypoint = None # discard the point
+                
             if self.waiting_for_action == False and self.mqtt_waypoint == None and self.mission_mode == 4:
+
                 self.timeout_simple_counter += 1
+            
                 if self.timeout_simple_counter > self.simple_goto_timeout*10:
+
                     self.mission_mode = 1
                     self.get_logger().info(f"No point in { self.simple_goto_timeout} seconds, going into standby mode")
             else:
-                self.timeout_simple_counter=0
+                self.timeout_simple_counter = 0
 
         # RTL mode
         #This mode will arm the vehicle and set RTL mode
@@ -503,13 +510,17 @@ class Mission_node(Node):
     """     
     def go_to(self, location):
         self.get_logger().info(f"going to [{location.lat},{location.lon}]")
-        self.destination_publisher.publish(location)
-        self.goto_action_client.wait_for_server()
+
+        self.destination_publisher.publish(location) # publish the destination point
+        self.goto_action_client.wait_for_server() # wait for the action server to be ready
         self.waiting_for_action=True
         self.point_backup=location
+
         goal_msg = Goto.Goal()
         goal_msg.samplepoint = location
         self.get_logger().debug('Sending goal request...')
+
+        # send the goal request 
         self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
         self._send_goal_future.add_done_callback(self.go_to_response)
 
