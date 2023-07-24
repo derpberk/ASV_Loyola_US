@@ -19,6 +19,14 @@
   <exec_depend>python3-geopy</exec_depend> <!-- for mqtt -->
   <!-- dronekit must be instaled from apt, still not in rosdep, add as depend in the future -->
 
+  <build_depend>rclpy</build_depend> <!-- for python -->
+  <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
+  <build_depend>rcl_interfaces</build_depend> <!-- for interfaces -->
+  <build_depend>action_msgs</build_depend> <!-- for interfaces -->
+  <build_depend>python3-paho-mqtt</build_depend> <!-- for mqtt -->
+  <build_depend>python3-numpy</build_depend> <!-- for mqtt -->
+  <build_depend>python3-geopy</build_depend> <!-- for mqtt -->
+
   <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>

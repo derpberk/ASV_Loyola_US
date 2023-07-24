@@ -18,3 +18,4 @@
     simple_goto_timeout: 10
     internet_loss_timeout: 30
     sensor_read_timeout: 15
+    sonar_connection_type: "USB"

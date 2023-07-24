@@ -16,6 +16,8 @@ from math import exp, sin, cos
 class Sonar_node(Node):
     def parameters(self):
         self.declare_parameter('serial_number', "DM00R2J8")
+        self.declare_parameter('sonar_connection_type', "USB")
+        self.sonar_connection_type = self.get_parameter('sonar_connection_type').get_parameter_value().string_value
         self.serial_number = self.get_parameter('serial_number').get_parameter_value().string_value
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
@@ -42,10 +44,15 @@ class Sonar_node(Node):
         # self.declare_parameter('serial_number', "DM00R2J8")
         # self.service = self.create_service(Sonar, "sonar", self.sonar_callback)
         if self.DEBUG==False:
-        
-            self.port_monitor_thread = threading.Thread(target=self.monitor_usb_port, daemon=True)
-            self.port_monitor_thread.start()
-
+            if 'USB' in self.sonar_connection_type:
+                self.port_monitor_thread = threading.Thread(target=self.monitor_usb_port, daemon=True)
+                self.port_monitor_thread.start()
+            elif 'UART' in self.sonar_connection_type:
+                self.port_monitor_thread = threading.Thread(target=self.monitor_uart_port, daemon=True)
+                self.port_monitor_thread.start()       
+            else:
+                self.get_logger().info(f"Failed to connect to Sonar")
+                         
 
 
  # funcion para buscar por los puertos USB el numero de serie del sonar, si coincide el numero de serie obtiene el puerto donde se ubica, ademas en esta fucnion lo que realizara sera una busqueda continua del sistema.
@@ -75,12 +82,40 @@ class Sonar_node(Node):
                         ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
                         self.ping_device = ping_device
                         self.remembered_port = port
+                        self.get_logger().info(f"Connected to {port} oiweeir")
+                        break
+                    except Exception as e:
+                        self.get_logger().info(f"Failed to connect to {port}: {e}")
+            rclpy.spin_once(self, timeout_sec=0.5)
+
+    def monitor_uart_port(self):
+        while True:
+            arduino_ports = [
+                p.device
+                for p in serial.tools.list_ports.comports()
+                if p.serial_number == self.get_parameter('serial_number').get_parameter_value().string_value # Numero de serie del sonar, cambiar al que se este utilizando
+            ]
+            if self.remembered_port not in arduino_ports:
+                self.get_logger().info("USB device disconnected")
+                self.ping_device = None
+                self.remembered_port = None
+
+            if not self.ping_device:
+                for port in arduino_ports:
+                    try:
+                        ping_device = Ping1D() 
+                        ping_device.connect_serial(port, 115200) #Nos conectamos al puerto hallado por el numero de serie
+                        ping_device.initialize()                #Inicializamos
+                        ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
+                        self.ping_device = ping_device
+                        self.remembered_port = port
                         self.get_logger().info(f"Connected to {port}")
                         break
                     except Exception as e:
                         self.get_logger().info(f"Failed to connect to {port}: {e}")
             rclpy.spin_once(self, timeout_sec=0.5)
 
+       
             
      
 # funcion para la comprobacion del sonar , se llama dentro de la clase Ping dada por el sonar a la funcion get_ping_enable que muestra 
@@ -109,10 +144,10 @@ class Sonar_node(Node):
                         #confirmamos que esta fincionando
                 self.sonar.sonar=float(data["distance"])
                 
-                # self.get_logger().info("Sonar send data")
-                # self.get_logger().info(
-                #     f"Result of check {self.sonar}"
-                # )
+                self.get_logger().info("Sonar send data")
+                self.get_logger().info(
+                 f"Result of check {self.sonar}"
+                 )
         if self.DEBUG:
             
             self.data0=self.status.lat
