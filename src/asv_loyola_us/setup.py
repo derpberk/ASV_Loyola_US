@@ -32,6 +32,8 @@ setup(
             'planner = asv_loyola_us.planner_node:main',
             'watchdog = asv_loyola_us.watchdog_node:main',
             'camera = asv_loyola_us.camera_node:main',
+            'database= asv_loyola_us.database_node:main',
+            'sonar= asv_loyola_us.sonar_module:main',
         ],
     },
 )

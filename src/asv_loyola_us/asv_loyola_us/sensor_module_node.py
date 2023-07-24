@@ -8,14 +8,15 @@ import random
 from asv_interfaces.srv import Takesample, SensorParams
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
 from asv_interfaces.action import SensorSample
+from math import exp, sin, cos, tan, tanh,sinh,cosh
 
-import Jetson.GPIO as GPIO
 from datetime import datetime
 from .submodulos.call_service import call_service #to call services
 import traceback
 from rclpy.action import ActionServer, CancelResponse, GoalResponse, ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
+import random
 
 class Sensor_node(Node):
 
@@ -23,10 +24,6 @@ class Sensor_node(Node):
     def parameters(self):
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
-        self.declare_parameter('pump', False)
-        self.pump_installed = self.get_parameter('pump').get_parameter_value().bool_value
-        self.declare_parameter('pump_channel', 7)
-        self.pump_channel = self.get_parameter('pump_channel').get_parameter_value().integer_value
         self.declare_parameter('num_samples', 4)
         self.num_samples = self.get_parameter('num_samples').get_parameter_value().integer_value
         self.declare_parameter('USB_string', "/dev/ttyUSB0")
@@ -39,12 +36,12 @@ class Sensor_node(Node):
         self.sensor_read_timeout = self.get_parameter('sensor_read_timeout').get_parameter_value().integer_value
         self.declare_parameter('time_between_samples', 0.5)
         self.time_between_samples = self.get_parameter('time_between_samples').get_parameter_value().double_value
-
-
+        
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
         self.update_parameters_server = self.create_service(SensorParams, 'Sensor_params', self.update_parameters_callback)
         
+
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.sensor_publisher = self.create_publisher(Sensor, 'sensors', 10)
@@ -61,19 +58,23 @@ class Sensor_node(Node):
     def __init__(self):
         #start the node
         super().__init__('sensor_node')
-
+        
         #declare parameter of drone IP
         self.parameters()
 
         self.declare_topics()
+        if self.DEBUG:
+            self.get_logger().warning("Debug mode enabled")
 
-        GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.pump_channel, GPIO.OUT)
         self.sensor_data = Sensor()
         self.status=Status()
         try:
-            if self.DEBUG == False:
+            # IF DEBUG, DONT CONNECT TO SERIAL. 
+            if self.DEBUG:
+                self.serial = None
+            else:
                 self.serial = serial.Serial(self.USB_string, self.baudrate, timeout=self.timeout)
+
             self.declare_services()
             self.declare_actions()
             self.get_logger().info("sensor node initialized")
@@ -95,6 +96,9 @@ class Sensor_node(Node):
             self.get_logger().fatal("Sensor module is dead")
             self.destroy_node()
         #declare the services
+        
+
+    
 
 
     def read_sensor(self):
@@ -119,6 +123,7 @@ class Sensor_node(Node):
             time.sleep(0.5)  # Polling time. Every 0.5 secs, check the buffer #
                 
             if self.DEBUG == False and self.serial.inWaiting() < 27:  # If frame has a lenght inferior to the minimum of the Header
+            
                 continue
 
             else:
@@ -154,6 +159,8 @@ class Sensor_node(Node):
                             sensor_str = data[0]
                             sensor_val = float(data[1])
 
+                            
+                            
                             if sensor_str == "SAMPLE_NUM":
                                 self.get_logger().info(f"Found SAMPLE_NUM {sensor_val}")
                             if sensor_str == "BAT":
@@ -174,6 +181,17 @@ class Sensor_node(Node):
                             if sensor_str == "ORP":
                                 self.get_logger().debug(f"Found Oxidation Reduction Potential {sensor_val}")
                                 self.sensor_data.oxidation_reduction_potential = sensor_val
+                        if self.DEBUG:
+                                self.sensor_data.smart_water_battery = sin(self.status.lon+self.status.lat)
+                                
+                                self.sensor_data.temperature = cos(self.status.lon+self.status.lat)
+                                self.sensor_data.ph = tan(self.status.lon+self.status.lat)
+                                self.sensor_data.o2 = cosh(self.status.lon+self.status.lat)
+                                self.sensor_data.conductivity = sinh(self.status.lon+self.status.lat)
+                                self.sensor_data.oxidation_reduction_potential = exp(self.status.lon+self.status.lat)
+                        
+                        
+                    
 
                     is_frame_ok = True
                     self.sensor_data.date = str(datetime.now())
@@ -189,29 +207,22 @@ class Sensor_node(Node):
 
     def update_parameters_callback(self, request, response):
         if request.read_only:
-            response.pump_channel = self.pump_channel
             response.number_of_samples = self.num_samples
             response.time_between_samples = self.time_between_samples
-            response.use_pump = self.pump_installed
+
             self.get_logger().info(f"params read sent")
             return response
-        if request.use_pump != self.pump_installed:
-            self.pump_installed=request.use_pump
-            self.get_logger().info("pump installed" if request.use_pump else "pump deactivated")
-        if self.pump_installed and (request.pump_channel != self.pump_channel):
-            self.get_logger().info(f"pump channel changed to {request.pump_channel}")
-            self.pump_channel = request.pump_channel
-            GPIO.setup(self.pump_channel, GPIO.OUT) #TODO: consider deactivating old channel
+
         if self.num_samples != request.number_of_samples:
             self.num_samples = request.number_of_samples
             self.get_logger().info(f"number of samples changed to {request.number_of_samples}")
+
         if response.time_between_samples != self.time_between_samples:
             self.time_between_samples = response.time_between_samples
             self.get_logger().info(f"time between samples changed to {request.time_between_samples} s")
-        response.pump_channel = request.pump_channel
+
         response.number_of_samples = request.number_of_samples
         response.time_between_samples = request.time_between_samples
-        response.use_pump = request.use_pump
         return response
 
     def status_suscriber_callback(self, msg):
@@ -244,11 +255,6 @@ class Sensor_node(Node):
         feedback_msg = SensorSample.Feedback()
         result=SensorSample.Result()
         self.sensor_data = Sensor()
-
-        if self.pump_installed:
-            GPIO.output(self.pump_channel, GPIO.HIGH)  # start filling the tank
-            self.get_logger().info("activando bomba")
-            time.sleep(10.0)                          #wait 10 seconds
             
         for i in range(self.num_samples):
             self.get_logger().info(f"taking sample {i+1} of {self.num_samples}")
@@ -260,15 +266,11 @@ class Sensor_node(Node):
                 #make it loiter around actual position
                 goal_handle.canceled()
                 result.finish_flag = "Action cancelled"
-                if self.pump_installed:
-                    GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
-                    self.get_logger().info("deteniendo bomba")
+
                 goal_handle.abort()
                 return result
             time.sleep(self.time_between_samples)
-        if self.pump_installed:
-            GPIO.output(self.pump_channel, GPIO.LOW)  #stop filling the tank
-            self.get_logger().info("deteniendo bomba")
+
         goal_handle.succeed()
         result.finish_flag = "Normal execution"
         return result
@@ -290,7 +292,6 @@ def main(args=None):
         """
         There has been an error with the program, so we will send the error log to the watchdog
         """
-        GPIO.cleanup() #release GPIO
         x = rclpy.create_node('sensor_node') #we state what node we are
         publisher = x.create_publisher(Nodeupdate, '_internal_error', 10) #we create the publisher
         #we create the message

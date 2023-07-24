@@ -2,11 +2,13 @@
   ros__parameters:
     debug: false
     vehicle_ip: "tcp:navio.local:5678"
+    debug_vehicle_ip: "127.0.0.1:14550"
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
     vehicle_id: 3
-    mqtt_addr: "dronesloyolaus.eastus.cloudapp.azure.com"
-    pump: false
+    mqtt_addr: "bender.us.es"
+    mqtt_user: "asv1"
+    mqtt_password: "azkenmuga"
     num_samples: 4
     time_between_samples: 0.5
     travelling_timeout: 60
@@ -16,3 +18,4 @@
     simple_goto_timeout: 10
     internet_loss_timeout: 30
     sensor_read_timeout: 15
+    sonar_connection_type: "USB"

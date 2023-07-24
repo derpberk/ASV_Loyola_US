@@ -4,7 +4,7 @@ import os
 from ament_index_python.packages import get_package_share_directory
 import time
 
-# este launch carga la configuración de la carpeta {simulator}/config y lanza ardupilot SITL, MavROS y RVIZ
+# este launch carga la configuración de la carpeta config y lanza ardupilot SITL, MavROS y RVIZ
 
 
 def generate_launch_description():
@@ -56,6 +56,7 @@ def generate_launch_description():
         parameters = [config]
     )
 
+
     camera = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='camera',
@@ -72,5 +73,5 @@ def generate_launch_description():
         mqtt,
         sensors,
         planner,
-        camera,
+        #camera,
     ])

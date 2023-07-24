@@ -1,0 +1,19 @@
+[Unit]
+After=network.target
+Description="ASV Service"
+
+[Service]
+Environment="ROS_DOMAIN_ID=42"
+Environment="LD_LIBRARY_PATH=/opt/project/install/lib:/opt/ros/dashing/lib"
+Environment="PYTHONPATH=/opt/project/install/lib/python3.6/site-packages:/opt/r$
+Environment="AMENT_PREFIX_PATH=/opt/project/install:/opt/ros/dashing"
+ExecStart=/usr/bin/asv_start.sh
+User=xavier
+WorkingDirectory=/home/xavier/ASV_Loyola_US/
+TimeoutStopSec=10
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+
+#located in  /lib/systemd/system/asv_start.service

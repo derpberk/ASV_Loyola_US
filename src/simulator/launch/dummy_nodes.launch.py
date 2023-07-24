@@ -92,13 +92,27 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    sonar = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='sonar',
+        emulate_tty=True,
+        output='screen',
+        name='sonar_node',
+        prefix=['stdbuf -o L'],
+        parameters = [config]
+    )
+    
+
+    
 
     return launch.LaunchDescription([
         mission,
         watchdog,
-        dummy_publisher,
+        #dummy_publisher,
         mqtt,
         sensors,
         planner,
+        drone,
         #camera,
+        sonar
     ])

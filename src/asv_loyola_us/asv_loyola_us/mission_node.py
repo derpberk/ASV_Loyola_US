@@ -22,52 +22,77 @@ class Mission_node(Node):
 
     #this functions defines and assigns value to the variables defined in /config/config.yaml
     def parameters(self):
+
         self.declare_parameter('mission_filepath', "MisionesLoyola_dron_2.kml")
-        path="~/ASV_Loyola_US/"+self.get_parameter('mission_filepath').get_parameter_value().string_value
+
+        # Obtain the mission file path from the parameter server
+        path="~/ASV_Loyola_US/misions/" + self.get_parameter('mission_filepath').get_parameter_value().string_value
         self.mission_filepath = os.path.expanduser(path)
+        self.get_logger().info("Loaded system parameters from: " + self.mission_filepath)
+        
+        # The DEBUG parameter is used to run the system in simulation #
         self.declare_parameter('debug', False)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
+        self.get_logger().info(f"Executing in debug mode?: {self.DEBUG}")
+
+        # The simple_goto_timeout parameter is used to set the timeout for the simple goto mode #
         self.declare_parameter('simple_goto_timeout', 15)
         self.simple_goto_timeout = self.get_parameter('simple_goto_timeout').get_parameter_value().integer_value
-
+    
 
     #this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
-        #host services
+
+        # host services - These services are hosted by this node
+
+        # 1) To take a new samplepoint
         self.samplepoint_service = self.create_service(Newpoint, 'new_samplepoint', self.new_samplepoint_callback)
+        # 2) To change the mission mode
         self.mission_mode_service = self.create_service(ASVmode, 'change_mission_mode', self.new_mission_mode)
+        # 3) To close the ASV connection
         self.close_asv_service = self.create_service(CommandBool, 'close_asv', self.close_asv_callback)
+        # 4) To load a mission
         self.load_mission_service = self.create_service(LoadMission, 'load_mission', self.load_mission_callback)
+        # 5) To cancel movement
         self.cancel_movement_service = self.create_service(CommandBool, 'cancel_movement', self.cancel_movement_callback)
 
-        #client services
+        # client services - These services are hosted by other nodes
+
+        # 1) To send info to MQTT
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
+        # 2) To arm the vehicle
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
+        # 3) To get the vehicle status
         self.collect_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
+        # 4) To change the ASV mode
         self.change_asv_mode_client = self.create_client(ASVmode, 'change_asv_mode')
+        # 5) To go to a point
         self.go_to_point_client = self.create_client(Newpoint, 'go_to_point_command')
 
-    #this function delcares the topics
     def declare_topics(self):
-        #subscriptions
+        # This function delcares the topics
+
+        # Subscriptions
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_publisher = self.create_publisher(String, 'mission_mode', 10)
         
-        #publishers
-        self.mission_mode_publisher_timer = self.create_timer(1, self.mission_mode_publish) #timer 1 Hz
+        # Publishers
+        self.mission_mode_publisher_timer = self.create_timer(1, self.mission_mode_publish) # timer 1 Hz
         self.destination_publisher = self.create_publisher(Location, 'destination', 10)
 
-    #this function declares the actions
+    
     def declare_actions(self):
-        self.goto_action_client = ActionClient(self, Goto, 'goto') #action client
-        self.waiting_for_action = False                            #variable to indicate the action is executing (True) or not (False)
+        # This function declares the actions
+        # Create the client of the Action server to GOTO a single point #
+        self.goto_action_client = ActionClient(self, Goto, 'goto') # action client
+        self.waiting_for_action = False                            # variable to indicate the action is executing (True) or not (False)
 
-    #this function will be the first one executed
+
     def __init__(self):
         #start the node with name 'mission_node'
         super().__init__('mission_node')
 
-        #declare parameter of drone IP
+        # declare parameter of drone IP
         self.parameters()
 
         #declare the services
@@ -96,21 +121,21 @@ class Mission_node(Node):
             self.main()
             sleep(0.1)  #we will run main each 1 second
 
-    """This function is in charge of the initialization fo the drone, it must take into account
-    - Initialization of variables
 
-    
-    
-    """
     def startup(self):
+
+        """ This function is in charge of the initialization fo the drone, it must take into account:
+        - The drone must be armed
+        - The drone must be in MANUAL mode
+        """
 
         self.mission_mode = 0  # desired ASV mission mode
         self.current_mission_mode = -1  # actual ASV mission mode
         self.samplepoints=[] #list of points where we want to take a sample
         self.mission_mode_strs = ["LAND", "STANDBY", "PRELOADED_MISSION", "MANUAL", "SIMPLE POINT", "RTL", "MANUAL_INTERRUPTION"]  # Strings for mission mode names
 
-        self.mqtt_waypoint = None #store samplepoint from Server
-        self.status = Status() #Status of the robot, this includes: (arm_status, location, asv_mode, vehicle_id), will be updated in self.status_suscriber_callback each 0.5 seconds
+        self.mqtt_waypoint = None # store samplepoint from Server
+        self.status = Status() # Status of the robot, this includes: (arm_status, location, asv_mode, vehicle_id), will be updated in self.status_suscriber_callback each 0.5 seconds
         
         self.get_logger().debug("Starting startup")
         self.get_logger().info(f"Starting mode:{self.mission_mode} {self.mission_mode_strs[self.mission_mode]}.")
@@ -137,12 +162,13 @@ class Mission_node(Node):
             self.get_logger().fatal('mqtt node is not answering')
 
 
-    """
-    This function automatically runs in loop at 1 Hz
-    we MUST avoid spin_until_future_complete
-    This function contains all the modes
-    """
     def main(self):
+
+        """
+        This function automatically runs in loop at 1 Hz
+        we MUST avoid spin_until_future_complete
+        This function contains all the modes
+        """
         #LAND mode
         #This mode disarms the robot, and throws a warning if it has been armed externally
         if self.mission_mode == 0:
@@ -151,7 +177,7 @@ class Mission_node(Node):
                 self.change_ASV_mode("MANUAL")
                 self.arm_vehicle(False)
             if self.status.manual_mode:
-                self.mission_mode=6
+                self.mission_mode = 6 # go to manual interruption
             if self.status.armed:
                 self.get_logger().warning("Vehicle was armed externally! .", once=True)
         
@@ -234,17 +260,13 @@ class Mission_node(Node):
             else:
                 self.timeout_simple_counter=0
 
-
-
-
-
         # RTL mode
         #This mode will arm the vehicle and set RTL mode
         #TODO: this mode is supposed to make ASV return to home, but we have not yet checked if it works
         elif self.mission_mode == 5: 
             if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual
                     self.get_logger().info("The vehicle lost GPS reference")
-                    self.mission_mode=0
+                    self.mission_mode = 0
             if self.status.manual_mode: #manual takes preference over anything else
                 self.mission_mode=6
             elif self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
@@ -603,6 +625,7 @@ class Mission_node(Node):
 def main(args=None):
     #init ROS2
     rclpy.init(args=args)
+    
     #start a class that servers the services
     try:
         mission_node = Mission_node()

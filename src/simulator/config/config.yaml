@@ -1,11 +1,25 @@
 /**:
   ros__parameters:
     debug: false
-    vehicle_ip: "tcp:navio.local:5678"
+    # vehicle_ip: "tcp:navio.local:5670"
+    vehicle_ip: '127.0.0.1:14550'
+    
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
     vehicle_id: 3
-    mqtt_addr: "dronesloyolaus.eastus.cloudapp.azure.com"
+#mqtt,user,password,addr
+####################################################
+
+
+    mqtt_addr: "bender.us.es"
+    mqtt_user: 'asv1'
+    mqtt_password: 'azkenmuga'
+    # mqtt_addr: '127.0.0.1:1883'
+
+
+
+###################################################
+
     pump: false
     num_samples: 4
     time_between_samples: 0.5

@@ -4,8 +4,8 @@ import rclpy
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
-from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
+from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor, Sonar
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr, SonarService
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -23,8 +23,13 @@ class MQTT_node(Node):
         self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
         self.declare_parameter('internet_loss_timeout', 30)
         self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
-        self.declare_parameter('mqtt_addr', "127.0.0.1")
+        self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
+        self.declare_parameter('mqtt_user', "user")
+        self.mqtt_user = self.get_parameter('mqtt_user').get_parameter_value().string_value
+        self.declare_parameter('mqtt_password', "password")
+        self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
+        
 
     def declare_services(self):
         self.sendinfo = self.create_service(CommandBool, 'MQTT_send_info', self.sendinfo_callback)
@@ -35,6 +40,7 @@ class MQTT_node(Node):
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
         self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
+        # self.sonar_client=self.create_client(SonarService, 'sonar_service')
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
@@ -47,6 +53,7 @@ class MQTT_node(Node):
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
         self.destination_subscriber = self.create_subscription(Location, 'destination', self.destination_subscriber_callback, 10)
         self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
+        self.sonar_subscriber = self.create_subscription(Sonar, 'sonar', self.sonar_suscriber_callback, 10)
         self.waypoints_subscriber = self.create_subscription(Location, 'waypoint_mark',self.waypoint_mark_subscriber_callback, 10)
 
     #def declare_actions(self):
@@ -65,7 +72,7 @@ class MQTT_node(Node):
         #start MQTT Connection
         try:
             self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
-            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect)
+            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect,user=self.mqtt_user,password=self.mqtt_password)
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to MQTT server was refused")
             self.get_logger().fatal("MQTT module is dead")
@@ -102,6 +109,8 @@ class MQTT_node(Node):
         self.reset_home=None
         self.enable_planner=CommandBool.Request()
         self.sensor_params=SensorParams.Request()
+        self.sonar_params=SonarService.Request()
+        self.sonar=Sonar()
         self.enable_planner.value=True #prestart as no planner
         #call services
         self.declare_services()
@@ -144,6 +153,7 @@ class MQTT_node(Node):
                     self.get_logger().info(f"params write")
                     call_service(self, self.enable_planning_client, self.enable_planner)
                     call_service(self, self.sensor_parameters_client, self.sensor_params)
+                    
                     self.update_params=False
                 elif self.read_params:
                     #call_service(self, self.enable_planning_client, self.aux)
@@ -173,6 +183,7 @@ class MQTT_node(Node):
         msg = json.dumps({
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
+            "Sonar": self.sonar.sonar,
                 "yaw": self.status.yaw,
             "veh_num": self.status.vehicle_id,
             "battery": self.status.battery,
@@ -184,11 +195,13 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         #TODO: transformar el topic con la informacion a formato JSON
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
-
+        self.mqtt.send_new_msg(self.sonar.sonar, topic="sonar")
 
     def status_suscriber_callback(self, msg):
         self.status = msg
 
+    def sonar_suscriber_callback(self, msg):
+        self.sonar.sonar = msg.sonar
 
     def on_message(self, _client, _, msg):
         """
@@ -345,10 +358,23 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
+    # def sonar_susbcriber_callback(self,msg):
+    #     z = { "veh_num": self.vehicle_id,
+    #         "date": msg.date,
+    #         "Sonar":msg.sonar,
+    #         "Latitude": self.status.lat,
+    #         "Longitude": self.status.lon,
+    #     }  # Must be a JSON format file.
+    #     message = json.dumps(z)
+    #     self.mqtt.send_new_msg(message, topic="sonar")  # Send the MQTT message
+    #     self.get_logger().info(f'sonar data sent to database{message}')
+
+
     def sensors_subscriber_callback(self, msg):
 
         z = { "veh_num": self.vehicle_id,
             "date": msg.date,
+            "sonar":self.sonar.sonar,
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
         }  # Must be a JSON format file.
