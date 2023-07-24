@@ -230,8 +230,12 @@ class MQTT_node(Node):
                 elif message["mission_type"] == "SIMPLEPOINT":
                     self.call_msg.asv_mode = 4
                     self.mqtt_point = Newpoint.Request()
-                    self.mqtt_point.new_point.lat = message["lat"]
-                    self.mqtt_point.new_point.lon = message["lon"]
+                    if "lat" not in message or "lon" not in message:
+                        self.mqtt_point = None
+                    else:
+                        self.mqtt_point.new_point.lat = message["lat"]
+                        self.mqtt_point.new_point.lon = message["lon"]
+
                 elif message["mission_type"] == "RTL":
                     self.call_msg.asv_mode = 5
                 elif message["mission_type"] == "SHUTDOWN":
@@ -356,17 +360,6 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
-    # def sonar_susbcriber_callback(self,msg):
-    #     z = { "veh_num": self.vehicle_id,
-    #         "date": msg.date,
-    #         "Sonar":msg.sonar,
-    #         "Latitude": self.status.lat,
-    #         "Longitude": self.status.lon,
-    #     }  # Must be a JSON format file.
-    #     message = json.dumps(z)
-    #     self.mqtt.send_new_msg(message, topic="sonar")  # Send the MQTT message
-    #     self.get_logger().info(f'sonar data sent to database{message}')
-
 
     def sensors_subscriber_callback(self, msg):
 
@@ -421,7 +414,6 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
         restart_asv() #restart ASV
-
 
     def params_read(self):
         msg = json.dumps({
