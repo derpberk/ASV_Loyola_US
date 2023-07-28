@@ -64,6 +64,14 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    sonar = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='sonar',
+        name='sonar_node',
+        parameters = [config]
+    )
+
+
 
 
     return launch.LaunchDescription([
@@ -74,4 +82,5 @@ def generate_launch_description():
         sensors,
         planner,
         #camera,
+        sonar,
     ])

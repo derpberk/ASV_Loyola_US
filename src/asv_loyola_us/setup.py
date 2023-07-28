@@ -25,7 +25,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'drone = asv_loyola_us.new_dronekit_node:main',
+            'drone = asv_loyola_us.dronekit_node:main',
             'mqtt = asv_loyola_us.mqtt_node:main',
             'mission = asv_loyola_us.mission_node:main',
             'sensors = asv_loyola_us.sensor_module_node:main',
@@ -33,7 +33,7 @@ setup(
             'watchdog = asv_loyola_us.watchdog_node:main',
             'camera = asv_loyola_us.camera_node:main',
             'database= asv_loyola_us.database_node:main',
-            'sonar= asv_loyola_us.sonar_module:main',
+            'sonar = asv_loyola_us.sonar_module:main',
         ],
     },
 )

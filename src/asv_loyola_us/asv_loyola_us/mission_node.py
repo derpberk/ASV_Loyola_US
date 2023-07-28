@@ -11,7 +11,7 @@ import traceback #for code errors
 from time import sleep #delay
 
 #custom interfaces
-from asv_interfaces.srv import Newpoint, ASVmode, CommandBool, LoadMission
+from asv_interfaces.srv import Newpoint, ASVmode, CommandBool, LoadMission, SonarService
 from asv_interfaces.msg import Status, Nodeupdate, String, Location
 from asv_interfaces.action import Goto
 
@@ -62,12 +62,15 @@ class Mission_node(Node):
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
         # 2) To arm the vehicle
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
-        # 3) To get the vehicle status
-        self.collect_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
-        # 4) To change the ASV mode
+        # 3) To change the ASV mode
         self.change_asv_mode_client = self.create_client(ASVmode, 'change_asv_mode')
-        # 5) To go to a point
+        # 4) To go to a point
         self.go_to_point_client = self.create_client(Newpoint, 'go_to_point_command')
+        # 5) To take a sample from the water module
+        # TODO: this service is not yet implemented BECAUSE OF THE WATER MODULE IS NOT YET INSTALLED
+        # self.get_water_module_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
+        # 6) To take a sonar measurement
+        self.sonar_measurement_client = self.create_client(SonarService, 'sonar_measurement_service')
 
     def declare_topics(self):
         # This function delcares the topics
