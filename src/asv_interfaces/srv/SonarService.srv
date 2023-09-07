@@ -1,8 +1,5 @@
 #request
-# bool value 
+bool value 
 ---
 #response
-float32 value
-float32 confidence
-bool success
-string message
+asv_interfaces/Sonar sonar

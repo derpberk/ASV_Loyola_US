@@ -2,9 +2,9 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>asv_loyola_us</name>
-  <version>0.0.0</version>
-  <description>Working with Navio2 helping the project ASV_Loyola_US merging it in ROS</description>
-  <maintainer email="alexcpesp@gmail.com">alejandro</maintainer>
+  <version>1.3.0</version>
+  <description> Firmware of the Unmanned Surface Vehicles for Monitoring Environmental Water Resources </description>
+  <maintainer email="syanes@us.es">Samuel Yanes</maintainer>
   <license>Apache License 2.0</license>
 
 

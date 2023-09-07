@@ -5,7 +5,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor, Sonar
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr, SonarService
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -40,12 +40,12 @@ class MQTT_node(Node):
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
         self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
-        # self.sonar_client=self.create_client(SonarService, 'sonar_service')
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
 
     def declare_topics(self):
+
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
@@ -54,7 +54,6 @@ class MQTT_node(Node):
         self.sonar_subscriber = self.create_subscription(Sonar, 'sonar', self.sonar_suscriber_callback, 10)
         self.waypoints_subscriber = self.create_subscription(Location, 'waypoint_mark',self.waypoint_mark_subscriber_callback, 10)
 
-    #def declare_actions(self):
 
     def __init__(self):
         #start the node
@@ -107,9 +106,9 @@ class MQTT_node(Node):
         self.reset_home=None
         self.enable_planner=CommandBool.Request()
         self.sensor_params=SensorParams.Request()
-        self.sonar_params=SonarService.Request()
-        self.sonar=Sonar()
-        self.enable_planner.value=True #prestart as no planner
+        # self.sonar_params=SonarService.Request()
+        self.sonar_msg = Sonar()
+        self.enable_planner.value = True #prestart as no planner
         #call services
         self.declare_services()
 
@@ -181,8 +180,7 @@ class MQTT_node(Node):
         msg = json.dumps({
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
-            "Sonar": self.sonar.sonar,
-                "yaw": self.status.yaw,
+            "yaw": self.status.yaw,
             "veh_num": self.status.vehicle_id,
             "battery": self.status.battery,
             "armed": self.status.armed,
@@ -191,15 +189,30 @@ class MQTT_node(Node):
             "EKF": self.status.ekf_ok,
             "manual_mode": self.status.manual_mode
         })  # Must be a JSON format file.
-        #TODO: transformar el topic con la informacion a formato JSON
+
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
-        self.mqtt.send_new_msg(self.sonar.sonar, topic="sonar")
 
     def status_suscriber_callback(self, msg):
         self.status = msg
 
     def sonar_suscriber_callback(self, msg):
-        self.sonar.sonar = msg.sonar
+
+        # When a message is received from the sonar, it is stored in the sonar_msg variable and sent to the MQTT broker.
+
+        self.sonar_msg.distance = msg.distance
+        self.sonar_msg.confidence = msg.confidence
+        self.sonar_msg.lat = msg.lat
+        self.sonar_msg.lon = msg.lon
+
+        msg = json.dumps({
+            "veh_num": self.vehicle_id,
+            "sample_time": str(datetime.now()),
+            "measurement": self.sonar_msg.distance,
+            "Latitude": self.sonar_msg.lat,
+            "Longitude": self.sonar_msg.lon,
+        })
+
+        self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
 
     def on_message(self, _client, _, msg):
         """
@@ -230,8 +243,12 @@ class MQTT_node(Node):
                 elif message["mission_type"] == "SIMPLEPOINT":
                     self.call_msg.asv_mode = 4
                     self.mqtt_point = Newpoint.Request()
-                    self.mqtt_point.new_point.lat = message["lat"]
-                    self.mqtt_point.new_point.lon = message["lon"]
+                    if "lat" not in message or "lon" not in message:
+                        self.mqtt_point = None
+                    else:
+                        self.mqtt_point.new_point.lat = message["lat"]
+                        self.mqtt_point.new_point.lon = message["lon"]
+
                 elif message["mission_type"] == "RTL":
                     self.call_msg.asv_mode = 5
                 elif message["mission_type"] == "SHUTDOWN":
@@ -301,7 +318,6 @@ class MQTT_node(Node):
         else:
             self.get_logger().error("there is internet, unknown reason, retrying to connect to MQTT")
 
-
     def sendinfo_callback(self, request, response):
         try:
             if request.value:
@@ -356,23 +372,11 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
-    # def sonar_susbcriber_callback(self,msg):
-    #     z = { "veh_num": self.vehicle_id,
-    #         "date": msg.date,
-    #         "Sonar":msg.sonar,
-    #         "Latitude": self.status.lat,
-    #         "Longitude": self.status.lon,
-    #     }  # Must be a JSON format file.
-    #     message = json.dumps(z)
-    #     self.mqtt.send_new_msg(message, topic="sonar")  # Send the MQTT message
-    #     self.get_logger().info(f'sonar data sent to database{message}')
-
-
     def sensors_subscriber_callback(self, msg):
 
         z = { "veh_num": self.vehicle_id,
             "date": msg.date,
-            "sonar":self.sonar.sonar,
+            # "sonar":self.sonar.sonar,
             "Latitude": self.status.lat,
             "Longitude": self.status.lon,
         }  # Must be a JSON format file.
@@ -421,7 +425,6 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="log")  # Send the MQTT message
         restart_asv() #restart ASV
-
 
     def params_read(self):
         msg = json.dumps({

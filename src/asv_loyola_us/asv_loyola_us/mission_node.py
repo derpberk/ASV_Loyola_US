@@ -11,7 +11,7 @@ import traceback #for code errors
 from time import sleep #delay
 
 #custom interfaces
-from asv_interfaces.srv import Newpoint, ASVmode, CommandBool, LoadMission
+from asv_interfaces.srv import Newpoint, ASVmode, CommandBool, LoadMission, SonarService
 from asv_interfaces.msg import Status, Nodeupdate, String, Location
 from asv_interfaces.action import Goto
 
@@ -20,7 +20,8 @@ from action_msgs.msg import GoalStatus
 
 class Mission_node(Node):
 
-    #this functions defines and assigns value to the variables defined in /config/config.yaml
+
+    # this functions defines and assigns value to the variables defined in /config/config.yaml
     def parameters(self):
 
         self.declare_parameter('mission_filepath', "MisionesLoyola_dron_2.kml")
@@ -40,7 +41,7 @@ class Mission_node(Node):
         self.simple_goto_timeout = self.get_parameter('simple_goto_timeout').get_parameter_value().integer_value
     
 
-    #this function declares the services, its only purpose is to keep code clean
+    # this function declares the services, its only purpose is to keep code clean
     def declare_services(self):
 
         # host services - These services are hosted by this node
@@ -62,12 +63,16 @@ class Mission_node(Node):
         self.mqtt_send_info = self.create_client(CommandBool, 'MQTT_send_info')
         # 2) To arm the vehicle
         self.arm_vehicle_client = self.create_client(CommandBool, 'arm_vehicle')
-        # 3) To get the vehicle status
-        self.collect_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
-        # 4) To change the ASV mode
+        # 3) To change the ASV mode
         self.change_asv_mode_client = self.create_client(ASVmode, 'change_asv_mode')
-        # 5) To go to a point
+        # 4) To go to a point
         self.go_to_point_client = self.create_client(Newpoint, 'go_to_point_command')
+        # 5) To take a sample from the water module
+        # TODO: this service is not yet implemented BECAUSE OF THE WATER MODULE IS NOT YET INSTALLED
+        # self.get_water_module_sample_client = self.create_client(CommandBool, 'get_water_module_sample')
+        # 6) To take a sonar measurement
+        self.sonar_measurement_client = self.create_client(SonarService, 'sonar_measurement_service') 
+
 
     def declare_topics(self):
         # This function delcares the topics
@@ -169,10 +174,11 @@ class Mission_node(Node):
         we MUST avoid spin_until_future_complete
         This function contains all the modes
         """
+
         #LAND mode
         #This mode disarms the robot, and throws a warning if it has been armed externally
         if self.mission_mode == 0:
-            if self.change_current_mission_mode(self.mission_mode): #the contents of this if will only be executed once
+            if self.change_current_mission_mode(self.mission_mode): # the contents of this if will only be executed once
                 self.get_logger().info("vehicle resting.")
                 self.change_ASV_mode("MANUAL")
                 self.arm_vehicle(False)
@@ -230,18 +236,18 @@ class Mission_node(Node):
         # Manual Mode
         #This mode changes ASV mode to MANUAL and arms the vehicle
         elif self.mission_mode == 3:  
-            if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+            if self.change_current_mission_mode(self.mission_mode): # the contents of this if will only be executed once
                 self.change_ASV_mode("MANUAL")
                 self.arm_vehicle(True)
                 self.get_logger().info(f"vehicle in \'MANUAL\' mode")
 
         # Simple GO-TO
         # This mode is basically STANDBY
-        # but it administrates a buffer of 1 MQTT message due to code flow
+        # but it administrates a buffer of 1 MQTT message
         elif self.mission_mode == 4: 
             
-            if self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
-                self.timeout_simple_counter=0
+            if self.change_current_mission_mode(self.mission_mode): # the contents of this if will only be executed once
+                self.timeout_simple_counter = 0
 
                 if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual and do not enter the new mode
                     self.get_logger().info("The vehicle is not able to go into automatic mode due to EKF problems")
@@ -255,15 +261,33 @@ class Mission_node(Node):
 
                 self.go_to(self.mqtt_waypoint) # go to the point
                 self.mqtt_waypoint = None # discard the point
+                self.waiting_for_measurement = True # set the flag to wait for the measurement
+
+            if self.waiting_for_measurement and self.waiting_for_action == False: # if we are waiting for the measurement and we are not busy
+
+                # Call the service to get the measurement
+                self.get_logger().info("Taking sonar measurement")
+                future = self.sonar_measurement_client.call_async(SonarService.Request())
+                rclpy.spin_until_future_complete(self, future)
+                # Print the result
+                if future.result() is not None:
+                    self.get_logger().info(f"Sonar measurement: {future.result().sonar.distance}")
+                    self.waiting_for_measurement = False
+                else:
+                    self.get_logger().error("Service call failed %r" % (future.exception(),))
                 
-            if self.waiting_for_action == False and self.mqtt_waypoint == None and self.mission_mode == 4:
+                # Set the flag to continue
+                self.waiting_for_measurement = False
+
+            if self.waiting_for_measurement == False and self.mqtt_waypoint == None and self.mission_mode == 4:
 
                 self.timeout_simple_counter += 1
             
-                if self.timeout_simple_counter > self.simple_goto_timeout*10:
+                if self.timeout_simple_counter > self.simple_goto_timeout:
 
                     self.mission_mode = 1
-                    self.get_logger().info(f"No point in { self.simple_goto_timeout} seconds, going into standby mode")
+                    self.get_logger().info(f"No point given in { self.simple_goto_timeout} seconds, going into standby mode")
+                    # WARNING: Cuidado con esto. Es una potencial fuente de fallos si no se provee de un Waypoint lo suficientemente rapido
             else:
                 self.timeout_simple_counter = 0
 
@@ -271,12 +295,15 @@ class Mission_node(Node):
         #This mode will arm the vehicle and set RTL mode
         #TODO: this mode is supposed to make ASV return to home, but we have not yet checked if it works
         elif self.mission_mode == 5: 
+
             if not self.status.ekf_ok: #if vehicle has EKF problems go back to manual
-                    self.get_logger().info("The vehicle lost GPS reference")
+                    self.get_logger().info("The vehicle is not able to RTL due to EKF problems")
                     self.mission_mode = 0
+
             if self.status.manual_mode: #manual takes preference over anything else
-                self.mission_mode=6
-            elif self.change_current_mission_mode(self.mission_mode):#the contents of this if will only be executed once
+                self.mission_mode = 6
+
+            elif self.change_current_mission_mode(self.mission_mode): # the contents of this if will only be executed once
                 self.arm_vehicle(True)
                 self.change_ASV_mode("RTL")
                 self.get_logger().info("vehicle in \'RTL\' mode")
@@ -407,9 +434,11 @@ class Mission_node(Node):
         #TODO: Arreglar esta funcion para que se hagan referencia unos a otros
 
         if self.current_mission_mode != desired_mode:
+
             self.current_mission_mode = desired_mode
             self.get_logger().info(f"Changed current ASV mode to {self.mission_mode_strs[self.current_mission_mode]}.")
             return True
+
         return False
 
 
@@ -505,15 +534,17 @@ class Mission_node(Node):
             call_service(self, self.change_asv_mode_client, aux)
 
 
-    """
-        This function starts the call to the action /goto
-    """     
+  
     def go_to(self, location):
+        """
+        This function starts the call to the action /goto
+        """   
+
         self.get_logger().info(f"going to [{location.lat},{location.lon}]")
 
         self.destination_publisher.publish(location) # publish the destination point
         self.goto_action_client.wait_for_server() # wait for the action server to be ready
-        self.waiting_for_action=True
+        self.waiting_for_action = True  # Set the flag to true, so the callback can know that it is waiting for the action to finish
         self.point_backup=location
 
         goal_msg = Goto.Goal()
@@ -538,12 +569,15 @@ class Mission_node(Node):
         self.goal_handle = future.result()
         if not self.goal_handle.accepted:
             self.get_logger().error('Goal rejected :(, something is not working')
+
             if self.status.manual_mode:
                 self.get_logger().info("Manual interruption, killing mission handler")
                 #restore the point #TODO: check the point comes from mission and not simplepoint
                 self.mission_mode=6 #go to manual
-            elif self.mission_mode == 2 or self.mission_mode == 4:#mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
+
+            elif self.mission_mode == 2 or self.mission_mode == 4: # mission was rejected, but we want to do a mission, probably drone started in a wrong state, or it is busy
                 if self.status.armed:
+
                     self.get_logger().info('Vehicle in wrong state, trying to recover')
                     self.change_ASV_mode("LOITER")
                     self.get_logger().info(f'asking again to go to {self.point_backup}')
@@ -552,13 +586,17 @@ class Mission_node(Node):
                     goal_msg.samplepoint = self.point_backup
                     self._send_goal_future = self.goto_action_client.send_goal_async(goal_msg, feedback_callback=self.goto_feedback_callback)
                     self._send_goal_future.add_done_callback(self.go_to_response)
+
                 else:
                     self.mission_mode=0
                     self.get_logger().error('Vehicle disarmed, going to REST mode')
                     #TODO: add timeout in case ekf fails for too long
+
             else:
                 self.get_logger().info(f'Goal was rejected, unknown state {self.mission_mode}')
+
             self.waiting_for_action=False
+
             if self.current_mission_mode == 2:
                 self.get_logger().info(f'restoring point')
                 self.samplepoints.insert(0,self.point_backup)
