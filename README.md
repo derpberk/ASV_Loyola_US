@@ -18,6 +18,20 @@ Los nodos son los siguientes:
 
 ... COMPLETAR INSTRUCCIONES ...
 
+## Dependencias
+
+1. Es necesario instalar las siguientes dependencias:
+
+```bash
+    pip install bluerobotics-ping
+```
+
+2. Es necesario downgradear setuptools:
+
+```bash
+    pip install setuptools==58.2.0
+```
+
 ## Ejecución en simulación
 
 ### 1. *Instalación del Ardupilot SITL* 

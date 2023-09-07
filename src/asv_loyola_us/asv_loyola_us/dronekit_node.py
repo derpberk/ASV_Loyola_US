@@ -450,13 +450,19 @@ class Dronekit_node(Node):
             # Send the vehicle to the next waypoint
             self.vehicle.simple_goto(LocationGlobal(next_waypoint.lat, next_waypoint.lon, 0.0))
             self.publish_waypoint(next_waypoint)
+
+            feedback_count = 0
             
             # Wait until the vehicle is close to the waypoint
             while rclpy.ok() and not self.reached_position(next_waypoint):
-                # Publish the remaining distance to the goal
-                feedback_msg.distance = self.calculate_distance(next_waypoint)
-                goal_handle.publish_feedback(feedback_msg)
+
                 time.sleep(0.1)
+                # Publish the remaining distance to the goal
+                feedback_count  += 1
+                if feedback_count == 50:
+                    feedback_msg.distance = self.calculate_distance(next_waypoint)
+                    goal_handle.publish_feedback(feedback_msg)
+                    feedback_count = 0
 
                 # Check the abort conditions #
                 # 1) The action is cancelled -> To loiter around actual position #
