@@ -2,34 +2,30 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - 'main'
 
 jobs:
-
-  build:
-
-    runs-on: ubuntu-18.04
-    env:       
-      DOCKER_IMAGE: syanes/asv_us:arm64     
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  
-      DOCKER_TARGET_PLATFORM: linux/arm/v8
-      
+  docker:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout de code
-    - uses: actions/checkout@v3
-
-    - name: Docker Login      
-      if: success()      
-      run: |
-        echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
-    
-    - name: Build the Docker image (ARM)
-      run: |
-        docker build . --file dockerfile_ARM --tag syanes/asv_us:arm64 --platform ${DOCKER_TARGET_PLATFORM}
-
-    - name: Push the Docker image (ARM)
-      run: |
-        docker push dockerfile_ARM --tag ${DOCKER_IMAGE}
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          file: dockerfile_ARM
+          tags: syanes/asv_us:arm64
+          
