@@ -34,7 +34,7 @@ class Camera_node(Node):
         self.declare_parameter('enable_obstacle_avoidance', True)
         self.enable_obstacle_avoidance = self.get_parameter('enable_obstacle_avoidance').get_parameter_value().bool_value
         self.declare_parameter('weights_filename', 'best.pt')
-        path = "~/ASV_Loyola_US/" + self.get_parameter('weights_filename').get_parameter_value().string_value
+        path = "/home/ASV_Loyola_US/" + self.get_parameter('weights_filename').get_parameter_value().string_value
         self.weights_filepath = os.path.expanduser(path)
         self.declare_parameter('confidence', 0.4)
         self.confidence = self.get_parameter('confidence').get_parameter_value().double_value

@@ -22,7 +22,7 @@ class Sensor_node(Node):
 
     #his functions defines and assigns value to the
     def parameters(self):
-        self.declare_parameter('debug', False)
+        self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
         self.declare_parameter('num_samples', 4)
         self.num_samples = self.get_parameter('num_samples').get_parameter_value().integer_value

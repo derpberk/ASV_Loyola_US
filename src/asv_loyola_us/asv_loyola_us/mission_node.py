@@ -32,7 +32,7 @@ class Mission_node(Node):
         self.get_logger().info("Loaded system parameters from: " + self.mission_filepath)
         
         # The DEBUG parameter is used to run the system in simulation #
-        self.declare_parameter('debug', False)
+        self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
         self.get_logger().info(f"Executing in debug mode?: {self.DEBUG}")
 

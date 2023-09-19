@@ -80,7 +80,7 @@ class Dronekit_node(Node):
         # Declare the parameters of the node
 
         # Parameter to enable/disable the debug mode
-        self.declare_parameter('debug', False)
+        self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
         # Parameter to set the vehicle IP

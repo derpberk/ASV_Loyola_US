@@ -23,7 +23,7 @@ class Sonar_node(Node):
         self.declare_parameter('sonar_connection_type', "USB")
         self.sonar_connection_type = self.get_parameter('sonar_connection_type').get_parameter_value().string_value
         self.serial_number = self.get_parameter('serial_number').get_parameter_value().string_value
-        self.declare_parameter('debug', False)
+        self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
         
 
