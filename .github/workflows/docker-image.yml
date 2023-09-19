@@ -23,10 +23,13 @@ jobs:
 
     - name: Docker Login      
       if: success()      
-      run: echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
+      run: |
+        echo "${DOCKER_PASSWORD}" | docker login --username "${DOCKER_USERNAME}" --password-stdin
     
     - name: Build the Docker image (ARM)
-      run: docker build . --file dockerfile_ARM --tag syanes/asv_us:arm64 --platform linux/arm/v8
+      run: |
+        docker build . --file dockerfile_ARM --tag syanes/asv_us:arm64 --platform ${DOCKER_TARGET_PLATFORM}
 
     - name: Push the Docker image (ARM)
-      run: docker push dockerfile_ARM --tag syanes/asv_us:arm64
+      run: |
+        docker push dockerfile_ARM --tag ${DOCKER_IMAGE}
