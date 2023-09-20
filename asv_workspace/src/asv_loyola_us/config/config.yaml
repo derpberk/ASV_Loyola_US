@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    debug: true
+    debug: false
     vehicle_ip: "tcp:navio.local:5678"
     debug_vehicle_ip: "127.0.0.1:14550"
     timeout: 15
@@ -19,3 +19,4 @@
     internet_loss_timeout: 30
     sensor_read_timeout: 15
     sonar_connection_type: "USB"
+    sonar_device_name: "/dev/SONAR"
