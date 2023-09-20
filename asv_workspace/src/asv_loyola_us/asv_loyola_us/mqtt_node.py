@@ -25,7 +25,7 @@ class MQTT_node(Node):
         self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
         self.declare_parameter('mqtt_user', "user")
-
+        self.vehicle_id = get_asv_identity()
         self.mqtt_user = 'asv' + str(get_asv_identity())
         self.declare_parameter('mqtt_password', "password")
         self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
@@ -45,7 +45,6 @@ class MQTT_node(Node):
 
 
     def declare_topics(self):
-
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
@@ -59,12 +58,9 @@ class MQTT_node(Node):
         #start the node
         super().__init__('MQTT_node')
 
-        #call the parameters
         self.parameters()
-        if gma() == '70:cf:49:9d:39:1f':
-            self.vehicle_id=3
-        else:
-            self.vehicle_id=0 #debug ID
+
+
         #check if there is internet connection
         while not ping_google(): #ping google has an internal delay
             self.get_logger().error("There is no internet connection, retrying...") 
@@ -72,7 +68,13 @@ class MQTT_node(Node):
         #start MQTT Connection
         try:
             self.get_logger().info(f"MQTT connecting to {self.mqtt_addr}")
-            self.mqtt = MQTT(str(self.vehicle_id), addr=self.mqtt_addr, topics2suscribe=[f"veh{self.vehicle_id}"], on_message=self.on_message, on_disconnect=self.on_disconnect,user=self.mqtt_user,password=self.mqtt_password)
+            self.mqtt = MQTT(str(self.vehicle_id), 
+                            addr=self.mqtt_addr, 
+                            topics2suscribe=[f"veh{self.vehicle_id}"], 
+                            on_message=self.on_message, 
+                            on_disconnect=self.on_disconnect,
+                            user=self.mqtt_user,
+                            password=self.mqtt_password)
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to MQTT server was refused")
             self.get_logger().fatal("MQTT module is dead")
