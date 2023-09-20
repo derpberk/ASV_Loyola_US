@@ -69,6 +69,7 @@ class Sonar_node(Node):
                 else:
                     self.get_logger().info(f"Sonar not connected! Trial: {connection_trials}")
                     connection_trials += 1
+                    time.sleep(1)
 
                 if connection_trials > 10:
                     self.get_logger().info(f"Failed to connect to Sonar")
