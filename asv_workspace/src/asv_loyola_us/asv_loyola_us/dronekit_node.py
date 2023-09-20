@@ -12,6 +12,7 @@ from math import atan2
 import time
 from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle distance information
 from numpy import uint
+from getmac import get_mac_address as gma
 
 from asv_interfaces.msg import Status, Nodeupdate, Camera, Obstacles, Location
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
@@ -98,9 +99,6 @@ class Dronekit_node(Node):
         # Parameter to set the maximum distance of a Waypoint
         self.declare_parameter('max_distance', 5000)
         self.max_distance = self.get_parameter('max_distance').get_parameter_value().integer_value
-        # The vehicle ID #
-        self.declare_parameter('vehicle_id', 1)
-        self.vehicle_id=self.get_parameter('vehicle_id').get_parameter_value().integer_value
         # The vehicle arm timeout in seconds 
         self.declare_parameter('arm_timeout', 15)
         self.arm_timeout = self.get_parameter('arm_timeout').get_parameter_value().integer_value
@@ -154,6 +152,11 @@ class Dronekit_node(Node):
 
         if self.DEBUG:
             self.get_logger().warning("Debug mode enabled")
+
+        if gma() == '70:cf:49:9d:39:1f':
+            self.vehicle_id=3
+        else:
+            self.vehicle_id=0
 
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
 

@@ -48,8 +48,6 @@ class Sonar_node(Node):
         self.status = Status()
         self.sonar_msg = Sonar()
         
-        self.remembered_port = None
-        self.ping_device = None # Esto es el dispositivo sonar
 
         self.data0 = None
         self.data1 = None
@@ -124,7 +122,7 @@ class Sonar_node(Node):
                 if self.ping_device.get_ping_enable: #comprobamos si esta funcionando el sonar 
                     data = self.ping_device.get_distance()
                     
-                    self.sonar_msg.distance = float(dada["distance"])
+                    self.sonar_msg.distance = float(data["distance"])
                     self.sonar_msg.confidence = float(data["confidence"])
                     self.sonar_msg.success = True
 
