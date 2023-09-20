@@ -48,27 +48,12 @@ class Sonar_node(Node):
         self.status = Status()
         self.sonar_msg = Sonar()
         
-        self.remembered_port = None
-        self.ping_device = None # Esto es el dispositivo sonar
 
         self.data0 = None
         self.data1 = None
 
         if self.DEBUG:
             self.get_logger().info(f"Simulating sonar measurements")
-
-        if not self.DEBUG:
-            connection_trials = 0
-            while True:
-                # Try sonar connection
-                self.ping_device = Ping1D()
-                self.ping_device.connect_serial(self.sonar_device_name, 115200)
-                if self.ping_device.get_ping_enable:
-                    self.get_logger().info(f"Sonar connected!")
-                    break
-                else:
-                    self.get_logger().info(f"Sonar not connected! Trial: {connection_trials}")
-                    connection_trials += 1
 
                 if connection_trials > 10:
                     self.get_logger().info(f"Failed to connect to Sonar")
@@ -123,7 +108,7 @@ class Sonar_node(Node):
                 if self.ping_device.get_ping_enable: #comprobamos si esta funcionando el sonar 
                     data = self.ping_device.get_distance()
                     
-                    self.sonar_msg.distance = float(dada["distance"])
+                    self.sonar_msg.distance = float(data["distance"])
                     self.sonar_msg.confidence = float(data["confidence"])
                     self.sonar_msg.success = True
 
