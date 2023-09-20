@@ -12,7 +12,7 @@ from math import atan2
 import time
 from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle distance information
 from numpy import uint
-from getmac import get_mac_address as gma
+from .submodulos.asv_identity import get_asv_identity
 
 from asv_interfaces.msg import Status, Nodeupdate, Camera, Obstacles, Location
 from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
@@ -91,7 +91,9 @@ class Dronekit_node(Node):
         if not self.DEBUG:
             self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         else:
-            self.vehicle_ip = self.get_parameter('debug_vehicle_ip').get_parameter_value().string_value
+            self.vehicle_ip = self.get_parameter('debug_vehicle_ip').get_parameter_value().string_valueç
+
+        self.vehicle_id = get_asv_identity()
 
         # Parameter to set the connection timeout
         self.declare_parameter('connect_timeout', 15)
@@ -153,10 +155,7 @@ class Dronekit_node(Node):
         if self.DEBUG:
             self.get_logger().warning("Debug mode enabled")
 
-        if gma() == '70:cf:49:9d:39:1f':
-            self.vehicle_id=3
-        else:
-            self.vehicle_id=0
+
 
         self.get_logger().info(f"Connecting to vehicle in {self.vehicle_ip}")
 

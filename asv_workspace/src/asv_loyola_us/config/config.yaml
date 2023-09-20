@@ -5,9 +5,7 @@
     debug_vehicle_ip: "127.0.0.1:14550"
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
-    vehicle_id: 3
     mqtt_addr: "bender.us.es"
-    mqtt_user: "asv1"
     mqtt_password: "azkenmuga"
     num_samples: 4
     time_between_samples: 0.5

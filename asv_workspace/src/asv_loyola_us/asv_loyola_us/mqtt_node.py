@@ -15,7 +15,7 @@ from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
 import threading
-from getmac import get_mac_address as gma
+from .submodulos.asv_identity import get_asv_identity
 
 class MQTT_node(Node):
 
@@ -25,7 +25,8 @@ class MQTT_node(Node):
         self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
         self.declare_parameter('mqtt_user', "user")
-        self.mqtt_user = self.get_parameter('mqtt_user').get_parameter_value().string_value
+
+        self.mqtt_user = 'asv' + str(get_asv_identity())
         self.declare_parameter('mqtt_password', "password")
         self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
         
