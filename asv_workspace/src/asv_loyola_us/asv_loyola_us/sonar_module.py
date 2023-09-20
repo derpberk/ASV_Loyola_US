@@ -19,10 +19,9 @@ class Sonar_node(Node):
 
     def parameters(self):
 
-        self.declare_parameter('serial_number', "DM00R2J8")
+        
         self.declare_parameter('sonar_connection_type', "USB")
         self.sonar_connection_type = self.get_parameter('sonar_connection_type').get_parameter_value().string_value
-        self.serial_number = self.get_parameter('serial_number').get_parameter_value().string_value
         self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
         
@@ -48,7 +47,7 @@ class Sonar_node(Node):
         self.status = Status()
         self.sonar_msg = Sonar()
         
-        self.remembered_port = None
+        
         self.ping_device = None
         self.ping_thread = None
         self.data0 = None
@@ -76,62 +75,43 @@ class Sonar_node(Node):
 
         while True:
 
-            arduino_ports = [
-                p.device
-                for p in serial.tools.list_ports.comports()
-                if p.serial_number == self.get_parameter('serial_number').get_parameter_value().string_value # Numero de serie del sonar, cambiar al que se este utilizando
-            ]
-
-            if self.remembered_port not in arduino_ports:
-
-                self.get_logger().info("USB device disconnected")
-                self.ping_device = None
-                self.remembered_port = None
-
             if not self.ping_device:
-                for port in arduino_ports:
+
                     try:
                         ping_device = Ping1D() 
-                        ping_device.connect_serial(port, 115200) #Nos conectamos al puerto hallado por el numero de serie
+                        ping_device.connect_serial('/dev/SONAR', 115200) #Nos conectamos al puerto hallado por el numero de serie
                         ping_device.initialize()                #Inicializamos
                         ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
                         self.ping_device = ping_device
-                        self.remembered_port = port
-                        self.get_logger().info(f"Connected to {port} oiweeir")
-                        break
-                    except Exception as e:
-                        self.get_logger().info(f"Failed to connect to {port}: {e}")
-            
-            rclpy.spin_once(self, timeout_sec=0.5)
-
-    def monitor_uart_port(self):
-
-        while True:
-            arduino_ports = [
-                p.device
-                for p in serial.tools.list_ports.comports()
-                if p.serial_number == self.get_parameter('serial_number').get_parameter_value().string_value # Numero de serie del sonar, cambiar al que se este utilizando
-            ]
-            if self.remembered_port not in arduino_ports:
-                self.get_logger().info("USB device disconnected")
-                self.ping_device = None
-                self.remembered_port = None
-
-            if not self.ping_device:
-                for port in arduino_ports:
-                    try:
-                        ping_device = Ping1D() 
-                        ping_device.connect_serial(port, 115200) #Nos conectamos al puerto hallado por el numero de serie
-                        ping_device.initialize()                #Inicializamos
-                        ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
-                        self.ping_device = ping_device
-                        self.remembered_port = port
+                        port = '/dev/SONAR'
                         self.get_logger().info(f"Connected to {port}")
                         break
                     except Exception as e:
                         self.get_logger().info(f"Failed to connect to {port}: {e}")
             
             rclpy.spin_once(self, timeout_sec=0.5)
+    
+
+    #Mejorar la UART
+    # def monitor_uart_port(self):
+
+    #     while True:
+            
+
+    #         if not self.ping_device:
+    #                 try:
+    #                     ping_device = Ping1D() 
+    #                     ping_device.connect_serial(port, 115200) #Nos conectamos al puerto hallado por el numero de serie
+    #                     ping_device.initialize()                #Inicializamos
+    #                     ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
+    #                     self.ping_device = ping_device
+    #                     self.remembered_port = port
+    #                     self.get_logger().info(f"Connected to {port}")
+    #                     break
+    #                 except Exception as e:
+    #                     self.get_logger().info(f"Failed to connect to {port}: {e}")
+            
+    #         rclpy.spin_once(self, timeout_sec=0.5)
 
        
             
@@ -184,7 +164,7 @@ class Sonar_node(Node):
                 if self.ping_device.get_ping_enable: #comprobamos si esta funcionando el sonar 
                     data = self.ping_device.get_distance()
                     
-                    self.sonar_msg.distance = float(dada["distance"])
+                    self.sonar_msg.distance = float(data["distance"])
                     self.sonar_msg.confidence = float(data["confidence"])
 
                 else:

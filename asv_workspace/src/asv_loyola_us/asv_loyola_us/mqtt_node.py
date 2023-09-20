@@ -15,12 +15,11 @@ from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
 import threading
+from getmac import get_mac_address as gma
 
 class MQTT_node(Node):
 
     def parameters(self):
-        self.declare_parameter('vehicle_id', 1)
-        self.vehicle_id = self.get_parameter('vehicle_id').get_parameter_value().integer_value
         self.declare_parameter('internet_loss_timeout', 30)
         self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
         self.declare_parameter('mqtt_addr', "adress")
@@ -61,7 +60,10 @@ class MQTT_node(Node):
 
         #call the parameters
         self.parameters()
-
+        if gma() == '70:cf:49:9d:39:1f':
+            self.vehicle_id=3
+        else:
+            self.vehicle_id=0 #debug ID
         #check if there is internet connection
         while not ping_google(): #ping google has an internal delay
             self.get_logger().error("There is no internet connection, retrying...") 
