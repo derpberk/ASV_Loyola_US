@@ -1,7 +1,6 @@
 FROM arm64v8/ros:humble
 
-ARG WORKSPACE=ASV_Loyola_US
-WORKDIR /home/$WORKSPACE
+WORKDIR /home/asv_workspace
 
 ENV QT_X11_NO_MITSHM=1
 ENV EDITOR=nano
@@ -35,7 +34,7 @@ RUN apt-get autoremove -y \
 
 EXPOSE 1883 1880 5688 5678
 
-COPY ./asv_workspace /home/ASV_Loyola_US
+COPY ./asv_workspace /home/asv_workspace
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
 
