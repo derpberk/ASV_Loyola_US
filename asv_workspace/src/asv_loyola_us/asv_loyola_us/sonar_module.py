@@ -19,8 +19,9 @@ class Sonar_node(Node):
 
     def parameters(self):
 
-        
         self.declare_parameter('sonar_connection_type', "USB")
+        self.declare_parameter('sonar_device_name', '/dev/SONAR')
+        self.sonar_device_name = self.get_parameter('sonar_device_name').get_parameter_value().string_value
         self.sonar_connection_type = self.get_parameter('sonar_connection_type').get_parameter_value().string_value
         self.declare_parameter('debug', True)
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
@@ -47,73 +48,16 @@ class Sonar_node(Node):
         self.status = Status()
         self.sonar_msg = Sonar()
         
-        
-        self.ping_device = None
-        self.ping_thread = None
+
         self.data0 = None
         self.data1 = None
 
-        
-        if not self.DEBUG:
+        if self.DEBUG:
+            self.get_logger().info(f"Simulating sonar measurements")
 
-            if 'USB' in self.sonar_connection_type:
-                self.port_monitor_thread = threading.Thread(target=self.monitor_usb_port, daemon=True)
-                self.port_monitor_thread.start()
-            elif 'UART' in self.sonar_connection_type:
-                self.port_monitor_thread = threading.Thread(target=self.monitor_uart_port, daemon=True)
-                self.port_monitor_thread.start()       
-            else:
-                self.get_logger().info(f"Failed to connect to Sonar")
-        
-                         
- # funcion para buscar por los puertos USB el numero de serie del sonar, si coincide el numero de serie obtiene el puerto donde se ubica, ademas en esta fucnion lo que realizara sera una busqueda continua del sistema.
- #  Se realiza para cuando hay una desconexion del USB y a continuacion conectamos de nuevo pueda volver a funcionar sin que tengamos que levantar el servicio de nuevo. 
- # La busqueda se realiza de manera constante cuando no se encuentra el dispositivo con el numero de serie.
-
-
-    def monitor_usb_port(self):
-
-        while True:
-
-            if not self.ping_device:
-
-                    try:
-                        ping_device = Ping1D() 
-                        ping_device.connect_serial('/dev/SONAR', 115200) #Nos conectamos al puerto hallado por el numero de serie
-                        ping_device.initialize()                #Inicializamos
-                        ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
-                        self.ping_device = ping_device
-                        port = '/dev/SONAR'
-                        self.get_logger().info(f"Connected to {port}")
-                        break
-                    except Exception as e:
-                        self.get_logger().info(f"Failed to connect to {port}: {e}")
-            
-            rclpy.spin_once(self, timeout_sec=0.5)
-    
-
-    #Mejorar la UART
-    # def monitor_uart_port(self):
-
-    #     while True:
-            
-
-    #         if not self.ping_device:
-    #                 try:
-    #                     ping_device = Ping1D() 
-    #                     ping_device.connect_serial(port, 115200) #Nos conectamos al puerto hallado por el numero de serie
-    #                     ping_device.initialize()                #Inicializamos
-    #                     ping_device.set_ping_enable(True)       #Empieza a funcionar el sonar
-    #                     self.ping_device = ping_device
-    #                     self.remembered_port = port
-    #                     self.get_logger().info(f"Connected to {port}")
-    #                     break
-    #                 except Exception as e:
-    #                     self.get_logger().info(f"Failed to connect to {port}: {e}")
-            
-    #         rclpy.spin_once(self, timeout_sec=0.5)
-
-       
+                if connection_trials > 10:
+                    self.get_logger().info(f"Failed to connect to Sonar")
+                    break
             
      
 # funcion para la comprobacion del sonar , se llama dentro de la clase Ping dada por el sonar a la funcion get_ping_enable que muestra 
@@ -166,11 +110,13 @@ class Sonar_node(Node):
                     
                     self.sonar_msg.distance = float(data["distance"])
                     self.sonar_msg.confidence = float(data["confidence"])
+                    self.sonar_msg.success = True
 
                 else:
                     self.get_logger().info("Sonar not working")
                     self.sonar_msg.distance = -1.0
                     self.sonar_msg.confidence = -1.0
+                    self.sonar_msg.success = False
 
         else:
             
@@ -197,6 +143,7 @@ def main(args=None):
     try:
         #start a class that servers the services
         sonar_node= Sonar_node()
+        
         #loop the node
         rclpy.spin(sonar_node, executor=MultiThreadedExecutor())
 
