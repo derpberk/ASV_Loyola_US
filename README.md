@@ -1,6 +1,8 @@
 # ASV Loyola-US project
 
-Este paquete de ROS2 implementa los nodos necesarios para la ejecución de la rutina normal de funcionamiento de la flota de ASV.
+[![Docker Image CI](https://github.com/derpberk/ASV_Loyola_US/actions/workflows/docker-image.yml/badge.svg?branch=Production)](https://github.com/derpberk/ASV_Loyola_US/actions/workflows/docker-image.yml)
+
+Este repositorio implementa el middleware con ROS2 y Docker para que los vehículos realicen tareas de monitorización. El sistema iplementa los nodos necesarios para la ejecución de la rutina normal de funcionamiento de la flota de ASV.
 
 Los nodos son los siguientes:
 
