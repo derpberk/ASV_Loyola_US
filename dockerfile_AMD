@@ -1,5 +1,7 @@
 FROM osrf/ros:humble-desktop-full
 
+RUN chmod +x ros_entrypoint.sh
+
 WORKDIR /home/asv_workspace
 
 ENV QT_X11_NO_MITSHM=1

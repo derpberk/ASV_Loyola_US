@@ -121,7 +121,7 @@ class Sonar_node(Node):
             if self.ping_device: #Si estamos concetados realizamos el checkeo
                 if self.ping_device.get_ping_enable: #comprobamos si esta funcionando el sonar 
                     data = self.ping_device.get_distance()
-                    
+
                     self.sonar_msg.distance = float(data["distance"])
                     self.sonar_msg.confidence = float(data["confidence"])
                     self.sonar_msg.success = True
