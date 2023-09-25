@@ -47,7 +47,10 @@ class MQTT_node(Node):
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
-        self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
+
+        # This is commented to avoid unnecesary flow of information to the server. We don't have an infinite ammount of MBs in the SIM card!
+        #self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
+        
         self.destination_subscriber = self.create_subscription(Location, 'destination', self.destination_subscriber_callback, 10)
         self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
         self.sonar_subscriber = self.create_subscription(Sonar, 'sonar', self.sonar_suscriber_callback, 10)
