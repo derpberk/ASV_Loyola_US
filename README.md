@@ -1,6 +1,8 @@
 # ASV Loyola-US project
 
-Este paquete de ROS2 implementa los nodos necesarios para la ejecución de la rutina normal de funcionamiento de la flota de ASV.
+[![Docker Image CI](https://github.com/derpberk/ASV_Loyola_US/actions/workflows/docker-image.yml/badge.svg?branch=Production)](https://github.com/derpberk/ASV_Loyola_US/actions/workflows/docker-image.yml)
+
+Este repositorio implementa el middleware con ROS2 y Docker para que los vehículos realicen tareas de monitorización. El sistema iplementa los nodos necesarios para la ejecución de la rutina normal de funcionamiento de la flota de ASV.
 
 Los nodos son los siguientes:
 
@@ -16,20 +18,19 @@ Los nodos son los siguientes:
 4. *Planner Node*:
     Se encarga del path planning de los ASV. Recibe los puntos de destino, y calcula la ruta a seguir sin obstáculos. Devuelve los puntos de la ruta al *Mission Node*. A este nodo se accede a través de un servicio.
 
-... COMPLETAR INSTRUCCIONES ...
+5. *Sonar Node*:
+    Se encarga de gestionar el sonar para dar medidas de batimetría.
 
 ## Dependencias
 
 1. Es necesario instalar las siguientes dependencias:
 
 ```bash
-    pip install bluerobotics-ping
-```
-
-2. Es necesario downgradear setuptools:
-
-```bash
-    pip install setuptools==58.2.0
+    pip install bluerobotics-ping 
+    pip install paho-mqtt
+    pip install pyserial
+    pip install dronekit
+    pip install getmac
 ```
 
 ## Ejecución en simulación
