@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    debug: false
+    debug: True
     vehicle_ip: "tcp:192.168.1.203:5678" 
     debug_vehicle_ip: "127.0.0.1:14550"
     timeout: 15

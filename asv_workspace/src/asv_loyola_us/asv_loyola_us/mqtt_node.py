@@ -49,7 +49,7 @@ class MQTT_node(Node):
         self.mission_mode_subscriber = self.create_subscription(String, 'mission_mode', self.mission_mode_suscriber_callback, 10)
         self.log_subscriber = self.create_subscription(Log, '/rosout',self.log_subscriber_callback, 10)
         self.destination_subscriber = self.create_subscription(Location, 'destination', self.destination_subscriber_callback, 10)
-        self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
+        self.sensors_subscriber = self.create_subscription(Sensor, 'sensor', self.sensors_subscriber_callback, 10)
         self.sonar_subscriber = self.create_subscription(Sonar, 'sonar', self.sonar_suscriber_callback, 10)
         self.waypoints_subscriber = self.create_subscription(Location, 'waypoint_mark',self.waypoint_mark_subscriber_callback, 10)
 
@@ -110,9 +110,10 @@ class MQTT_node(Node):
         self.read_params=False
         self.reset_home=None
         self.enable_planner=CommandBool.Request()
-        self.sensor_params=SensorParams.Request()
+        #self.sensor_params=SensorParams.Request()
         # self.sonar_params=SonarService.Request()
         self.sonar_msg = Sonar()
+        self.sensor_msg=Sensor()
         self.enable_planner.value = True #prestart as no planner
         #call services
         self.declare_services()
@@ -379,33 +380,31 @@ class MQTT_node(Node):
 
     def sensors_subscriber_callback(self, msg):
 
-        z = { "veh_num": self.vehicle_id,
-            "date": msg.date,
-            # "sonar":self.sonar.sonar,
-            "Latitude": self.status.lat,
-            "Longitude": self.status.lon,
-        }  # Must be a JSON format file.
-        if msg.ph != -1:
-            y= {"ph" : msg.ph}
-            z.update(y)
-        if msg.smart_water_battery != -1:
-            y= {"smart_water_battery" : msg.smart_water_battery}
-            z.update(y)
-        if msg.o2 != -1:
-            y = {"Disolved_Oxygen": msg.o2}
-            z.update(y)
-        if msg.temperature != -1:
-            y = {"temperature": msg.temperature}
-            z.update(y)
-        if msg.conductivity != -1:
-            y = {"conductivity": msg.conductivity}
-            z.update(y)
-        if msg.oxidation_reduction_potential != -1:
-            y = {"oxidation_reduction_potential": msg.oxidation_reduction_potential}
-            z.update(y)
-        message = json.dumps(z)
-        self.mqtt.send_new_msg(message, topic="database")  # Send the MQTT message
-        self.get_logger().info(f'sensor data sent to database{message}')
+        self.sensor_msg.vbat= msg.vbat
+        self.sensor_msg.ph=msg.ph
+        self.sensor_msg.turbidity=msg.turbidity
+        self.sensor_msg.temperature_ct=msg.temperature_ct
+        self.sensor_msg.conductivity=msg.conductivity
+        #self.sensor_msg.date=msg.date
+        self.sensor_msg.lat=msg.lat
+        self.sensor_msg.lon=msg.lon
+
+        msg = json.dumps({
+            "veh_num": self.vehicle_id,
+            "sample_time": str(datetime.now()),
+            "battery": self.sensor_msg.vbat,
+            "Latitude": self.sensor_msg.lat,
+            "Longitude": self.sensor_msg.lon,
+            "Ph": self.sensor_msg.ph,
+            "Turbidity": self.sensor_msg.turbidity,
+            "Temperature": self.sensor_msg.temperature_ct,
+            "Conductivity": self.sensor_msg.conductivity,
+
+
+
+        })
+        self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
+        self.get_logger().info(f'sensor data sent to database{msg}')
 
     def shutdown_asv(self):
         try:

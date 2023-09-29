@@ -1,0 +1,5 @@
+#request
+bool value 
+---
+#response
+asv_interfaces/Sensor sensor

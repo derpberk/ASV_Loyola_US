@@ -91,7 +91,7 @@ class Dronekit_node(Node):
         if not self.DEBUG:
             self.vehicle_ip = self.get_parameter('vehicle_ip').get_parameter_value().string_value
         else:
-            self.vehicle_ip = self.get_parameter('debug_vehicle_ip').get_parameter_value().string_valueç
+            self.vehicle_ip = self.get_parameter('debug_vehicle_ip').get_parameter_value().string_value
 
         self.vehicle_id = get_asv_identity()
 

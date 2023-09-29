@@ -28,7 +28,7 @@ setup(
             'drone = asv_loyola_us.dronekit_node:main',
             'mqtt = asv_loyola_us.mqtt_node:main',
             'mission = asv_loyola_us.mission_node:main',
-            'sensors = asv_loyola_us.sensor_module_node:main',
+            'sensors = asv_loyola_us.sensor_module:main',
             'planner = asv_loyola_us.planner_node:main',
             'watchdog = asv_loyola_us.watchdog_node:main',
             'camera = asv_loyola_us.camera_node:main',
