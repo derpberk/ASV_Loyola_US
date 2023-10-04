@@ -204,7 +204,7 @@ class Sensor_node(Node):
             self.sensor_msg.temperature_ct = 20 * cos(2*3.141592 * displaced_lat / interval_lat) + 30 * sin(2*3.141592 * displaced_long / interval_long) 
             self.sensor_msg.turbidity = 10 * cos(2*3.141592 * displaced_lat / interval_lat) + 30 * sin(2*3.141592 * displaced_long / interval_long) 
             self.sensor_msg.ph = 40 * cos(2*3.141592 * displaced_lat / interval_lat) + 30 * sin(2*3.141592 * displaced_long / interval_long) 
-
+            self.vbat=0
             self.get_logger().info(f"Conductivity debug value: {self.sensor_msg.conductivity}")
             self.get_logger().info(f"Temperature debug value: {self.sensor_msg.temperature_ct}")
             self.get_logger().info(f"Turbidity debug value: {self.sensor_msg.turbidity}")
