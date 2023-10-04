@@ -41,6 +41,7 @@ set(srv_files
   "srv/PlannerParams.srv"
   "srv/SensorParams.srv"
   "srv/SonarService.srv"
+  "srv/SensorService.srv"
   #"srv/Service2.srv"
    # etc
   )
