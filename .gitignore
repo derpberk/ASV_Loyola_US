@@ -68,3 +68,11 @@ src/simulator/COLCON_IGNORE
 
 src/asv_loyola_us/config/config.yaml
 temp/
+
+
+_site
+.sass-cache
+Gemfile.lock
+*.gem
+.jekyll-cache
+.jekyll-cache
