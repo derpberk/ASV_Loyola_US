@@ -4,6 +4,9 @@ show_downloads: true
 google_analytics:
 theme: jekyll-theme-cayman
 
+# Set the base URL of your site. Defaults to `/` if not set.
+baseurl: "/ASV_Loyola_US"
+
 include:
   - _pages
 
