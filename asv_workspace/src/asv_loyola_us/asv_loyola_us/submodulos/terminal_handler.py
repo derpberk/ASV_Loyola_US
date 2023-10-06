@@ -5,6 +5,7 @@ import psutil
 import sys
 import signal
 from datetime import datetime
+
 def ping_google():
     host="www.google.es"
     command = ["ping", "-c", "1", "-W2", host] #timeout 2 seconds

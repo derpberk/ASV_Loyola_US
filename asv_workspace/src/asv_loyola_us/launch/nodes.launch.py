@@ -4,7 +4,6 @@ import os
 from ament_index_python.packages import get_package_share_directory
 import time
 
-# este launch carga la configuración de la carpeta config y lanza ardupilot SITL, MavROS y RVIZ
 
 
 def generate_launch_description():
@@ -14,6 +13,7 @@ def generate_launch_description():
         'config',
         'config.yaml')
 
+    """
     comunication = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='drone',
@@ -70,17 +70,35 @@ def generate_launch_description():
         name='sonar_node',
         parameters = [config]
     )
+    
+    """
+    
+    asv_node = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='asv',
+        name='asv_node',
+        parameters = [config]
+    )
 
+    server_comms_node = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='communications',
+        name='server_communication_node',
+        parameters = [config]
+    )
 
 
 
     return launch.LaunchDescription([
-        mission,
-        watchdog,
-        comunication,
-        mqtt,
+        #mission,
+        #watchdog,
+        #comunication,
+        #mqtt,
         #sensors,
-        planner,
+        #planner,
         #camera,
-        sonar,
+        #sonar,
+        asv_node,
+        server_comms_node,
+
     ])
