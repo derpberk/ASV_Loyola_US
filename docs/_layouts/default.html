@@ -14,20 +14,42 @@
   </head>
   <body>
 
-
-
     <a id="skip-to-content" href="#content">Skip to the content.</a>
 
     <!-- The sidebar -->
     <div class="sidebar">
-      <a class="active" href="/ASV_Loyola_US/">Home</a>
-      <a href="/ASV_Loyola_US/hardware">Descripción Hardware</a>
+      <a class="active" href="/ASV_Loyola_US/">Inicio</a>
+
+      <div class="dropdown">
+        <button class="dropbtn">Guías rápidas</button>
+        <div class="dropdown-content">
+          <a href="/ASV_Loyola_US/conexionssh">Conexión SSH</a>
+          <a href="/ASV_Loyola_US/missionplanner">Mission Planner</a>
+          <a href="/ASV_Loyola_US/cmdsROS2">Comandos ROS2</a>
+          <a href="/ASV_Loyola_US/cmdsdocker">Docker</a>
+        </div>
+      </div>
+      
+      <div class="dropdown">
+        <button class="dropbtn">Configuración</button>
+        <div class="dropdown-content">
+          <a href="/ASV_Loyola_US/hardware">Conexionado</a>
+          <a href="/ASV_Loyola_US/navio2">Navio 2</a>
+          <a href="/ASV_Loyola_US/udevrule">Reglas UDEV</a>
+          <a href="/ASV_Loyola_US/reachm+">Reach M+</a>
+          <a href="/ASV_Loyola_US/sensoresaml">Sensores AML</a>
+          <a href="/ASV_Loyola_US/sonar">Sonar</a>
+          <a href="/ASV_Loyola_US/docker">Docker</a>
+        </div>
+      </div>
+
      <div class="dropdown">
         <button class="dropbtn">Software</button>
         <div class="dropdown-content">
           <a href="/ASV_Loyola_US/ros2">ROS2</a>
         </div>
       </div>
+
     </div>
 
     <header class="page-header" role="banner">
@@ -53,9 +75,9 @@
           <span class="site-footer-owner"><a href="{{ site.github.repository_url }}">{{ site.github.repository_name }}</a> is maintained by <a href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a>.</span>
         {% endif %}
         <div style="display: flex; align-items: center; margin-top: 30px;">
-          <img src="../images/Aceti.png" alt="aceti" style="width: 150px; margin-right: 20px;">
-          <img src="../images/Logo_US.png" alt="us" style="width: 90px; margin-right: 20px;">
-          <img src="../images/logo_loyola.png" alt="loyola" style="width: 150px; margin-right: 20px;">
+          <img src="/ASV_Loyola_US/images/Aceti.png" alt="aceti" style="width: 150px; margin-right: 20px;">
+          <img src="/ASV_Loyola_US/images/Logo_US.png" alt="us" style="width: 90px; margin-right: 20px;">
+          <img src="/ASV_Loyola_US/images/logo_loyola.png" alt="loyola" style="width: 150px; margin-right: 20px;">
         </div>
       </footer>
     </main>
