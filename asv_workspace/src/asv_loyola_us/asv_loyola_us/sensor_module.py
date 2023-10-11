@@ -56,7 +56,7 @@ class Sensor_node(Node):
         if self.DEBUG:
             self.get_logger().warning("Debug mode enabled")
 
-        if  self.DEBUG:
+        if  not self.DEBUG:
             connection_trials = 0
             while True:
                 # Try sensor connection
