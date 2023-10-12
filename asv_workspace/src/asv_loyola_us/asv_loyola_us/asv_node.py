@@ -69,6 +69,7 @@ class ASV_node(Node):
         # This function is called when the state topic is updated
         self.get_logger().info(f"State MODE: {msg.mode}")
         self.asv_mode = msg.mode
+        self.asv_armed = msg.armed
 
     def wp_reached_topic_callback(self, msg):
         # This function is called when the WP is reached
@@ -107,10 +108,12 @@ class ASV_node(Node):
         self.wp_cleared = False
         self.wp_received = None
         self.start_asv = False
+        
         # The WP Queue
         self.wp_queue = queue.Queue()
         self.FSM_STATE = "IDLE"
         self.asv_mode = "MANUAL"
+        self.asv_armed = False
 
         # Declare Services, Action and Subscribers
         self.declare_services()
@@ -127,8 +130,8 @@ class ASV_node(Node):
         # It is basically a FMS
 
         # If the mode is in manual, to IDLE
-        if self.asv_mode != 'GUIDED':
-            self.get_logger().info(f"We are in {self.asv_mode} mode, going to IDLE")
+        if self.asv_mode != 'GUIDED' or not self.asv_armed:
+            self.get_logger().info(f"We are in {self.asv_mode} mode, and ASV is {'armed' if self.asv_armed else 'not armed'}. Going to IDLE.")
             self.FSM_STATE = 'IDLE'
         
         # THE FSM STATES #
@@ -146,7 +149,6 @@ class ASV_node(Node):
             if self.wp_queue.empty():
                 # If the queue is empty, wait #
                 self.FSM_STATE = 'WAIT_WP'
-            
             else:
                 # If the queue is not empty, get the WP #
                 self.wp_received = self.wp_queue.get()

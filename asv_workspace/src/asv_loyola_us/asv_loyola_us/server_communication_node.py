@@ -81,7 +81,7 @@ class ServerCommunicationNode(Node):
         # Declare subscribers
         self.declare_topics()
 
-        self.topic_identity = 'asv' + str(self.vehicle_id)
+        self.topic_identity = 'asv/asv' + str(self.vehicle_id)
 
         self.asv_mode = "MANUAL"
         self.battery = -1

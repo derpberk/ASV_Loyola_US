@@ -241,12 +241,26 @@ class A_star:
             
 def main():
         
-
+    import matplotlib.pyplot as plt
+    # Import binary dilation function
+    from scipy.ndimage.morphology import binary_dilation
     #read map
-    mapp= A_star("Loyola121x239")
+    mapp= A_star("ASV_Loyola_US/asv_workspace/mapas/Loyola121x239")
+    #dilate map
+    dilated = binary_dilation(mapp.map, iterations=2).astype(mapp.map.dtype)
+
     start=[37.30756124092905, -5.940235027872745]
     destination=[37.308586181428446, -5.939682210759604]
     mapp.compute_gps_path(start, destination)
+
+    path = np.asarray(mapp.path)
+
+    plt.figure()
+    plt.imshow(dilated)
+    plt.plot([start[1],destination[1]],[start[0],destination[0]],'ro')
+    plt.plot(path[:,1], path[:,0],'g-o')
+
+    plt.show()
 
 
 if __name__ == '__main__':  main()
