@@ -70,9 +70,9 @@ a {
   border-style: solid;
   border-width: 1px;
   border-radius: 0.3rem;
-  transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+  transition: color 0.8s, background-color 0.8s, border-color 0.8s;
   position: relative;
-  margin-left: 200px;
+  margin-left: 0px;
 
   &:hover {
     color: rgba(255, 255, 255, 0.8);
@@ -123,7 +123,7 @@ a {
   background-attachment: fixed;
   // Move the background image in the y axis
   background-position-y: -400px;
-  background-position-x: 300px;
+  background-position-x: 200px;
 
 
   // The header is in the background, so it should be behind the content
@@ -165,15 +165,47 @@ a {
 @media screen and (max-width: 400px) {
   .page-header a {
     text-align: center;
+  }
+
+  .project-name {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+
+}
+// If the screen is small, set the margin left of the project name to 0
+@media screen and (max-width: 600px) {
+  .project-name {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+  .project-tagline {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+  // Also remove the margin left of the buttons
+  .btn {
+    margin-left: 0px;
+  }
+
+  // Also remove the position x and y of the background image
+  .page-header a {
+    text-align: center;
+    margin-left: 0;
     background-position-y: 0px;
-    background-position-x: 0px;
   }
 }
+
 
 .project-name {
   margin-top: 0;
   margin-bottom: 0.1rem;
-  margin-left: 200px;
+  margin-left: 0px;
+
+
 
   // Fade in animation
   animation: fadeIn 0.8s ease-in-out forwards;
@@ -196,7 +228,7 @@ a {
   font-weight: normal;
   opacity: 1.0;
   position: relative;
-  margin-left: 200px;
+  margin-left: 0px;
 
 
   @include large {
@@ -214,6 +246,7 @@ a {
 
 .main-content {
   word-wrap: break-word;
+  position: relative;
 
   :first-child {
     margin-top: 0;
@@ -493,7 +526,7 @@ $content-link-active-color: #0056b3;
 .sidebar {
   margin: 0;
   padding: 0;
-  width: 300px;
+  width: 200px;
   background-color: #f1f1f1;
   position: fixed;
   height: 100%;
@@ -524,7 +557,7 @@ $content-link-active-color: #0056b3;
 
 /* Page content. The value of the margin-left property should match the value of the sidebar's width property */
 div.content {
-  margin-left: 300px;
+  margin-left: 200px;
   padding: 1px 16px;
   height: 1000px;
 }
@@ -537,7 +570,22 @@ div.content {
     position: relative;
   }
   .sidebar a {float: left;}
-  div.content {margin-left: 0;}
+  div.content {margin-left: 200px;}
+
+  // Make the title of the page centered
+  .title {
+    text-align: center;
+  }
+
+  // Background image
+  .page-header {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+  }
+
+
 }
 
 /* On screens that are less than 400px, display the bar vertically, instead of horizontally */
@@ -546,6 +594,15 @@ div.content {
     text-align: center;
     float: none;
   }
+
+    // Background image
+    .bg {
+      height: 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      
+    }
 }
 
 // Define the color of the dropdown button
@@ -585,10 +642,10 @@ $dropdown-position: relative;
 
 // Define the top and left position of the dropdown
 $dropdown-top: 100%;
-$dropdown-left: 20%;
+$dropdown-left: 0%;
 
 // Define the transition of the dropdown
-$dropdown-transition: all 0.8s ease-in-out;
+$dropdown-transition: color 0.48s, background-color 0.4s, border-color 0.4s;
 
 // Define the display of the dropdown content
 $dropdown-content-display: none;
@@ -659,6 +716,8 @@ $dropdown-button-disabled-cursor: not-allowed;
   // width: 100%;
   width: 100%;
   text-align: left;
+  // Transition
+  transition: $dropdown-transition;
 
 }
 
@@ -684,6 +743,8 @@ $dropdown-button-disabled-cursor: not-allowed;
   padding: $dropdown-link-padding;
   text-decoration: none;
   display: block;
+  transition: 0.8s;
+  height: 40px;
 }
 
 // Define the styles for the dropdown links on hover
@@ -693,10 +754,19 @@ $dropdown-button-disabled-cursor: not-allowed;
   
 }
 
+// Smooth transition to the dropdown content
+.dropdown:hover .dropdown-content {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  transition: 0.8s;
+}
+
 // Define the styles for the active dropdown link
 .dropdown-content a.active {
   background-color: $dropdown-link-active-color;
   color: $dropdown-content-color;
+  transition: 0.8s ease-in-out;
 }
 
 // Define the styles for the dropdown button when it is hovered
