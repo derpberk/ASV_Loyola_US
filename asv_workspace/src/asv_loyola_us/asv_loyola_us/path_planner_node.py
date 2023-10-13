@@ -103,7 +103,7 @@ class PathPlannerNode(Node):
 		self.get_logger().info('New objetive updated: START: {}, GOAL: {}'.format(start_xy, goal_xy))
 
 		response = PathPlanner.Response()
-		solution = astar(self.navigation_map, start_xy, goal_xy, 10)
+		solution = astar(self.navigation_map, start_xy, goal_xy, self.path_planner_timeout)
 
 		self.get_logger().info('New SOLUTION: {}'.format(solution))
 

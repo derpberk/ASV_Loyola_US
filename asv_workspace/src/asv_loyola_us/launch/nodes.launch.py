@@ -87,6 +87,13 @@ def generate_launch_description():
         parameters = [config]
     )
 
+    path_planner_node = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='path_planner',
+        name='path_planner_node',
+        parameters = [config]
+    )
+
 
 
     return launch.LaunchDescription([
@@ -100,5 +107,6 @@ def generate_launch_description():
         #sonar,
         asv_node,
         server_comms_node,
+        path_planner_node
 
     ])
