@@ -36,6 +36,7 @@ setup(
             'sonar = asv_loyola_us.sonar_module:main',
             'asv = asv_loyola_us.asv_node:main',
             'communications = asv_loyola_us.server_communication_node:main',
+            'path_planner = asv_loyola_us.path_planner_node:main',
         ],
     },
 )

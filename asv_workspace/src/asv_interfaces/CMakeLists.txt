@@ -24,6 +24,7 @@ set(msg_files
   "msg/Camera.msg"
   "msg/Obstacles.msg"
   "msg/Sonar.msg"
+  "msg/Path.msg"
 
   #"msg/Message2.msg"
   # etc
@@ -41,6 +42,7 @@ set(srv_files
   "srv/PlannerParams.srv"
   "srv/SensorParams.srv"
   "srv/SonarService.srv"
+  "srv/PathPlanner.srv"
   #"srv/Service2.srv"
    # etc
   )
