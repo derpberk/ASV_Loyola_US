@@ -27,7 +27,6 @@ setup(
         'console_scripts': [
             'sensors = asv_loyola_us.sensor_module_node:main',
             'camera = asv_loyola_us.camera_node:main',
-            'database= asv_loyola_us.database_node:main',
             'sonar = asv_loyola_us.sonar_module:main',
             'asv = asv_loyola_us.asv_node:main',
             'communications = asv_loyola_us.server_communication_node:main',
