@@ -20,17 +20,12 @@ setup(
     zip_safe=True,
     maintainer='Samuel Yanes',
     maintainer_email='syanes@us.es',
-    description='Working with Navio2 helping the project ASV_Loyola_US merging it in ROS',
+    description='Autonomous Surface Vehicles for Environmental Monitoring - US/Loyola',
     license='Apache License 2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'drone = asv_loyola_us.dronekit_node:main',
-            'mqtt = asv_loyola_us.mqtt_node:main',
-            'mission = asv_loyola_us.mission_node:main',
             'sensors = asv_loyola_us.sensor_module_node:main',
-            'planner = asv_loyola_us.planner_node:main',
-            'watchdog = asv_loyola_us.watchdog_node:main',
             'camera = asv_loyola_us.camera_node:main',
             'database= asv_loyola_us.database_node:main',
             'sonar = asv_loyola_us.sonar_module:main',
