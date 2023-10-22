@@ -2,11 +2,14 @@ import rclpy
 from rclpy.node import Node
 from asv_interfaces.srv import PathPlanner
 from asv_interfaces.msg import Location
-from .submodulos.astar import astar
-from .submodulos.astar import reduce_path
+#from .submodulos.astar import astar
+#from .submodulos.astar import reduce_path
+
+from .submodulos.dijkstra import Dijkstra
+from .submodulos.dijkstra import reduce_path
 import os
 import numpy as np
-
+from scipy.ndimage import binary_dilation
 
 class PathPlannerNode(Node):
 
@@ -22,9 +25,18 @@ class PathPlannerNode(Node):
 		self.declare_parameter('debug', True)
 		self.debug = self.get_parameter('debug').get_parameter_value().bool_value
 
+		# binary dilation
+		self.declare_parameter('binary_dilation', 2)
+		self.binary_dilation_size = self.get_parameter('binary_dilation').get_parameter_value().integer_value
+
 		# Load the map
 
 		self.navigation_map = np.genfromtxt(self.navigation_map_path + 'plantilla.csv', dtype=int, delimiter=' ')
+		if self.binary_dilation_size > 0:
+			self.dilated_navigation_map = binary_dilation(self.navigation_map, np.ones((self.binary_dilation_size, self.binary_dilation_size)))
+		else:
+			self.dilated_navigation_map = self.navigation_map
+
 		grid_xy_to_lat_long = np.genfromtxt(self.navigation_map_path + 'grid.csv', delimiter=';', dtype=str)
 
 		self.navigation_map_lat_long = np.zeros((2, *self.navigation_map.shape))
@@ -53,8 +65,14 @@ class PathPlannerNode(Node):
 
 		# Declare parameters, services and topics
 		self.parameters()
+
+		# Declare the dijkstra object
+		self.dijkstra = Dijkstra(self.dilated_navigation_map, 1)
+
 		self.declare_services()	
 		self.declare_topics()
+		
+
 
 	def obstacles_callback(self, msg):
 
@@ -103,9 +121,9 @@ class PathPlannerNode(Node):
 		self.get_logger().info('New objetive updated: START: {}, GOAL: {}'.format(start_xy, goal_xy))
 
 		response = PathPlanner.Response()
-		solution = astar(self.navigation_map, start_xy, goal_xy, self.path_planner_timeout)
+		solution = self.dijkstra.planning(start_xy, goal_xy, self.path_planner_timeout)
 
-		self.get_logger().info('New SOLUTION: {}'.format(solution))
+		self.get_logger().info('Solution obtained!')
 
 		if solution is None:
 			response.success = False
@@ -113,7 +131,7 @@ class PathPlannerNode(Node):
 
 			response.success = True
 			response.path.path = []
-			solution = reduce_path(solution, self.navigation_map)
+			solution = reduce_path(solution, self.dilated_navigation_map).astype(int)
 
 			for point in solution:
 				lat, long = self.xy_to_lat_long(point[0], point[1])

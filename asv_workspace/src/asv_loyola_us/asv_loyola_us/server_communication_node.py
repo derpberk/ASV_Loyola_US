@@ -12,7 +12,11 @@ from sensor_msgs.msg import BatteryState
 from mavros_msgs.srv import CommandBool, SetMode
 from mavros_msgs.msg import GlobalPositionTarget
 from sensor_msgs.msg import NavSatFix
+from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
+
+# Import function to transform quaternion to euler
+from .submodulos.quaternion_to_euler import quaternion_to_euler
 
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
@@ -66,11 +70,18 @@ class ServerCommunicationNode(Node):
         self.asv_state_subscription = self.create_subscription(State, '/mavros/state', self.asv_state_callback, qos_profile)
         self.asv_battery_subscription = self.create_subscription(BatteryState, '/mavros/battery', self.asv_battery_callback, qos_profile_BEF)
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
-        
+        self.asv_orientation_subscription = self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.asv_orientation_callback, qos_profile_BEF)
+
         # Publications
         self.start_asv_publisher = self.create_publisher(Bool, '/start_asv', qos_profile)
         self.wp_target_publisher = self.create_publisher(GlobalPositionTarget, '/wp_target', qos_profile)
         self.wp_clear_publisher = self.create_publisher(Bool, '/wp_clear', qos_profile)
+
+    def declare_services(self):
+        """ Services that this node offers and subscribes to."""
+
+        # Service to change the mode of the ASV
+        self.set_mode_srv = self.create_client(SetMode, '/mavros/set_mode')
 
 
     def __init__(self):
@@ -80,18 +91,21 @@ class ServerCommunicationNode(Node):
         self.initialize_parameters()
         # Declare subscribers
         self.declare_topics()
+        # Declare services
+        self.declare_services()
 
         self.topic_identity = 'asv/asv' + str(self.vehicle_id)
 
         self.asv_mode = "MANUAL"
         self.battery = -1
-        self.asv_position = {'latitude': 0, 'longitude': 0}
+        self.asv_position = {'latitude': 0, 'longitude': 0, 'heading': 0}
 
 
         # Declare MQTT
         topics = [self.topic_identity + '/start_asv', 
                 self.topic_identity + '/wp_clear', 
-                self.topic_identity + '/wp_target']
+                self.topic_identity + '/wp_target',
+                self.topic_identity + '/asv_mode']
         
         for topic in topics:
             self.get_logger().info(f"Subscribing to {topic}")
@@ -130,7 +144,6 @@ class ServerCommunicationNode(Node):
         while rclpy.ok():
             rclpy.spin_once(self)
             sleep(0.1)
-        #rclpy.spin(self, executor=MultiThreadedExecutor())
 
 
     def pub_timer_callback(self):
@@ -145,6 +158,7 @@ class ServerCommunicationNode(Node):
         # Publish the position of the ASV
         position_json = json.dumps(self.asv_position)
         self.mqttConnection.send_new_msg(position_json, topic = self.topic_identity + '/asv_position')
+
 
 
     def on_disconnect(self,  client,  __, _):
@@ -206,6 +220,16 @@ class ServerCommunicationNode(Node):
             except KeyError:
                 self.get_logger().error("The payload of the requested WP is not correct")
 
+        elif topic == self.topic_identity + '/asv_mode':
+            # Call the service to change the mode of the ASV
+            # Check if the mode is correct
+            # Create the request
+            request = SetMode.Request()
+            request.custom_mode = payload
+            # Call the service
+            self.set_mode_srv.call_async(request)
+            self.get_logger().info("Change mode command received: " + payload)
+            
         else:
             self.get_logger().error("The topic " + topic + " is not recognized")
             self.get_logger().error("The payload is " + str(payload))
@@ -220,8 +244,14 @@ class ServerCommunicationNode(Node):
 
     def asv_position_callback(self, msg):
 
-        self.asv_position = {'latitude': msg.latitude, 'longitude': msg.longitude}
+        self.asv_position['latitude'] = msg.latitude
+        self.asv_position['longitude'] =  msg.longitude
 
+    def asv_orientation_callback(self, msg):
+         
+         euler = quaternion_to_euler([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
+        
+         self.asv_position['heading'] = euler[2]
 
 def main(args=None):
     #init ROS2
