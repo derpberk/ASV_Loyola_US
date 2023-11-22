@@ -86,7 +86,17 @@ class Sensor_node(Node):
             while(True):
 
                 if(self.serial.in_waiting > 0):
-                    read_data += str(self.serial.read().decode())
+                    new_incoming_data = self.serial.read()
+                    
+                    try:
+                        decoded_data = new_incoming_data.decode()
+                        new_character = str(decoded_data)
+                    except:
+                        response.get_logger().debug(f"Cannot decode incomming byte!")
+                        continue
+
+                    
+                    read_data += new_caracter
 
                 if len(read_data) > 0:
                     if '}' in read_data:
@@ -157,10 +167,18 @@ class Sensor_node(Node):
             self.serial.write(bytes("mscan\n",'ascii'))
             
             read_data = ""
+            
             while(True):
 
                 if(self.serial.in_waiting > 0):
-                    read_data += str(self.serial.read().decode())
+                    try:
+                        decoded_data = new_incoming_data.decode()
+                        new_character = str(decoded_data)
+                    except:
+                        response.get_logger().debug(f"Cannot decode incomming byte!")
+                        continue
+                        
+                    read_data += new_caracter
 
                 if len(read_data) > 0:
                     if '}' in read_data:
