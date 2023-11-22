@@ -122,9 +122,15 @@ class Sonar_node(Node):
                 if self.ping_device.get_ping_enable: #comprobamos si esta funcionando el sonar 
                     data = self.ping_device.get_distance()
 
-                    self.sonar_msg.distance = float(data["distance"])
-                    self.sonar_msg.confidence = float(data["confidence"])
-                    self.sonar_msg.success = True
+                    if data is None:
+                        self.sonar_msg.distance = -1.0
+                        self.sonar_msg.confidence: -1.0
+                        self.sonar_msg.success = False
+                        self.get_logger().info(f"Bad reading from sonar - None Received")
+                    else:
+                        self.sonar_msg.distance = float(data["distance"])
+                        self.sonar_msg.confidence = float(data["confidence"])
+                        self.sonar_msg.success = True
 
                 else:
                     self.get_logger().info("Sonar not working")
