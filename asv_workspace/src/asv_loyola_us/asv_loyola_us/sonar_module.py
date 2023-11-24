@@ -55,7 +55,7 @@ class Sonar_node(Node):
         if self.DEBUG:
             self.get_logger().info(f"Simulating sonar measurements")
 
-        if not self.DEBUG:
+        if  not self.DEBUG:
             connection_trials = 0
             while True:
                 # Try sonar connection
@@ -94,6 +94,7 @@ class Sonar_node(Node):
                         self.sonar_msg.distance = float(data["distance"])
                         self.sonar_msg.confidence = float(data["confidence"])
                         self.sonar_msg.success = True
+                        self.get_logger().info(f"Conductivity debug value: {self.sonar_msg.distance}")
 
                 else:                               #Si no esta funcionando, confirmamos de que no lo esta
                     response.success = False
@@ -137,7 +138,7 @@ class Sonar_node(Node):
                         self.sonar_msg.distance = float(data["distance"])
                         self.sonar_msg.confidence = float(data["confidence"])
                         self.sonar_msg.success = True
-
+                        #self.get_logger().info(f"Conductivity debug value: {self.sonar_msg.distance}")
                 else:
                     self.get_logger().info("Sonar not working")
                     self.sonar_msg.distance = -1.0

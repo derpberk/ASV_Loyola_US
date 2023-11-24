@@ -96,7 +96,7 @@ class Sensor_node(Node):
                         continue
 
                     
-                    read_data += new_caracter
+                    read_data += new_character
 
                 if len(read_data) > 0:
                     if '}' in read_data:
@@ -171,14 +171,15 @@ class Sensor_node(Node):
             while(True):
 
                 if(self.serial.in_waiting > 0):
+                    new_incoming_data = self.serial.read()
                     try:
                         decoded_data = new_incoming_data.decode()
                         new_character = str(decoded_data)
                     except:
-                        response.get_logger().debug(f"Cannot decode incomming byte!")
+                        self.get_logger().debug(f"Cannot decode incomming byte!")
                         continue
                         
-                    read_data += new_caracter
+                    read_data += new_character
 
                 if len(read_data) > 0:
                     if '}' in read_data:
@@ -229,7 +230,7 @@ class Sensor_node(Node):
             self.get_logger().info(f"PH debug value: {self.sensor_msg.ph}")
             self.get_logger().info(f"Voltage battery debug value: {self.sensor_msg.vbat}")
         
-        self.sensor_msg.vbat = 62.5*(self.vbat)-425
+        self.sensor_msg.vbat = (62.5*(self.vbat)-425)
         self.sensor_msg.lat = self.status.lat
         self.sensor_msg.lon = self.status.lon
         self.sensor_msg.date = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
