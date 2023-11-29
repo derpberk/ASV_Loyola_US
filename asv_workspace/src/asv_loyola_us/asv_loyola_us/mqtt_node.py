@@ -407,7 +407,7 @@ class MQTT_node(Node):
 
         })
         self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
-        self.get_logger().info(f'sensor data sent to database{msg}')
+        #self.get_logger().info(f'sensor data sent to database{msg}')
 
     def shutdown_asv(self):
         try:

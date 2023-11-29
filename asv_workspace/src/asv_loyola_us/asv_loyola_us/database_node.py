@@ -16,7 +16,7 @@ import json, traceback
 from datetime import datetime
 import threading
 from .submodulos.asv_identity import get_asv_identity
-
+from decimal import Decimal
 class DB_node(Node):
 
     def parameters(self):
@@ -39,13 +39,13 @@ class DB_node(Node):
 
     def declare_services(self):
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
-        self.sendinfo = self.create_service(CommandBool, 'Database_send_info', self.sendinfo_callback)
+        #self.sendinfo = self.create_service(CommandBool, 'Database_send_info', self.sendinfo_callback)
 
 
 
     def declare_topics(self):
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
-        self.sensors_subscriber = self.create_subscription(Sensor, 'sensors', self.sensors_subscriber_callback, 10)
+        self.sensors_subscriber = self.create_subscription(Sensor, 'sensor', self.sensors_subscriber_callback, 10)
         self.sonar_subscriber = self.create_subscription(Sonar, 'sonar', self.sonar_suscriber_callback, 10)
 
     #def declare_actions(self):
@@ -64,7 +64,7 @@ class DB_node(Node):
         #start Database Connection
         try:
             self.get_logger().info(f"Database connecting to {self.database_host}")
-            self.database = Database(host=self.database_host, port=self.database_port, user=self.database_user, password=self.database_password,db=self.database_db)
+            self.database = Database(hostname=self.database_host, port=self.database_port, username=self.database_user, password=self.database_password,database=self.database_db)
         except ConnectionRefusedError:
             self.get_logger().error(f"Connection to Database server was refused")
             self.get_logger().fatal("Database module is dead")
@@ -85,19 +85,13 @@ class DB_node(Node):
         self.status=Status()
 
         self.call_msg=ASVmode.Request()
-        self.sensor_params=SensorParams.Request()
-        self.shutdown = False
-        self.update_params=False
-        self.read_params=False
-        self.reset_home=None
         self.enable_planner=CommandBool.Request()
         self.sonar_msg = Sonar()
         self.sensor_msg=Sensor()
 
-        self.enable_planner.value = True #prestart as no planner
-        #call services
+        
         self.declare_services()
-        sleep(1)
+        
 
 
         # declare topics
@@ -109,34 +103,59 @@ class DB_node(Node):
 
 
     def sonar_suscriber_callback(self,msg):
+        self.get_logger().fatal("Sensing data")
+        self.sonar_msg.date=str(datetime.now())
+        self.sonar_msglat=msg.lat
+        self.sonar_msglon=msg.lon
+        self.sonar_msg_lat = Decimal(self.sonar_msglat)
+        self.sonar_msg_lon = Decimal(self.sonar_msglon)
         self.sonar_msg.distance = msg.distance
-        self.sonar_msg.confidence = msg.confidence
-        self.sonar_msg.lat = msg.lat
-        self.sonar_msg.lon = msg.lon
-        self.sonar.db= 'sonar'
-        self.database.insert_record_sonar(ID=self.vehicle_id,LATITUD=None, LONGITUD=None,DATA=self.sonar_msg.distance,CONFIDENCE=self.sonar_msg.confidence, DATE=None,DB=self.sonar_msg.sonar)
+        self.sonar_msg.lat = self.latitud
+        self.sonar_msg.lon = self.longitud
+        self.sonar_db= "Sonar"
+        self.database.insert_record_data(Date=self.sonar_msg.date,Latitud=self.sonar_msg_lat, Longitud=self.sonar_msg_lon,Sensor=self.sonar_db,ASV=self.vehicle_id,Data=self.sonar_msg.distance)
 
-    def sonar_suscriber_callback(self,msg):
+    def sensors_subscriber_callback(self,msg):
+        self.sensor_msg_date=str(datetime.now())
         self.sensor_msg.vbat= msg.vbat
         self.sensor_msg.ph=msg.ph
         self.sensor_msg.turbidity=msg.turbidity
         self.sensor_msg.temperature_ct=msg.temperature_ct
         self.sensor_msg.conductivity=msg.conductivity
         #self.sensor_msg.date=msg.date
-        self.sensor_msg.lat=msg.lat
-        self.sensor_msg.lon=msg.lon
-        self.sensor_msg.db= 'sensor'
-        self.database.insert_record_sensor(ID=self.vehicle_id,LATITUD=None, LONGITUD=None,BAT=self.sensor_msg.vbat,TURBITY=self.sensor_msg.turbidity,TEMPERATURE=self.sensor_msg.temperature_ct,CONDUCTIVITY=self.sensor_msg.conductivity,PH=self.sensor_msg.ph, DATE=None,DB=self.sensor_msg.db)
+        self.sensor_msglat=msg.lat
+        self.sensor_msglon=msg.lon
+        self.sensor_msg_lat = Decimal(self.sensor_msglat)
+        self.sensor_msg_lon = Decimal(self.sensor_msglon)
+        self.sensor_msg_batdb= "Battery"
+        self.sensor_msg_phdb= "PH"
+        self.sensor_msg_condb= "Conductivity"
+        self.sensor_msg_turdb= "Turbidity"
+        self.sensor_msg_tempdb= "Temperature"
+        
+
+        self.database.insert_record_data(Date=self.sensor_msg_date, Latitud=self.sensor_msg_lat, Longitud=self.sensor_msg_lon, Sensor=self.sensor_msg_batdb, ASV=self.vehicle_id, Data=self.sensor_msg.vbat)
+        self.database.insert_record_data(Date=self.sensor_msg_date, Latitud=self.sensor_msg_lat, Longitud=self.sensor_msg_lon, Sensor=self.sensor_msg_phdb, ASV=self.vehicle_id, Data=self.sensor_msg.ph)
+        self.database.insert_record_data(Date=self.sensor_msg_date, Latitud=self.sensor_msg_lat, Longitud=self.sensor_msg_lon, Sensor=self.sensor_msg_turdb, ASV=self.vehicle_id, Data=self.sensor_msg.turbidity)
+        self.database.insert_record_data(Date=self.sensor_msg_date, Latitud=self.sensor_msg_lat, Longitud=self.sensor_msg_lon, Sensor=self.sensor_msg_tempdb, ASV=self.vehicle_id, Data=self.sensor_msg.temperature_ct)
+        self.database.insert_record_data(Date=self.sensor_msg_date, Latitud=self.sensor_msg_lat, Longitud=self.sensor_msg_lon, Sensor=self.sensor_msg_condb, ASV=self.vehicle_id, Data=self.sensor_msg.conductivity)
 
 
 
 
-def main():
-    rclpy.init()
-    while rclpy.ok():
-        try:
-            DB_node = DB_node()
-        except:
+
+def main(args=None):
+    #init ROS2
+    rclpy.init(args=args)
+    try:
+        #start a class that servers the services
+        db_node= DB_node()
+        
+        #loop the node
+        rclpy.spin(db_node, executor=MultiThreadedExecutor())
+
+        db_node.destroy_node()
+    except:
             """
             There has been an error with the program, so we will send the error log to the watchdog
             """

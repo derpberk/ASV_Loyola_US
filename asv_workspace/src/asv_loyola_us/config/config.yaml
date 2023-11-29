@@ -1,12 +1,17 @@
 /**:
   ros__parameters:
-    debug: False
+    debug: True
     vehicle_ip: "tcp:192.168.1.203:5678" 
     debug_vehicle_ip: "127.0.0.1:14550"
     timeout: 15
     mission_filename: "MisionesLoyola_dron_2.kml"
     mqtt_addr: "bender.us.es"
     mqtt_password: "azkenmuga"
+    database_host: "golem.us.es"
+    database_port: 6006
+    database_user : "root"
+    database_password : "azkenmugaÑ."
+    database_db : "ASV_US"
     num_samples: 4
     time_between_samples: 0.5
     travelling_timeout: 60
