@@ -5,7 +5,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor, Sonar
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr, StartSvoRec
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
@@ -14,6 +14,7 @@ from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start
 from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
+from std_srvs.srv import Trigger
 import threading
 from .submodulos.asv_identity import get_asv_identity
 
@@ -39,7 +40,9 @@ class MQTT_node(Node):
         self.cancel_movement_client = self.create_client(CommandBool, 'cancel_movement')
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
-        self.camera_recording_client = self.create_client(CommandBool, 'camera_recording',self.camera_record_callback)
+        # self.camera_recording_client = self.create_client(CameraRecord, 'camera_recording')
+        self.camera_recording_client = self.create_client(StartSvoRec, '/zed2i/zed_node/start_svo_rec')
+        self.camera_stop_recording_client = self.create_client(Trigger, '/zed2i/zed_node/stop_svo_rec')
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
@@ -109,6 +112,7 @@ class MQTT_node(Node):
         self.map_name=None
         self.camera_handler=False
         self.camera_signal=CommandBool.Request()
+        self.camera_message="{svo_filename: '/root/CameraRecord/record.svo', compression_mode: '2', target_framerate: '30', bitrate: '6000'}"
         self.update_params=False
         self.read_params=False
         self.reset_home=None
@@ -171,7 +175,10 @@ class MQTT_node(Node):
                     self.params_read()
                     self.read_params=False
                 elif self.camera_handler:
-                    call_service(self, self.camera_recording_client, self.camera_signal)
+                    if self.camera_signal:
+                        call_service(self, self.camera_recording_client, self.camera_message)
+                    if not self.camera_signal:
+                        call_service(self, self.camera_stop_recording_client, self.camera_message)
                     self.camera_handler=False
                 elif self.map_name != None:
                     call_service(self, self.load_map_client, self.map_name)
@@ -348,6 +355,10 @@ class MQTT_node(Node):
             response.success=False
         return response
 
+    # def camera_record_callback(self,request,response):
+    #     if request.value:
+    #         response.message="ros2 node list"
+            
     def mission_mode_suscriber_callback(self, msg):
         self.mission_mode=msg.string
 
@@ -384,8 +395,7 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
-    def camera_record_callback(self,request,response):
-        n
+
 
     def sensors_subscriber_callback(self, msg):
 

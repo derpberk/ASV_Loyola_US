@@ -42,6 +42,8 @@ set(srv_files
   "srv/SensorParams.srv"
   "srv/SonarService.srv"
   "srv/SensorService.srv"
+  "srv/CameraRecord.srv"
+  "srv/StartSvoRec.srv"
   #"srv/Service2.srv"
    # etc
   )
