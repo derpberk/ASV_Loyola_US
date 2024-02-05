@@ -39,7 +39,7 @@ class MQTT_node(Node):
         self.cancel_movement_client = self.create_client(CommandBool, 'cancel_movement')
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
-        self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
+        self.camera_recording_client = self.create_client(CommandBool, 'camera_recording',self.camera_record_callback)
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
@@ -134,6 +134,9 @@ class MQTT_node(Node):
         # declare topics
         self.declare_topics()
 
+        timer_period = 2.0  # seconds
+        self.mqtt_publisher_timer = self.create_timer(timer_period, self.mqtt_info)
+
         while rclpy.ok():
             rclpy.spin_once(self)  # wait for callback
 
@@ -198,7 +201,7 @@ class MQTT_node(Node):
             "EKF": self.status.ekf_ok,
             "manual_mode": self.status.manual_mode
         })  # Must be a JSON format file.
-
+        # self.mqtt.send_new_msg(msg, topic="database")
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
 
     def status_suscriber_callback(self, msg):
@@ -214,14 +217,14 @@ class MQTT_node(Node):
         self.sonar_msg.lon = msg.lon
 
         msg = json.dumps({
-            "veh_num": self.vehicle_id,
-            "sample_time": str(datetime.now()),
+            # "veh_num": self.vehicle_id,
+            # "sample_time": str(datetime.now()),
             "measurement": self.sonar_msg.distance,
-            "Latitude": self.sonar_msg.lat,
-            "Longitude": self.sonar_msg.lon,
+            # "Latitude": self.sonar_msg.lat,
+            # "Longitude": self.sonar_msg.lon,
         })
 
-        self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
+        #self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
 
     def on_message(self, _client, _, msg):
         """
@@ -381,6 +384,9 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
+    def camera_record_callback(self,request,response):
+        n
+
     def sensors_subscriber_callback(self, msg):
 
         self.sensor_msg.vbat= msg.vbat
@@ -389,25 +395,38 @@ class MQTT_node(Node):
         self.sensor_msg.temperature_ct=msg.temperature_ct
         self.sensor_msg.conductivity=msg.conductivity
         #self.sensor_msg.date=msg.date
+
         self.sensor_msg.lat=msg.lat
         self.sensor_msg.lon=msg.lon
-
         msg = json.dumps({
             "veh_num": self.vehicle_id,
             "sample_time": str(datetime.now()),
-            "battery": self.sensor_msg.vbat,
             "Latitude": self.sensor_msg.lat,
             "Longitude": self.sensor_msg.lon,
             "Ph": self.sensor_msg.ph,
+            "Baterry": self.sensor_msg.vbat,
             "Turbidity": self.sensor_msg.turbidity,
             "Temperature": self.sensor_msg.temperature_ct,
             "Conductivity": self.sensor_msg.conductivity,
-
-
-
+            "Sonar": self.sonar_msg.distance,
         })
-        self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
+        #self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
         #self.get_logger().info(f'sensor data sent to database{msg}')
+
+    def mqtt_info(self):
+        msg = json.dumps({
+            "veh_num": self.vehicle_id,
+            "sample_time": str(datetime.now()),
+            "Latitude": self.sensor_msg.lat,
+            "Longitude": self.sensor_msg.lon,
+            "Ph": self.sensor_msg.ph,
+            "Baterry": self.sensor_msg.vbat,
+            "Turbidity": self.sensor_msg.turbidity,
+            "Temperature": self.sensor_msg.temperature_ct,
+            "Conductivity": self.sensor_msg.conductivity,
+            "Sonar": self.sonar_msg.distance,
+        })
+        self.mqtt.send_new_msg(msg, topic="database")
 
     def shutdown_asv(self):
         try:

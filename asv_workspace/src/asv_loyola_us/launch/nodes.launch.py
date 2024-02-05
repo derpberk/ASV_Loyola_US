@@ -80,13 +80,12 @@ def generate_launch_description():
 
 
     return launch.LaunchDescription([
-        #mission,
+        mission,
         watchdog,
         comunication,
         mqtt,
         sensors,
-        #planner,
-        camera,
+        planner,
+        #camera,
         sonar,
-        db,
     ])
