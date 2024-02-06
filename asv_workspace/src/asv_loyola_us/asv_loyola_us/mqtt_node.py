@@ -5,11 +5,12 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor, Sonar
-from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr, StartSvoRec
+from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
+from zed_interfaces.srv import StartSvoRec
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
-from .submodulos.call_service import call_service
+from .submodulos.call_service import call_service,call_service_extern
 from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, restart_asv, check_internet
 from .submodulos.MQTT import MQTT
 import json, traceback
@@ -111,8 +112,10 @@ class MQTT_node(Node):
         self.shutdown = False
         self.map_name=None
         self.camera_handler=False
-        self.camera_signal=CommandBool.Request()
-        self.camera_message="{svo_filename: '/root/CameraRecord/record.svo', compression_mode: '2', target_framerate: '30', bitrate: '6000'}"
+        self.camera_signal=False
+        self.camera_stop=False
+        self.camera_message=StartSvoRec.Request()
+        #self.camera_message="{svo_filename: '/root/CameraRecord/record.svo', compression_mode: '2', target_framerate: '30', bitrate: '6000'}"
         self.update_params=False
         self.read_params=False
         self.reset_home=None
@@ -175,11 +178,15 @@ class MQTT_node(Node):
                     self.params_read()
                     self.read_params=False
                 elif self.camera_handler:
-                    if self.camera_signal:
-                        call_service(self, self.camera_recording_client, self.camera_message)
-                    if not self.camera_signal:
-                        call_service(self, self.camera_stop_recording_client, self.camera_message)
-                    self.camera_handler=False
+                    #call_service(self, self.camera_stop_recording_client)
+                    if self.camera_signal:    
+                        call_service_extern(self, self.camera_recording_client, self.message_zed)
+                        self.camera_handler=False
+                        self.camera_signal=False
+                    elif self.camera_stop:
+                        call_service_extern(self, self.camera_stop_recording_client,self.message_stop)
+                        self.camera_handler=False
+                        self.camera_stop=False
                 elif self.map_name != None:
                     call_service(self, self.load_map_client, self.map_name)
                     self.map_name=None
@@ -306,12 +313,22 @@ class MQTT_node(Node):
                 self.sensor_params.read_only=True
 
             if "start_recording" in message:
+                current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                # Construct the filename with the current date
+                filename = f"/root/CameraRecord/ASV_{current_date}.svo"
+                self.message_zed = {
+                    'svo_filename': filename,
+                    'compression_mode': 2,
+                    'target_framerate': 30,
+                    'bitrate': 6000
+                }
                 self.camera_handler=True
-                self.camera_signal.value=True
+                self.camera_signal=True
 
             if "stop_recording" in message:
+                self.message_stop={}
                 self.camera_handler=True
-                self.camera_signal.value=False
+                self.camera_stop=True
             
             if "load_map" in message:
                 self.map_name=CommandStr.Request()
