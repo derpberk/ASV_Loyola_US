@@ -441,19 +441,21 @@ class MQTT_node(Node):
         #self.get_logger().info(f'sensor data sent to database{msg}')
 
     def mqtt_info(self):
-        msg = json.dumps({
-            "veh_num": self.vehicle_id,
-            "sample_time": str(datetime.now()),
-            "Latitude": self.sensor_msg.lat,
-            "Longitude": self.sensor_msg.lon,
-            "Ph": self.sensor_msg.ph,
-            "Baterry": self.sensor_msg.vbat,
-            "Turbidity": self.sensor_msg.turbidity,
-            "Temperature": self.sensor_msg.temperature_ct,
-            "Conductivity": self.sensor_msg.conductivity,
-            "Sonar": self.sonar_msg.distance,
-        })
-        self.mqtt.send_new_msg(msg, topic="database")
+        if self.sonar_msg.distance !=0 or self.sensor_msg.temperature_ct !=0:
+
+            msg = json.dumps({
+                "veh_num": self.vehicle_id,
+                "sample_time": str(datetime.now()),
+                "Latitude": self.sensor_msg.lat,
+                "Longitude": self.sensor_msg.lon,
+                "Ph": self.sensor_msg.ph,
+                "Baterry": self.sensor_msg.vbat,
+                "Turbidity": self.sensor_msg.turbidity,
+                "Temperature": self.sensor_msg.temperature_ct,
+                "Conductivity": self.sensor_msg.conductivity,
+                "Sonar": self.sonar_msg.distance,
+            })
+            self.mqtt.send_new_msg(msg, topic="database")
 
     def shutdown_asv(self):
         try:

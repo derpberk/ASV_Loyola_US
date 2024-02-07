@@ -84,8 +84,8 @@ def generate_launch_description():
         watchdog,
         comunication,
         mqtt,
-        #sensors,
+        sensors,
         planner,
         #camera,
-        #sonar,
+        sonar,
     ])
