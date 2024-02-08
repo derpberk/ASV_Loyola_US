@@ -456,7 +456,18 @@ class MQTT_node(Node):
                 "Sonar": self.sonar_msg.distance,
             })
             self.mqtt.send_new_msg(msg, topic="database")
+        
+        self.sensor_msg.lat=0
+        self.sensor_msg.lon=0
+        self.sensor_msg.ph=0
+        self.sensor_msg.vbat=0
+        self.sensor_msg.turbidity=0
+        self.sensor_msg.temperature_ct=0
+        self.sensor_msg.conductivity=0
+        self.sonar_msg.distance=0
 
+        
+    
     def shutdown_asv(self):
         try:
             self.mqtt_timer.destroy() #stop updating drone status
