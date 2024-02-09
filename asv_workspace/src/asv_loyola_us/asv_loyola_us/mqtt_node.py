@@ -6,14 +6,16 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from time import sleep
 from asv_interfaces.msg import Status, Nodeupdate, Location, String, Sensor, Sonar
 from asv_interfaces.srv import ASVmode, CommandBool, Newpoint, LoadMission, SensorParams, PlannerParams, CommandStr
+from zed_interfaces.srv import StartSvoRec
 from rcl_interfaces.msg import Log
 from asv_interfaces.action import Goto
 from action_msgs.msg import GoalStatus
-from .submodulos.call_service import call_service
+from .submodulos.call_service import call_service,call_service_extern
 from .submodulos.terminal_handler import ping_google, check_ssh_tunelling, start_ssh_tunneling, kill_ssh_tunelling, restart_asv, check_internet
 from .submodulos.MQTT import MQTT
 import json, traceback
 from datetime import datetime
+from std_srvs.srv import Trigger
 import threading
 from .submodulos.asv_identity import get_asv_identity
 
@@ -39,7 +41,9 @@ class MQTT_node(Node):
         self.cancel_movement_client = self.create_client(CommandBool, 'cancel_movement')
         self.enable_planning_client = self.create_client(CommandBool, 'enable_planning')
         self.sensor_parameters_client = self.create_client(SensorParams, 'Sensor_params')
-        self.camera_recording_client = self.create_client(CommandBool, 'camera_recording')
+        # self.camera_recording_client = self.create_client(CameraRecord, 'camera_recording')
+        self.camera_recording_client = self.create_client(StartSvoRec, '/zed2i/zed_node/start_svo_rec')
+        self.camera_stop_recording_client = self.create_client(Trigger, '/zed2i/zed_node/stop_svo_rec')
         self.load_map_client = self.create_client(CommandStr, 'load_map')
         self.reset_home_client = self.create_client(CommandBool, 'reset_home')
 
@@ -108,7 +112,10 @@ class MQTT_node(Node):
         self.shutdown = False
         self.map_name=None
         self.camera_handler=False
-        self.camera_signal=CommandBool.Request()
+        self.camera_signal=False
+        self.camera_stop=False
+        self.camera_message=StartSvoRec.Request()
+        #self.camera_message="{svo_filename: '/root/CameraRecord/record.svo', compression_mode: '2', target_framerate: '30', bitrate: '6000'}"
         self.update_params=False
         self.read_params=False
         self.reset_home=None
@@ -133,6 +140,9 @@ class MQTT_node(Node):
         
         # declare topics
         self.declare_topics()
+
+        timer_period = 2.0  # seconds
+        self.mqtt_publisher_timer = self.create_timer(timer_period, self.mqtt_info)
 
         while rclpy.ok():
             rclpy.spin_once(self)  # wait for callback
@@ -168,8 +178,15 @@ class MQTT_node(Node):
                     self.params_read()
                     self.read_params=False
                 elif self.camera_handler:
-                    call_service(self, self.camera_recording_client, self.camera_signal)
-                    self.camera_handler=False
+                    #call_service(self, self.camera_stop_recording_client)
+                    if self.camera_signal:    
+                        call_service_extern(self, self.camera_recording_client, self.message_zed)
+                        self.camera_handler=False
+                        self.camera_signal=False
+                    elif self.camera_stop:
+                        call_service_extern(self, self.camera_stop_recording_client,self.message_stop)
+                        self.camera_handler=False
+                        self.camera_stop=False
                 elif self.map_name != None:
                     call_service(self, self.load_map_client, self.map_name)
                     self.map_name=None
@@ -198,7 +215,7 @@ class MQTT_node(Node):
             "EKF": self.status.ekf_ok,
             "manual_mode": self.status.manual_mode
         })  # Must be a JSON format file.
-
+        # self.mqtt.send_new_msg(msg, topic="database")
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
 
     def status_suscriber_callback(self, msg):
@@ -214,14 +231,14 @@ class MQTT_node(Node):
         self.sonar_msg.lon = msg.lon
 
         msg = json.dumps({
-            "veh_num": self.vehicle_id,
-            "sample_time": str(datetime.now()),
+            # "veh_num": self.vehicle_id,
+            # "sample_time": str(datetime.now()),
             "measurement": self.sonar_msg.distance,
-            "Latitude": self.sonar_msg.lat,
-            "Longitude": self.sonar_msg.lon,
+            # "Latitude": self.sonar_msg.lat,
+            # "Longitude": self.sonar_msg.lon,
         })
 
-        self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
+        #self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
 
     def on_message(self, _client, _, msg):
         """
@@ -296,12 +313,22 @@ class MQTT_node(Node):
                 self.sensor_params.read_only=True
 
             if "start_recording" in message:
+                current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                # Construct the filename with the current date
+                filename = f"/root/CameraRecord/ASV_{current_date}.svo"
+                self.message_zed = {
+                    'svo_filename': filename,
+                    'compression_mode': 2,
+                    'target_framerate': 30,
+                    'bitrate': 6000
+                }
                 self.camera_handler=True
-                self.camera_signal.value=True
+                self.camera_signal=True
 
             if "stop_recording" in message:
+                self.message_stop={}
                 self.camera_handler=True
-                self.camera_signal.value=False
+                self.camera_stop=True
             
             if "load_map" in message:
                 self.map_name=CommandStr.Request()
@@ -345,6 +372,10 @@ class MQTT_node(Node):
             response.success=False
         return response
 
+    # def camera_record_callback(self,request,response):
+    #     if request.value:
+    #         response.message="ros2 node list"
+            
     def mission_mode_suscriber_callback(self, msg):
         self.mission_mode=msg.string
 
@@ -381,6 +412,8 @@ class MQTT_node(Node):
         })  # Must be a JSON format file.
         self.mqtt.send_new_msg(message, topic="waypoint")  # Send the MQTT message
 
+
+
     def sensors_subscriber_callback(self, msg):
 
         self.sensor_msg.vbat= msg.vbat
@@ -389,26 +422,52 @@ class MQTT_node(Node):
         self.sensor_msg.temperature_ct=msg.temperature_ct
         self.sensor_msg.conductivity=msg.conductivity
         #self.sensor_msg.date=msg.date
+
         self.sensor_msg.lat=msg.lat
         self.sensor_msg.lon=msg.lon
-
         msg = json.dumps({
             "veh_num": self.vehicle_id,
             "sample_time": str(datetime.now()),
-            "battery": self.sensor_msg.vbat,
             "Latitude": self.sensor_msg.lat,
             "Longitude": self.sensor_msg.lon,
             "Ph": self.sensor_msg.ph,
+            "Baterry": self.sensor_msg.vbat,
             "Turbidity": self.sensor_msg.turbidity,
             "Temperature": self.sensor_msg.temperature_ct,
             "Conductivity": self.sensor_msg.conductivity,
-
-
-
+            "Sonar": self.sonar_msg.distance,
         })
-        self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
-        self.get_logger().info(f'sensor data sent to database{msg}')
+        #self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
+        #self.get_logger().info(f'sensor data sent to database{msg}')
 
+    def mqtt_info(self):
+        if self.sonar_msg.distance !=0 or self.sensor_msg.temperature_ct !=0:
+
+            msg = json.dumps({
+                "veh_num": self.vehicle_id,
+                "sample_time": str(datetime.now()),
+                "Latitude": self.sensor_msg.lat,
+                "Longitude": self.sensor_msg.lon,
+                "Ph": self.sensor_msg.ph,
+                "Baterry": self.sensor_msg.vbat,
+                "Turbidity": self.sensor_msg.turbidity,
+                "Temperature": self.sensor_msg.temperature_ct,
+                "Conductivity": self.sensor_msg.conductivity,
+                "Sonar": self.sonar_msg.distance,
+            })
+            self.mqtt.send_new_msg(msg, topic="database")
+        
+        self.sensor_msg.lat=0.0
+        self.sensor_msg.lon=0.0
+        self.sensor_msg.ph=0.0
+        self.sensor_msg.vbat=0.0
+        self.sensor_msg.turbidity=0.0
+        self.sensor_msg.temperature_ct=0.0
+        self.sensor_msg.conductivity=0.0
+        self.sonar_msg.distance=0.0
+
+        
+    
     def shutdown_asv(self):
         try:
             self.mqtt_timer.destroy() #stop updating drone status

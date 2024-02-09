@@ -34,6 +34,7 @@ setup(
             'camera = asv_loyola_us.camera_node:main',
             'database= asv_loyola_us.database_node:main',
             'sonar = asv_loyola_us.sonar_module:main',
+            'db = asv_loyola_us.database_node:main',
         ],
     },
 )

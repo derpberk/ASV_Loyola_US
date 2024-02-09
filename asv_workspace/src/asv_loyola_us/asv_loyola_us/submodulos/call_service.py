@@ -1,4 +1,3 @@
-
 import rclpy
 
 from rclpy.node import Node
@@ -45,6 +44,32 @@ def call_service_spin(client_ori, msg):
             return response
             break
 #TODO: add tagg de la persona que llama al servicio
+
+
+
+def call_service_extern(self,client, msg):
+    while not client.wait_for_service(timeout_sec=1.0):
+        self.get_logger().info(f'Service {client.srv_name} not available, waiting again...', once=True)
+
+    # Create a request message based on the provided dictionary
+    request = client.srv_type.Request()
+    for key, value in msg.items():
+        setattr(request, key, value)
+
+    future = client.call_async(request)
+    self.get_logger().info(f'{self.get_name()} is calling service {client.srv_name}')
+
+    while rclpy.ok():
+        rclpy.spin_once(self)
+        if future.done():
+            try:
+                response = future.result()
+            except Exception as e:
+                self.get_logger().info(
+                    'Service call failed %r' % (e,))
+            self.get_logger().debug("answer gotten")
+            return response
+            break
 
 
 """original call service function"""

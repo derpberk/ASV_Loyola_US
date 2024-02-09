@@ -29,7 +29,7 @@ class Sonar_node(Node):
 
     def declare_topics(self):
 
-        timer_period = 1.0  # seconds
+        timer_period = 2.0  # seconds
         self.sonar_publisher = self.create_publisher(Sonar, 'sonar', 10)
         self.sonar_publisher_timer = self.create_timer(timer_period, self.sonar_publish)
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)

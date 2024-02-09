@@ -1,0 +1,6 @@
+#request
+bool value true
+---
+#response
+bool success
+string message

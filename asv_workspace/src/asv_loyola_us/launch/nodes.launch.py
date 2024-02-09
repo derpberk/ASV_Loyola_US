@@ -71,7 +71,12 @@ def generate_launch_description():
         parameters = [config]
     )
 
-
+    db = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='db',
+        name='db_node',
+        parameters = [config]
+    )
 
 
     return launch.LaunchDescription([

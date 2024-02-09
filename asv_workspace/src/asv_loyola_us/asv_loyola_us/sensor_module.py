@@ -197,19 +197,19 @@ class Sensor_node(Node):
                 sensor_val = match[1]
 
                 if sensor_str == "Cond":
-                    self.get_logger().info(f"Found Conductivity {sensor_val}")
+                    #self.get_logger().info(f"Found Conductivity {sensor_val}")
                     self.sensor_msg.conductivity = float(sensor_val)
                 if sensor_str == "TempCT":
-                    self.get_logger().info(f"Found Temperature from an CT.X2 sensor {sensor_val}")
+                    #self.get_logger().info(f"Found Temperature from an CT.X2 sensor {sensor_val}")
                     self.sensor_msg.temperature_ct = float(sensor_val)
                 if sensor_str == "Turbidity":
-                    self.get_logger().info(f"Found Turdibity {sensor_val}")
+                    #self.get_logger().info(f"Found Turdibity {sensor_val}")
                     self.sensor_msg.turbidity = float(sensor_val)
                 if sensor_str == "pH":
-                    self.get_logger().info(f"Found pH value {sensor_val}")
+                    #self.get_logger().info(f"Found pH value {sensor_val}")
                     self.sensor_msg.ph = float(sensor_val)
                 if sensor_str == "vbat":
-                    self.get_logger().info(f"Found battery value {sensor_val}")
+                    #self.get_logger().info(f"Found battery value {sensor_val}")
                     self.vbat = float(sensor_val)
          
         else:
