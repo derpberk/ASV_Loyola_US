@@ -47,11 +47,37 @@ def call_service_spin(client_ori, msg):
 
 
 
-def call_service_extern(self,client, msg):
-    while not client.wait_for_service(timeout_sec=1.0):
-        self.get_logger().info(f'Service {client.srv_name} not available, waiting again...', once=True)
+# def call_service_extern(self,client, msg):
+#     while not client.wait_for_service(timeout_sec=1.0):
+#         self.get_logger().info(f'Service {client.srv_name} not available, waiting again...', once=True)
 
-    # Create a request message based on the provided dictionary
+#     # Create a request message based on the provided dictionary
+#     request = client.srv_type.Request()
+#     for key, value in msg.items():
+#         setattr(request, key, value)
+
+#     future = client.call_async(request)
+#     self.get_logger().info(f'{self.get_name()} is calling service {client.srv_name}')
+
+#     while rclpy.ok():
+#         rclpy.spin_once(self)
+#         if future.done():
+#             try:
+#                 response = future.result()
+#             except Exception as e:
+#                 self.get_logger().info(
+#                     'Service call failed %r' % (e,))
+#                 self.get_logger().debug("answer gotten")
+#                 return response
+#             break
+
+def call_service_extern(self, client, msg):
+    # Check if the service is available, but only wait for a short time
+    if not client.wait_for_service(timeout_sec=1.0):
+        self.get_logger().info(f'Service {client.srv_name} not available, not calling.', once=True)
+        return None  # Or handle this case as needed
+
+    # Service is available, proceed with creating and sending the request
     request = client.srv_type.Request()
     for key, value in msg.items():
         setattr(request, key, value)
@@ -59,17 +85,20 @@ def call_service_extern(self,client, msg):
     future = client.call_async(request)
     self.get_logger().info(f'{self.get_name()} is calling service {client.srv_name}')
 
-    while rclpy.ok():
-        rclpy.spin_once(self)
-        if future.done():
-            try:
-                response = future.result()
-            except Exception as e:
-                self.get_logger().info(
-                    'Service call failed %r' % (e,))
-            self.get_logger().debug("answer gotten")
+    # Wait for the response, but don't block other operations
+    rclpy.spin_once(self, timeout_sec=0)  # Just check once, don't wait
+    if future.done():
+        try:
+            response = future.result()
+            self.get_logger().info(f'Service call to {client.srv_name} succeeded.')
             return response
-            break
+        except Exception as e:
+            self.get_logger().error(f'Service call to {client.srv_name} failed: {e}')
+            return None
+    else:
+        
+        # Optionally return something or handle this case
+        return None
 
 
 """original call service function"""

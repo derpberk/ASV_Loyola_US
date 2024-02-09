@@ -18,7 +18,8 @@ RUN apt-get update && apt-get install -y \
     ruby-dev \
     wget \
     xorg-dev \
-    iputils-ping 
+    iputils-ping
+
 
 RUN pip3 install setuptools==58.2.0
 
