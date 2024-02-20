@@ -152,16 +152,6 @@ class ServerCommunicationNode(Node):
     def pub_timer_callback(self):
         # When the timer is triggered, publish the data
 
-        # Publish the state of the ASV
-        # self.mqttConnection.send_new_msg(self.asv_mode, topic = self.topic_identity + '/asv_state')
-
-        # Publish the battery of the ASV
-        # self.mqttConnection.send_new_msg(self.battery, topic = self.topic_identity + '/asv_battery')
-
-        # Publish the position of the ASV
-        # position_json = json.dumps(self.asv_position)
-        # self.mqttConnection.send_new_msg(position_json, topic = self.topic_identity + '/asv_position')
-
         # Publish the complete state of the ASV
         self.mqttConnection.send_new_msg(json.dumps({
             'mode': self.asv_mode,
