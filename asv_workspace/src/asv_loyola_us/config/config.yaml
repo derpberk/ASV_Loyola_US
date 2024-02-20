@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     # General parameters
-    debug: false
+    debug: true
     use_path_planner: true
     # Path planner parameters
     path_planner_timeout: 20.0
@@ -11,7 +11,7 @@
     wqp_sensor_USB_string: "/dev/SENSOR"
     wqp_sensor_baudrate: 115200
     wqp_sensor_measurement_frequency: 1.0
-    wqp_sensor_timeout: 6
+    wqp_sensor_timeout: 6.0
     # Sonar parameters
     sonar_USB_string: "/dev/SONAR"
     sonar_measurement_frequency: 1.0

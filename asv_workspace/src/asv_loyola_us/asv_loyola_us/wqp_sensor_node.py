@@ -8,6 +8,9 @@ from math import sin, cos
 from datetime import datetime
 import re
 
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+
+
 
 
 class WQP_Sensor_module(Node):
@@ -26,10 +29,10 @@ class WQP_Sensor_module(Node):
         self.baudrate = self.get_parameter('wqp_sensor_baudrate').get_parameter_value().integer_value
 
         self.declare_parameter('wqp_sensor_timeout', 10.0)
-        self.timeout = self.get_parameter('wqp_sensor_timeout').get_parameter_value().float_value
+        self.timeout = self.get_parameter('wqp_sensor_timeout').get_parameter_value().double_value
 
         self.declare_parameter('wqp_sensor_measurement_frequency', 1.0)
-        self.measurement_frequency = self.get_parameter('wqp_sensor_measurement_frequency').get_parameter_value().float_value
+        self.measurement_frequency = self.get_parameter('wqp_sensor_measurement_frequency').get_parameter_value().double_value
     
     def declare_topics(self):
         
@@ -43,7 +46,7 @@ class WQP_Sensor_module(Node):
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
 
         # Create a publisher for the sensor measurements
-        self.sensor_publisher = self.create_publisher(Sensor, '/wqp_measurements', qos_profile_BEF)
+        self.sensor_publisher = self.create_publisher(SensorMsg, '/wqp_measurements', qos_profile_BEF)
         self.sensor_publisher_timer = self.create_timer(self.measurement_frequency, self.sensor_publish)
     
 

@@ -280,7 +280,7 @@ def reduce_path(path, nav_map):
 
 			# Check if the point is the next point of index index_i
 
-			if index_i == i:
+			if index_i == i and len(new_path) > 1:
 				p2 = path[i+1]
 				new_path.append(p2)
 				index_i = i

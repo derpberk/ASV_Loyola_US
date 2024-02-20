@@ -4,7 +4,7 @@ from rclpy.node import Node #for defining a node
 
 from .submodulos.MQTT import MQTT
 from .submodulos.terminal_handler import ping_google
-from .submodulos.get_asv_identity import get_asv_identity
+from .submodulos.asv_identity import get_asv_identity
 
 from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState
@@ -19,6 +19,8 @@ from asv_interfaces.msg import SonarMsg
 # Import function to transform quaternion to euler
 from .submodulos.quaternion_to_euler import quaternion_to_euler
 
+
+
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
 import rclpy
@@ -31,7 +33,7 @@ class ServerCommunicationNode(Node):
     def initialize_parameters(self):
 
         # Declare some parameters #
-        self.declare_parameter('internet_loss_timeout', 30)
+        self.declare_parameter('internet_loss_timeout', 30.0)
         self.internet_loss_timeout = self.get_parameter('internet_loss_timeout').get_parameter_value().integer_value
         self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
@@ -257,14 +259,38 @@ class ServerCommunicationNode(Node):
         # Check if the message is correct
         if msg.success:
             # If the message is correct, send the message to the MQTT server
-            self.mqttConnection.send_new_msg(msg, topic = '/database/wqp')
+
+            # Format the json msg
+            json_msg = json.dumps({
+                'conductivity': msg.conductivity,
+                'temperature_ct': msg.temperature_ct,
+                'turbidity': msg.turbidity,
+                'ph': msg.ph,
+                'vbat': msg.vbat,
+                'lat': msg.lat,
+                'lon': msg.lon,
+                'date': msg.date
+                'veh_num': self.vehicle_id
+            })
+
+            # Send the message
+            self.mqttConnection.send_new_msg(json_msg, topic = '/database/wqp')
         else:
             self.get_logger().error("The message received from the WQP sensor is not correct")
 
     def sonar_sensor_callback(self, msg):
         # This function is called when the sonar_sensor topic is updated
         if msg.success:
-            self.mqttConnection.send_new_msg(msg, topic = '/database/sonar')
+            
+            json_msg = json.dumps({
+                'measurement': msg.distance,
+                'Latitude': msg.lat,
+                'Longitude': msg.lon,
+                'veh_num': self.vehicle_id,
+                'date': msg.date
+            })
+
+            self.mqttConnection.send_new_msg(json_msg, topic = '/database/sonar')
         else:
             self.get_logger().error("The message received from the sonar sensor is not correct")
 

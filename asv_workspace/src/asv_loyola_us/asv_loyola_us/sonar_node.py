@@ -12,6 +12,9 @@ from datetime import datetime
 import random
 from math import exp, sin, cos
 
+from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
+
+
 class Sonar_node(Node):
 
     def parameters(self):
@@ -26,7 +29,7 @@ class Sonar_node(Node):
         self.DEBUG = self.get_parameter('debug').get_parameter_value().bool_value
 
         self.declare_parameter('sonar_measurement_frequency', 1.0)
-        self.sonar_measurement_frequency = self.get_parameter('sonar_measurement_frequency').get_parameter_value().float_value
+        self.sonar_measurement_frequency = self.get_parameter('sonar_measurement_frequency').get_parameter_value().double_value
         
 
     def declare_topics(self):
@@ -39,7 +42,7 @@ class Sonar_node(Node):
 
         # Create a publisher for the sonar measurements
         self.sonar_publisher = self.create_publisher(SonarMsg, '/sonar_measurements', qos_profile_BEF)
-        self.sonar_publisher_timer = self.create_timer(timer_period, self.sonar_publish)
+        self.sonar_publisher_timer = self.create_timer(self.sonar_measurement_frequency, self.sonar_publish)
        
         # Create a subscription to the position of the ASV
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)

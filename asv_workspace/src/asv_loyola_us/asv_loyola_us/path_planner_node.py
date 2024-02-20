@@ -16,8 +16,8 @@ class PathPlannerNode(Node):
 	def parameters(self):
 
 		# Timeout to compute a path
-		self.declare_parameter('path_planner_timeout', 20)
-		self.path_planner_timeout = self.get_parameter('path_planner_timeout').get_parameter_value().integer_value	
+		self.declare_parameter('path_planner_timeout', 20.0)
+		self.path_planner_timeout = self.get_parameter('path_planner_timeout').get_parameter_value().double_value	
 		# Base obstacle map path
 		self.declare_parameter('navigation_map_path', 'mapas/Alamillo95x216')
 		self.navigation_map_path = self.get_parameter('navigation_map_path').get_parameter_value().string_value
