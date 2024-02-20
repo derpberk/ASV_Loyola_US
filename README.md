@@ -6,32 +6,13 @@ Este repositorio implementa el middleware con ROS2 y Docker para que los vehícu
 
 Los nodos son los siguientes:
 
-1. *Mission Node*:
-    Nodo principal del sistema. Implementa los distintos modos de funcionamiento de la flota de ASV. Se encarga de la gestión de la misión, la comunicación con el *Ground Station* y la gestión de los nodos de control de los ASV. Este nodo llama a los servicios de los nodos de control para la ejecución de las distintas maniobras, como los de cambios de modo, el servidor de acción GoTo o el servidor de los sensores.
+1. *ASV Node*: Se encarga de gestionar los waypoints y de enviar las órdenes al controlador del ASV.
 
-2. *Donekit Node*:
-    No es más que un transductor de ROS a Mavlink a través de la librería Dronekit. Se encarga de la comunicación con el autopiloto de los ASV. Recibe los comandos de los nodos de control y los envía al autopiloto. Publica los datos de los sensores y del estado del ASV.
+2. *Server Node*: Se encarga de la comunicación con el servidor.
 
-3. *MQTT Node*:
-    Se encarga de la comunicación con el servidor. Recibe los comandos de la *Ground Station* y los envía al *Mission Node*. Publica los datos de los sensores y del estado del ASV en el servidor.
+3. *Sonar Node*: Se encarga de la lectura del sonar.
 
-4. *Planner Node*:
-    Se encarga del path planning de los ASV. Recibe los puntos de destino, y calcula la ruta a seguir sin obstáculos. Devuelve los puntos de la ruta al *Mission Node*. A este nodo se accede a través de un servicio.
-
-5. *Sonar Node*:
-    Se encarga de gestionar el sonar para dar medidas de batimetría.
-
-## Dependencias
-
-1. Es necesario instalar las siguientes dependencias:
-
-```bash
-    pip install bluerobotics-ping 
-    pip install paho-mqtt
-    pip install pyserial
-    pip install dronekit
-    pip install getmac
-```
+4. *WQP Node*: Se encarga de la comunicación con los sensors de calidad del agua.
 
 ## Ejecución en simulación
 
