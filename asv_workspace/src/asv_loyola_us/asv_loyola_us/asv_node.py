@@ -1,19 +1,13 @@
 #ros libraries
 import rclpy #main librarie
 from rclpy.node import Node #for defining a node
-
 from mavros_msgs.msg import State, WaypointReached, GlobalPositionTarget, Waypoint
 from sensor_msgs.msg import BatteryState, NavSatFix
 from mavros_msgs.srv import CommandBool, SetMode, WaypointClear, WaypointPush
-
 from asv_interfaces.srv import PathPlanner
-
 from std_msgs.msg import Bool
-
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 
-
-import os 
 from time import sleep #delay
 
 import queue # for queueing the WP
@@ -25,8 +19,7 @@ class ASV_node(Node):
 
         # Get parameters from ROSPARAM
         self.declare_parameter('debug', True)
-        self.debug = True #self.get_parameter('debug').get_parameter_value().bool_value
-        #self.get_logger().info(f"Debug mode: {self.debug}")
+        self.get_parameter('debug').get_parameter_value().bool_value
         self.declare_parameter('use_path_planner', True)
         self.use_path_planner = self.get_parameter('use_path_planner').get_parameter_value().bool_value
 
@@ -160,7 +153,7 @@ class ASV_node(Node):
             self.wp_queue = queue.Queue() # Clear the queue
             self.mission_length = 0 # Reset the mission length
 
-            # Call the clear service - Sincronously#
+            # Call the clear service - Sincronously #
             future = self.wp_clear_client.call_async(WaypointClear.Request())
             # Wait for the response #
             rclpy.spin_until_future_complete(self, future)

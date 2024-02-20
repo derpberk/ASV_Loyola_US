@@ -1,15 +1,14 @@
 #ros libraries
 import rclpy #main librarie
 from rclpy.node import Node #for defining a node
-from rclpy import qos
 
 from .submodulos.MQTT import MQTT
-from .submodulos.asv_identity import get_asv_identity
 from .submodulos.terminal_handler import ping_google
+from .submodulos.get_asv_identity import get_asv_identity
 
-from mavros_msgs.msg import State, WaypointReached
+from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState
-from mavros_msgs.srv import CommandBool, SetMode
+from mavros_msgs.srv import SetMode
 from mavros_msgs.msg import GlobalPositionTarget
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import PoseStamped
@@ -19,14 +18,12 @@ from std_msgs.msg import Bool
 from .submodulos.quaternion_to_euler import quaternion_to_euler
 
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
-
 import json 
 import rclpy
 from time import sleep #delay
 import traceback
 
 #Import MultiThreadExecutor
-from rclpy.executors import MultiThreadedExecutor
 
 
 class ServerCommunicationNode(Node):
@@ -39,7 +36,7 @@ class ServerCommunicationNode(Node):
         self.declare_parameter('mqtt_addr', "adress")
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
         self.declare_parameter('mqtt_user', "user")
-        self.vehicle_id = 1 # get_asv_identity()
+        self.vehicle_id = get_asv_identity()
         self.mqtt_user = 'asv1' #+ str(get_asv_identity())
         self.declare_parameter('mqtt_password', "password")
         self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
@@ -101,7 +98,7 @@ class ServerCommunicationNode(Node):
         self.asv_position = {'latitude': 0, 'longitude': 0, 'heading': 0}
 
 
-        # Declare MQTT
+        # Declare MQTT topics
         topics = [self.topic_identity + '/start_asv', 
                 self.topic_identity + '/wp_clear', 
                 self.topic_identity + '/wp_target',

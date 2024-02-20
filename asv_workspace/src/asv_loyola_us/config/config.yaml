@@ -1,20 +1,26 @@
 /**:
   ros__parameters:
+    # General parameters
     debug: false
-    vehicle_ip: "tcp:192.168.1.203:5678" 
-    debug_vehicle_ip: "127.0.0.1:14550"
-    timeout: 15
-    mission_filename: "MisionesLoyola_dron_2.kml"
+    use_path_planner: true
+    # Path planner parameters
+    path_planner_timeout: 20.0
+    navigation_map_path: "mapas/Alamillo95x216"
+    binary_dilation: 2
+    # Sensors parameters
+    sensor_USB_string: "/dev/SENSOR"
+    baudrate: 115200
+    timeout: 6
+    # Sonar parameters
+    sonar_USB_string: "/dev/SONAR"
+    sonar_baudrate: 115200
+    # Server parameters
+    internet_loss_timeout: 30.0
     mqtt_addr: "bender.us.es"
+    mqtt_port: 1883
+    mqtt_user: "asv1"
     mqtt_password: "azkenmuga"
-    num_samples: 4
-    time_between_samples: 0.5
-    travelling_timeout: 60
-    arm_timeout: 15
-    max_distance: 5000
-    connect_timeout: 15
-    simple_goto_timeout: 60
-    internet_loss_timeout: 30
-    sensor_read_timeout: 15
-    sonar_connection_type: "USB"
-    sonar_device_name: "/dev/SONAR"
+
+
+
+
