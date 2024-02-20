@@ -207,7 +207,7 @@ class MQTT_node(Node):
             "EKF": self.status.ekf_ok,
             "manual_mode": self.status.manual_mode
         })  # Must be a JSON format file.
-        # self.mqtt.send_new_msg(msg, topic="database")
+        
         self.mqtt.send_new_msg(msg)  # Send the MQTT message
 
     def status_suscriber_callback(self, msg):
@@ -230,7 +230,7 @@ class MQTT_node(Node):
                 "Longitude": self.sonar_msg.lon,
             })
 
-            self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
+            self.mqtt.send_new_msg(msg, topic="database/sonar")  # Send the MQTT message
 
     def on_message(self, _client, _, msg):
         """
@@ -348,9 +348,7 @@ class MQTT_node(Node):
             response.success=False
         return response
 
-    # def camera_record_callback(self,request,response):
-    #     if request.value:
-    #         response.message="ros2 node list"
+
             
     def mission_mode_suscriber_callback(self, msg):
         self.mission_mode=msg.string
@@ -413,10 +411,10 @@ class MQTT_node(Node):
                 "Turbidity": self.sensor_msg.turbidity,
                 "Temperature": self.sensor_msg.temperature_ct,
                 "Conductivity": self.sensor_msg.conductivity,
-                "Sonar": self.sonar_msg.distance,
+                
             })
 
-            self.mqtt.send_new_msg(msg, topic="database")  # Send the MQTT message
+            self.mqtt.send_new_msg(msg, topic="database/sensor")  # Send the MQTT message
             self.get_logger().info(f'sensor data sent to database{msg}')
 
     
