@@ -19,8 +19,7 @@ from asv_interfaces.msg import SonarMsg
 # Import function to transform quaternion to euler
 from .submodulos.quaternion_to_euler import quaternion_to_euler
 
-
-
+from datetime import datetime
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
 import rclpy
@@ -71,7 +70,9 @@ class ServerCommunicationNode(Node):
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
         self.asv_orientation_subscription = self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.asv_orientation_callback, qos_profile_BEF)
 
+        # Subscriptions to the sensors
         self.wqp_sensor_subscription = self.create_subscription(SensorMsg, '/wqp_measurements', self.wqp_sensor_callback, qos_profile_BEF)
+        # Subscriptions to the sonar
         self.sonar_sensor_subscription = self.create_subscription(SonarMsg, '/sonar_measurements', self.sonar_sensor_callback, qos_profile_BEF)
 
         # Publications
@@ -152,15 +153,25 @@ class ServerCommunicationNode(Node):
         # When the timer is triggered, publish the data
 
         # Publish the state of the ASV
-        self.mqttConnection.send_new_msg(self.asv_mode, topic = self.topic_identity + '/asv_state')
+        # self.mqttConnection.send_new_msg(self.asv_mode, topic = self.topic_identity + '/asv_state')
 
         # Publish the battery of the ASV
-        self.mqttConnection.send_new_msg(self.battery, topic = self.topic_identity + '/asv_battery')
+        # self.mqttConnection.send_new_msg(self.battery, topic = self.topic_identity + '/asv_battery')
 
         # Publish the position of the ASV
-        position_json = json.dumps(self.asv_position)
-        self.mqttConnection.send_new_msg(position_json, topic = self.topic_identity + '/asv_position')
+        # position_json = json.dumps(self.asv_position)
+        # self.mqttConnection.send_new_msg(position_json, topic = self.topic_identity + '/asv_position')
 
+        # Publish the complete state of the ASV
+        self.mqttConnection.send_new_msg(json.dumps({
+            'mode': self.asv_mode,
+            'battery': self.battery,
+            'Latitude': self.asv_position['latitude'],
+            'Longitude': self.asv_position['longitude'],
+            'Heading': self.asv_position['heading'],
+            'veh_num': self.vehicle_id,
+            'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }), topic = self.topic_identity + '/asv_state')
 
     def on_disconnect(self,  client,  __, _):
 
@@ -241,7 +252,7 @@ class ServerCommunicationNode(Node):
     
     def asv_battery_callback(self, msg):
         # This function is called when the battery topic is updated
-        self.battery = msg.voltage
+        self.battery = msg.percentage
 
     def asv_position_callback(self, msg):
 
