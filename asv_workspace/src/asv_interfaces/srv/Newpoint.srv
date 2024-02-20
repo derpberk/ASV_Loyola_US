@@ -1,6 +1,0 @@
-#request
-asv_interfaces/Location new_point
----
-#response
-asv_interfaces/Location[] point_list
-bool success true
