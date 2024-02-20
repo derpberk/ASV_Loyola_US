@@ -18,16 +18,12 @@ set(msg_files
   "msg/Location.msg"
   "msg/SensorMsg.msg"
   "msg/SonarMsg.msg"
-  "msg/Obstacles.msg"
   "msg/Path.msg"
 
   )
 
-
 set(srv_files
-  "srv/Newpoint.srv"
   "srv/PathPlanner.srv"
-
   )
 
 
