@@ -127,6 +127,11 @@ class Sensor_node(Node):
     def status_suscriber_callback(self, msg):
         self.status=msg
 
+    def destroy_usb(self):
+        if self.serial.open:
+
+            self.serial.close
+
     def reconnect_sensor(self):
 
         # Close the serial port
@@ -237,6 +242,7 @@ def main(args=None):
         sensor_node = Sensor_node()
         # loop the services
         rclpy.spin(sensor_node, executor=MultiThreadedExecutor())
+        sensor_node.destroy_usb()
         sensor_node.destroy_node()
         
     except:

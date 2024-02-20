@@ -216,21 +216,21 @@ class MQTT_node(Node):
     def sonar_suscriber_callback(self, msg):
 
         # When a message is received from the sonar, it is stored in the sonar_msg variable and sent to the MQTT broker.
+        if msg.success:
+            self.sonar_msg.distance = msg.distance
+            self.sonar_msg.confidence = msg.confidence
+            self.sonar_msg.lat = msg.lat
+            self.sonar_msg.lon = msg.lon
 
-        self.sonar_msg.distance = msg.distance
-        self.sonar_msg.confidence = msg.confidence
-        self.sonar_msg.lat = msg.lat
-        self.sonar_msg.lon = msg.lon
+            msg = json.dumps({
+                "veh_num": self.vehicle_id,
+                "sample_time": str(datetime.now()),
+                "measurement": self.sonar_msg.distance,
+                "Latitude": self.sonar_msg.lat,
+                "Longitude": self.sonar_msg.lon,
+            })
 
-        msg = json.dumps({
-            # "veh_num": self.vehicle_id,
-            # "sample_time": str(datetime.now()),
-            "measurement": self.sonar_msg.distance,
-            # "Latitude": self.sonar_msg.lat,
-            # "Longitude": self.sonar_msg.lon,
-        })
-
-        #self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
+            self.mqtt.send_new_msg(msg, topic="sonar")  # Send the MQTT message
 
     def on_message(self, _client, _, msg):
         """
