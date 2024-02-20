@@ -25,9 +25,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'sensors = asv_loyola_us.sensor_module_node:main',
-            'camera = asv_loyola_us.camera_node:main',
-            'sonar = asv_loyola_us.sonar_module:main',
+            'wqp_sensor = asv_loyola_us.wqp_sensor_node:main',
+            'sonar = asv_loyola_us.sonar_node:main',
             'asv = asv_loyola_us.asv_node:main',
             'communications = asv_loyola_us.server_communication_node:main',
             'path_planner = asv_loyola_us.path_planner_node:main',

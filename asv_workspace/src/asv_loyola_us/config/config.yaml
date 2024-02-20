@@ -7,18 +7,20 @@
     path_planner_timeout: 20.0
     navigation_map_path: "mapas/Alamillo95x216"
     binary_dilation: 2
-    # Sensors parameters
-    sensor_USB_string: "/dev/SENSOR"
-    baudrate: 115200
-    timeout: 6
+    # WQP Sensors parameters
+    wqp_sensor_USB_string: "/dev/SENSOR"
+    wqp_sensor_baudrate: 115200
+    wqp_sensor_measurement_frequency: 1.0
+    wqp_sensor_timeout: 6
     # Sonar parameters
     sonar_USB_string: "/dev/SONAR"
+    sonar_measurement_frequency: 1.0
     sonar_baudrate: 115200
     # Server parameters
     internet_loss_timeout: 30.0
     mqtt_addr: "bender.us.es"
     mqtt_port: 1883
-    mqtt_user: "asv1"
+    mqtt_user: "asv3" # TODO: Change to avoid collisions
     mqtt_password: "azkenmuga"
 
 

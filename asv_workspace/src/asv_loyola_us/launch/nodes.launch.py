@@ -13,65 +13,20 @@ def generate_launch_description():
         'config',
         'config.yaml')
 
-    """
-    comunication = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='drone',
-        name='drone_node',
-        parameters = [config]
-    )
 
-    planner = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='planner',
-        name='planner_node',
-        parameters = [config]
-    )
-
-    watchdog = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='watchdog',
-        name='watchdog_node',
-        parameters = [config]
-    )
-
-    mission = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='mission',
-        name='mission_node',
-        parameters = [config]
-    )
-
-    mqtt = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='mqtt',
-        name='mqtt_node',
-        parameters = [config]
-    )
-
-    sensors = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='sensors',
-        name='sensors_node',
-        parameters = [config]
-    )
-
-
-    camera = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='camera',
-        name='camera_node',
-        parameters = [config]
-    )
-
-    sonar = launch_ros.actions.Node(
+    sonar_node = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='sonar',
         name='sonar_node',
         parameters = [config]
     )
-    
-    """
+
+    wqp_sensor_node = launch_ros.actions.Node(
+        package='asv_loyola_us',
+        executable='wqp_sensor',
+        name='wqp_sensor_node',
+        parameters = [config]
+    )
     
     asv_node = launch_ros.actions.Node(
         package='asv_loyola_us',
@@ -97,16 +52,9 @@ def generate_launch_description():
 
 
     return launch.LaunchDescription([
-        #mission,
-        #watchdog,
-        #comunication,
-        #mqtt,
-        #sensors,
-        #planner,
-        #camera,
-        #sonar,
+        sonar_node,
+        wqp_sensor_node,
         asv_node,
         server_comms_node,
         path_planner_node
-
     ])
