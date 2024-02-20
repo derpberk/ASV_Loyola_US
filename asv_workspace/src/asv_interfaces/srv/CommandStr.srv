@@ -1,5 +1,0 @@
-#request
-string string ""
----
-#response
-bool success

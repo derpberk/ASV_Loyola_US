@@ -13,6 +13,8 @@ from mavros_msgs.msg import GlobalPositionTarget
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
+from asv_interfaces.msg import SensorMsg
+from asv_interfaces.msg import SonarMsg
 
 # Import function to transform quaternion to euler
 from .submodulos.quaternion_to_euler import quaternion_to_euler
@@ -20,10 +22,8 @@ from .submodulos.quaternion_to_euler import quaternion_to_euler
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
 import rclpy
-from time import sleep #delay
+from time import sleep 
 import traceback
-
-#Import MultiThreadExecutor
 
 
 class ServerCommunicationNode(Node):
@@ -37,7 +37,7 @@ class ServerCommunicationNode(Node):
         self.mqtt_addr = self.get_parameter('mqtt_addr').get_parameter_value().string_value
         self.declare_parameter('mqtt_user', "user")
         self.vehicle_id = get_asv_identity()
-        self.mqtt_user = 'asv1' #+ str(get_asv_identity())
+        self.mqtt_user = 'asv' + str(get_asv_identity())
         self.declare_parameter('mqtt_password', "password")
         self.mqtt_password = self.get_parameter('mqtt_password').get_parameter_value().string_value
 
@@ -68,6 +68,9 @@ class ServerCommunicationNode(Node):
         self.asv_battery_subscription = self.create_subscription(BatteryState, '/mavros/battery', self.asv_battery_callback, qos_profile_BEF)
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
         self.asv_orientation_subscription = self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.asv_orientation_callback, qos_profile_BEF)
+
+        self.wqp_sensor_subscription = self.create_subscription(SensorMsg, '/wqp_measurements', self.wqp_sensor_callback, qos_profile_BEF)
+        self.sonar_sensor_subscription = self.create_subscription(SonarMsg, '/sonar_measurements', self.sonar_sensor_callback, qos_profile_BEF)
 
         # Publications
         self.start_asv_publisher = self.create_publisher(Bool, '/start_asv', qos_profile)
@@ -155,7 +158,6 @@ class ServerCommunicationNode(Node):
         # Publish the position of the ASV
         position_json = json.dumps(self.asv_position)
         self.mqttConnection.send_new_msg(position_json, topic = self.topic_identity + '/asv_position')
-
 
 
     def on_disconnect(self,  client,  __, _):
@@ -249,6 +251,23 @@ class ServerCommunicationNode(Node):
          euler = quaternion_to_euler([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
         
          self.asv_position['heading'] = euler[2]
+
+    def wqp_sensor_callback(self, msg):
+        # This function is called when the wqp_sensor topic is updated
+        # Check if the message is correct
+        if msg.success:
+            # If the message is correct, send the message to the MQTT server
+            self.mqttConnection.send_new_msg(msg, topic = '/database/wqp')
+        else:
+            self.get_logger().error("The message received from the WQP sensor is not correct")
+
+    def sonar_sensor_callback(self, msg):
+        # This function is called when the sonar_sensor topic is updated
+        if msg.success:
+            self.mqttConnection.send_new_msg(msg, topic = '/database/sonar')
+        else:
+            self.get_logger().error("The message received from the sonar sensor is not correct")
+
 
 def main(args=None):
     #init ROS2

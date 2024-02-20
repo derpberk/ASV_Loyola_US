@@ -12,56 +12,29 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 set(msg_files
-  "msg/Status.msg"
-  "msg/Nodeupdate.msg"
-  "msg/String.msg"
-  "msg/Samplevalue.msg"
   "msg/Location.msg"
-  "msg/Sensor.msg"
-  "msg/Threeaxys.msg"
-  "msg/Camera.msg"
+  "msg/SensorMsg.msg"
+  "msg/SonarMsg.msg"
   "msg/Obstacles.msg"
-  "msg/Sonar.msg"
   "msg/Path.msg"
 
-  #"msg/Message2.msg"
-  # etc
   )
 
 
 set(srv_files
   "srv/Newpoint.srv"
-  "srv/ASVmode.srv"
-  "srv/CommandBool.srv"
-  "srv/Newrelativepoint.srv"
-  "srv/Takesample.srv"
-  "srv/LoadMission.srv"
-  "srv/CommandStr.srv"
-  "srv/PlannerParams.srv"
-  "srv/SensorParams.srv"
-  "srv/SonarService.srv"
   "srv/PathPlanner.srv"
-  #"srv/Service2.srv"
-   # etc
-  )
 
-set(action_files
-  "action/Newmission.action"
-  "action/Samplepoint.action"
-  "action/Goto.action"
-  "action/SensorSample.action"
-  #"action/Action2.action"
-   # etc
   )
 
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${msg_files}
   ${srv_files}
-  ${action_files}
-  DEPENDENCIES geometry_msgs
+  DEPENDENCIES geometry_msgs std_msgs
  )
 
 

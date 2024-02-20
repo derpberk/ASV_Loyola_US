@@ -1,9 +1,0 @@
-# Request
-bool debug False
----
-# Result
-asv_interfaces/Sensor[] sensor_reads
-string finish_flag "unknown"
----
-# Feedback
-asv_interfaces/Sensor sensor_read

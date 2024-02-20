@@ -8,7 +8,6 @@
   <license>Apache License 2.0</license>
 
 
-
   <!-- some dependencies -->
   <exec_depend>rclpy</exec_depend> <!-- for python -->
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
@@ -23,7 +22,6 @@
   <build_depend>rclpy</build_depend> <!-- for python -->
   <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
   <build_depend>rcl_interfaces</build_depend> <!-- for interfaces -->
-  <build_depend>action_msgs</build_depend> <!-- for interfaces -->
   <build_depend>python3-paho-mqtt</build_depend> <!-- for mqtt -->
   <build_depend>python3-numpy</build_depend> <!-- for mqtt -->
   <build_depend>python3-geopy</build_depend> <!-- for mqtt -->

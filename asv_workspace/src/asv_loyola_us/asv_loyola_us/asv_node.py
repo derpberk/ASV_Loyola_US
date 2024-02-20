@@ -3,7 +3,7 @@ import rclpy #main librarie
 from rclpy.node import Node #for defining a node
 from mavros_msgs.msg import State, WaypointReached, GlobalPositionTarget, Waypoint
 from sensor_msgs.msg import BatteryState, NavSatFix
-from mavros_msgs.srv import CommandBool, SetMode, WaypointClear, WaypointPush
+from mavros_msgs.srv import SetMode, WaypointClear, WaypointPush
 from asv_interfaces.srv import PathPlanner
 from std_msgs.msg import Bool
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy

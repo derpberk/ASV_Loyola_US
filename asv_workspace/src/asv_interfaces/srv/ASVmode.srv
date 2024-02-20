@@ -1,8 +1,0 @@
-#request
-int32 asv_mode -1
-string asv_mode_str ""
----
-#response
-int32 previous_mode
-string previous_mode_str
-bool success

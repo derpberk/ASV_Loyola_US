@@ -1,5 +1,0 @@
-#request
-bool debug False
----
-#response
-asv_interfaces/Sensor sensor
