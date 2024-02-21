@@ -270,7 +270,7 @@ class ServerCommunicationNode(Node):
                 'vbat': msg.vbat,
                 'lat': msg.lat,
                 'lon': msg.lon,
-                'date': msg.date
+                'date': msg.date,
                 'veh_num': self.vehicle_id
             })
 
