@@ -106,8 +106,6 @@ class MQTT_node(Node):
         self.camera_handler=False
         self.camera_signal=False
         self.camera_stop=False
-        self.camera_message=StartSvoRec.Request()
-
         self.update_params=False
         self.reset_home=None
         self.enable_planner=CommandBool.Request()

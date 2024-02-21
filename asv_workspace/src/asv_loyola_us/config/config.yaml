@@ -7,9 +7,6 @@
     mission_filename: "MisionesLoyola_dron_2.kml"
     mqtt_addr: "bender.us.es"
     mqtt_password: "azkenmuga"
-    database_host: "golem.us.es"
-    database_port: 6006
-    database_db : "ASV_US"
     num_samples: 4
     time_between_samples: 0.5
     travelling_timeout: 60
