@@ -2,8 +2,8 @@ import rclpy
 from rclpy.node import Node
 import time
 import serial
-from asv_interfaces.srv import SensorService
 from asv_interfaces.msg import Status, Sensor, Nodeupdate
+from asv_interfaces.srv import SensorService
 from math import sin, cos
 from datetime import datetime
 import traceback
@@ -29,6 +29,10 @@ class Sensor_node(Node):
         self.sensor_publisher = self.create_publisher(Sensor, 'sensor', 10)
         self.sensor_publisher_timer = self.create_timer(timer_period, self.sensor_publish)
     
+    
+    def declare_services(self):
+        # Create a service host for the sonar
+        self.sonar_service = self.create_service(SensorService, 'sensor_measurement_service', self.sensor_service_callback)
 
 
     def __init__(self):
@@ -123,6 +127,11 @@ class Sensor_node(Node):
     def status_suscriber_callback(self, msg):
         self.status=msg
 
+    def destroy_usb(self):
+        if self.serial.open:
+
+            self.serial.close
+
     def reconnect_sensor(self):
 
         # Close the serial port
@@ -150,6 +159,7 @@ class Sensor_node(Node):
             if connection_trials > 10:
                 self.get_logger().info(f"Failed to connect to Sensor")
                 return False
+    
     
 
     def sensor_publish(self):
@@ -233,6 +243,7 @@ def main(args=None):
         sensor_node = Sensor_node()
         # loop the services
         rclpy.spin(sensor_node, executor=MultiThreadedExecutor())
+        sensor_node.destroy_usb()
         sensor_node.destroy_node()
         
     except:

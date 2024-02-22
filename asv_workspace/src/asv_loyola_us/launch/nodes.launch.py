@@ -57,13 +57,6 @@ def generate_launch_description():
     )
 
 
-    camera = launch_ros.actions.Node(
-        package='asv_loyola_us',
-        executable='camera',
-        name='camera_node',
-        parameters = [config]
-    )
-
     sonar = launch_ros.actions.Node(
         package='asv_loyola_us',
         executable='sonar',
@@ -86,6 +79,5 @@ def generate_launch_description():
         mqtt,
         sensors,
         planner,
-        #camera,
         sonar,
     ])
