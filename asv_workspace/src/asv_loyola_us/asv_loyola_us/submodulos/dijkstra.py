@@ -6,7 +6,6 @@ author: Atsushi Sakai(@Atsushi_twi)
 
 """
 
-import matplotlib.pyplot as plt
 import math
 import numpy as np
 import time
@@ -94,16 +93,6 @@ class Dijkstra:
 			c_id = min(open_set, key=lambda o: open_set[o].cost)
 			current = open_set[c_id]
 
-			# show graph
-			if show_animation:  # pragma: no cover
-				plt.plot(self.calc_position(current.x, self.min_x),
-						 self.calc_position(current.y, self.min_y), "xc")
-				# for stopping simulation with the esc key.
-				plt.gcf().canvas.mpl_connect(
-					'key_release_event',
-					lambda event: [exit(0) if event.key == 'escape' else None])
-				if len(closed_set.keys()) % 10 == 0:
-					plt.pause(0.001)
 
 			if current.x == goal_node.x and current.y == goal_node.y:
 				print("Find goal")
@@ -316,7 +305,7 @@ def main():
 	# map_grid = np.loadtxt('/home/samuel/ASV_loyola_us_repo/ASV_Loyola_US/asv_workspace/mapas/othermap.txt')
 	
 
-	map_grid = np.loadtxt('/home/samuel/ASV_loyola_us_repo/ASV_Loyola_US/asv_workspace/mapas/Alamillo95x216plantilla.csv', delimiter=" ").astype(int)
+	map_grid = np.loadtxt('mapas/Alamillo95x216plantilla.csv', delimiter=" ").astype(int)
 
 	# Dilation of the map
 	dilated_map = binary_dilation(map_grid, np.ones((3, 3)))
@@ -329,19 +318,7 @@ def main():
 
 	if path is not None:
 		refined_path = reduce_path(path, dilated_map)
-	
-
-	plt.imshow(map_grid, cmap='Greys', origin='lower')
-	plt.imshow(dilated_map, cmap='Blues', origin='lower', alpha=0.5)
-	plt.plot(init_node[1], init_node[0], "og")
-	plt.plot(goal_node[1], goal_node[0], "xb")
-	plt.grid(True)
-	plt.axis("equal")
-	if path is not None:
-		plt.plot(path[:,1], path[:,0], "o-g")
-		plt.plot(refined_path[:,1], refined_path[:,0], "o-r")
-	plt.pause(0.01)
-	plt.show()
+		print(refined_path)
 
 
 if __name__ == '__main__':
