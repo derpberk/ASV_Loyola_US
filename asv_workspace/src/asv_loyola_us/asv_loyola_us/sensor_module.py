@@ -68,61 +68,57 @@ class Sensor_node(Node):
     def read_sensor(self):
         
         # Send the sensor a command to take a sample, and read the response
-        read_trials = 0
-        read_ok = False
+        waiting_time = 0.0
 
         # First, check if the sensor is connected
         if self.serial.is_open:
 
             # Wait for the response 100ms
-            read_data = ""
-            time.sleep(0.1)
+            read_data = "0"
 
-            # Try 5 times 
-            while(read_trials < 5 or not read_ok):
-                    
-                    # Flush the input buffer
-                    self.serial.read_all()
-                    
-                    # Send the command to the sensor
-                    self.serial.write(bytes("mscan\n",'ascii'))
-
-                    # Wait for the response
-                    time.sleep(0.1)
-
-                    # Increment the number of trials
-                    read_trials += 1
-                    
-                    # Read the incoming data byte by byte
-                    while(self.serial.in_waiting > 0):
-
-                        new_incoming_data = self.serial.read() # Read one byte
-
-                        try:
-                            decoded_data = new_incoming_data.decode()
-                            new_character = str(decoded_data)
-                        except:
-                            self.get_logger().debug(f"Cannot decode incomming byte!")
-                            continue
-                            
-                        # Append the new character to the read data
-                        read_data += new_character
-    
-                        if len(read_data) > 0 and '}' in read_data:
-                            # We have read the whole message
-                            read_ok = True
-                            self.get_logger().debug(f"A message has been read from the sensor: {read_data}")
-                            break
+            # Flush the input buffer
+            self.serial.read_all()
             
+            # Send the command to the sensor
+            self.serial.write(bytes("mscan\n",'ascii'))
 
-            if read_ok:
-                return read_data
-            elif read_trials >= 5:
-                self.get_logger().info(f"Too many trials to read the sensor!")
-                return None
-            else:
-                return None
+            # Wait until the serial port has data
+            waiting_time = 0.0
+            while(self.serial.in_waiting == 0 and waiting_time < 1.0):
+                time.sleep(0.1)
+                waiting_time += 0.1
+                if waiting_time >= 1:
+                    self.get_logger().info(f"Sensor not responding after sending mscan command for 1 second") 
+                    return None
+            
+            
+            t0 = time.time() # Initial time
 
+            # Read the incoming data byte by byte
+            while(read_data[-1] != '}'):
+
+                new_incoming_data = self.serial.read() # Read one byte
+
+                try:
+                    decoded_data = new_incoming_data.decode()
+                    new_character = str(decoded_data)
+                    # Append the new character to the read data
+                    read_data += new_character
+                except:
+                    self.get_logger().info(f"Error decoding data")
+                    return None
+                
+                if(time.time() - t0 > 1.0 and read_data[-1] != '}'):
+                    self.get_logger().info(f"Received data, but incumplete after not responding for 1 second")
+                    return None
+                
+
+            return read_data[1:]
+
+        else:
+            self.get_logger().info(f"Sensor not connected! - serial.is_open if False")
+            return None
+        
 
     def status_suscriber_callback(self, msg):
         self.status=msg
