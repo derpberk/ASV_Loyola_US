@@ -168,7 +168,7 @@ class Sensor_node(Node):
             
             trials = 0
             data = None
-            if (trials < 5 and data is None):
+            while (trials < 5 and data is None):
 
                 data = self.read_sensor()
 
@@ -187,9 +187,15 @@ class Sensor_node(Node):
                 # If the reconnection is successful, try to read the sensor again
                 if reconnect_response:
                     data = self.read_sensor()
+                    if data is None:
+                        self.get_logger().info(f"Sensor failed 5 times, reconnected, and still failed")
+                        return
                 else:
                     self.get_logger().info(f"Failed to reconnect to the sensor!")
                     return
+                
+            
+                
 
             # Now we have the data, we can parse it
                 
