@@ -165,13 +165,22 @@ class Sensor_node(Node):
     def sensor_publish(self):
 
         if not self.DEBUG:
+            
+            trials = 0
+            data = None
+            if (trials < 5 and data is None):
 
-            data = self.read_sensor()
+                data = self.read_sensor()
+
+                if data is None:
+                    self.get_logger().info(f"Failed to read sensor data. Trial: {trials}")
+                    trials += 1
+       
 
             # Check if the data is not empty
             if data is None:
 
-                self.get_logger().info(f"Sensor data is empty!")
+                self.get_logger().info(f"Sensor does not respond!")
                 # Try to reconnect to the sensor
                 reconnect_response = self.reconnect_sensor()
 
