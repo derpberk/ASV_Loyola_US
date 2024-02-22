@@ -1,0 +1,53 @@
+FROM arm64v8/ros:humble
+
+RUN chmod +x ros_entrypoint.sh
+
+WORKDIR /home/asv_workspace
+
+ENV QT_X11_NO_MITSHM=1
+ENV EDITOR=nano
+ENV XDG_RUNTIME_DIR=/tmp
+ENV ROS_DOMAIN_ID=42
+
+RUN apt-get update && apt-get install -y \
+    cmake \
+    curl \
+    nano \
+    python3-pip \
+    python3-pydantic \
+    ruby-dev \
+    wget \
+    xorg-dev \
+    iputils-ping
+
+
+RUN pip3 install setuptools==58.2.0
+
+# TODO: Estas dependencias se meteran en un dependencies.txt
+RUN pip3 install bluerobotics-ping 
+RUN pip3 install "paho-mqtt<2.0.0"
+RUN pip3 install pyserial
+RUN pip3 install dronekit
+RUN pip3 install getmac
+
+# Esto es necesario por un error de la libreria dronekit #
+RUN sed -i "s/import collections/import collections.abc as collections/g" /usr/local/lib/python3.10/dist-packages/dronekit/__init__.py
+
+RUN apt-get autoremove -y \
+    && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 1883 1880 5688 5678
+
+COPY ./asv_workspace /home/asv_workspace
+
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
+
+CMD ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash; source install/setup.bash; ros2 launch asv_loyola_us system.launch.py"]
+
+
+
+
+
+
+

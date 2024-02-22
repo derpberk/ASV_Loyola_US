@@ -1,0 +1,15 @@
+FROM syanes/asv_us:arm64
+
+EXPOSE 1883 1880 5688 5678
+
+COPY ./asv_workspace /home/asv_workspace
+
+RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
+
+CMD ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash; source install/setup.bash; ros2 launch asv_loyola_us system.launch.py"]
+
+
+
+
+
+
