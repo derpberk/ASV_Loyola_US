@@ -109,6 +109,7 @@ class WQP_Sensor_module(Node):
                     self.get_logger().info(f"Failed to connect to Sensor")
                     break
         
+    
     def read_sensor(self):
         
         # Send the sensor a command to take a sample, and read the response
