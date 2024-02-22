@@ -2,4 +2,4 @@
 bool value 
 ---
 #response
-asv_interfaces/Sensor sensor
+asv_interfaces/Sonar sonar

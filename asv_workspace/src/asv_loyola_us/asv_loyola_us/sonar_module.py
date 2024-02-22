@@ -29,7 +29,7 @@ class Sonar_node(Node):
 
     def declare_topics(self):
 
-        timer_period = 1.0  # seconds
+        timer_period = 2.0  # seconds
         self.sonar_publisher = self.create_publisher(Sonar, 'sonar', 10)
         self.sonar_publisher_timer = self.create_timer(timer_period, self.sonar_publish)
         self.status_subscriber = self.create_subscription(Status, 'status', self.status_suscriber_callback, 10)
@@ -121,6 +121,11 @@ class Sonar_node(Node):
     def status_suscriber_callback(self, msg):
         self.status = msg
 
+    def destroy_usb(self):
+        if self.ping_device:
+            self.ping_device.close()
+        
+
     def sonar_publish(self):
 
         if not self.DEBUG:
@@ -164,6 +169,8 @@ class Sonar_node(Node):
         self.sonar_publisher.publish(self.sonar_msg)
     
 
+
+
 def main(args=None):
     #init ROS2
     rclpy.init(args=args)
@@ -173,7 +180,7 @@ def main(args=None):
         
         #loop the node
         rclpy.spin(sonar_node, executor=MultiThreadedExecutor())
-
+        sonar_node.destroy_usb()
         sonar_node.destroy_node()
 
     except:
