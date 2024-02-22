@@ -126,6 +126,9 @@ class ASV_node(Node):
         # Declare Services, Action and Subscribers
         self.declare_services()
         self.declare_topics()
+
+        # Initialise counter
+        self.counter = 0
         
         sleep(5)
 
@@ -135,13 +138,22 @@ class ASV_node(Node):
             rclpy.spin_once(self)
             sleep(0.1)
 
+            # ESTO ES PA QUE NO ME PETE EL TERMINAL DE LOGS INNECESARIOS #
+            if self.counter <= 1000:
+                self.counter += 1
+            else:
+                self.counter = 0
+
     def main_loop(self):
         # This is the main loop of the ASV node # 
         # It is basically a FMS
 
         # If the mode is in manual, to IDLE
         if not self.asv_mode in ['GUIDED','AUTO'] or not self.asv_armed:
-            self.get_logger().info(f"We are in {self.asv_mode} mode, and ASV is {'armed' if self.asv_armed else 'not armed'}. Going to IDLE.")
+            
+            if self.counter % 50 == 0:
+                self.get_logger().warning(f"We are in {self.asv_mode} mode, and ASV is {'armed' if self.asv_armed else 'not armed'}. Going to IDLE.")
+            
             self.FSM_STATE = 'IDLE'
             self.mission_length = 0 # Reset the mission length
 
@@ -272,8 +284,6 @@ class ASV_node(Node):
             else:
                 self.FSM_STATE = 'WAIT_TO_REACH'
             
-        # self.get_logger().info(f"ASV is in {self.FSM_STATE} state")
-
 
     def set_mode(self, mode):
         # This function changes the mode of the vehicle #
