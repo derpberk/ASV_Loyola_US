@@ -25,7 +25,7 @@ RUN pip3 install setuptools==58.2.0
 
 # TODO: Estas dependencias se meteran en un dependencies.txt
 RUN pip3 install bluerobotics-ping 
-RUN pip3 install paho-mqtt
+RUN pip3 install paho-mqtt<2.0.0
 RUN pip3 install pyserial
 RUN pip3 install dronekit
 RUN pip3 install getmac
