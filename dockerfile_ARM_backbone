@@ -1,4 +1,4 @@
-FROM osrf/ros:humble-desktop-full
+FROM arm64v8/ros:humble
 
 RUN chmod +x ros_entrypoint.sh
 
@@ -19,12 +19,20 @@ RUN apt-get update && apt-get install -y \
     xorg-dev \
     iputils-ping 
 
+RUN apt install ros-humble-mavros -y
+RUN wget https://raw.githubusercontent.com/mavlink/mavros/ros2/mavros/scripts/install_geographiclib_datasets.sh
+RUN chmod +x install_geographiclib_datasets.sh
+RUN /bin/bash -c "./install_geographiclib_datasets.sh"
+
+# Download with wget the latest version of geographiclib
 RUN pip3 install setuptools==58.2.0
 
 # TODO: Estas dependencias se meteran en un dependencies.txt
 RUN pip3 install bluerobotics-ping 
-RUN pip3 install paho-mqtt
+RUN pip3 install "paho-mqtt<2.0.0"
 RUN pip3 install pyserial
+RUN pip3 install getmac
+
 
 RUN apt-get autoremove -y \
     && apt-get clean -y \
@@ -36,8 +44,8 @@ COPY ./asv_workspace /home/asv_workspace
 
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
 
-CMD ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash; source install/setup.bash; ros2 launch asv_loyola_us system.launch.py"]
 
+CMD ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash; source install/setup.bash;", ". ./exec_system.sh"]
 
 
 
