@@ -14,8 +14,8 @@ from pymavlink.dialects.v20 import ardupilotmega as mavlink2 #for obstacle dista
 from numpy import uint
 from .submodulos.asv_identity import get_asv_identity
 
-from asv_interfaces.msg import Status, Nodeupdate, Camera, Obstacles, Location
-from asv_interfaces.srv import CommandBool, ASVmode, Newpoint, Takesample
+from asv_interfaces.msg import Status, Nodeupdate,Location
+from asv_interfaces.srv import CommandBool, ASVmode, Newpoint
 from asv_interfaces.action import Goto
 
 
