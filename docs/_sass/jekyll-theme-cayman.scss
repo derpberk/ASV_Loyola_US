@@ -1,0 +1,817 @@
+@import "normalize";
+@import "rouge-github";
+@import "variables";
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap');
+
+@mixin large {
+  @media screen and (min-width: #{$large-breakpoint}) {
+    @content;
+  }
+}
+
+@mixin medium {
+  @media screen and (min-width: #{$medium-breakpoint}) and (max-width: #{$large-breakpoint}) {
+    @content;
+  }
+}
+
+@mixin small {
+  @media screen and (max-width: #{$medium-breakpoint}) {
+    @content;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: $body-text-color;
+}
+
+#skip-to-content {
+  height: 1px;
+  width: 1px;
+  position: absolute;
+  overflow: hidden;
+  top: -10px;
+
+  &:focus {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    height: auto;
+    width: auto;
+    background: invert($body-link-color);
+    outline: thick solid invert($body-link-color);
+  }
+}
+
+a {
+  color: $body-link-color;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.btn {
+  display: inline-block;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.884);
+  background-color: rgba(97, 185, 113, 0.708);
+  border-color: rgba(255, 255, 255, 0.573);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 0.3rem;
+  transition: color 0.8s, background-color 0.8s, border-color 0.8s;
+  position: relative;
+  margin-left: 0px;
+
+  &:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    background-color: rgba(22, 98, 56, 0.546);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  + .btn {
+    margin-left: 1rem;
+  }
+
+  @include large {
+    padding: 0.75rem 1rem;
+  }
+
+  @include medium {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  @include small {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 0.9rem;
+
+    + .btn {
+      margin-top: 1rem;
+      margin-left: 0;
+    }
+  }
+}
+
+
+.page-header {
+  color: $header-heading-color;
+  text-align: center;
+  background-color: $header-bg-color;
+  //background-image: linear-gradient(120deg, $header-bg-color-secondary, $header-bg-color);
+  // Include an image in the header as a path to local image for jekyll with path image/header.jpg
+  background-image: url("../../images/header.jpg");
+  // Set the background image to cover horizontally and vertically
+  background-size: cover;
+  // Set the background image to be centered
+  //background-position: center;
+  // Set the background image to be fixed
+  background-attachment: fixed;
+  // Move the background image in the y axis
+  background-position-y: -400px;
+  background-position-x: 200px;
+
+
+  // The header is in the background, so it should be behind the content
+  z-index: -1;
+
+
+
+  
+  
+
+  @include large {
+    padding: 5rem 6rem;
+  }
+
+  @include medium {
+    padding: 3rem 4rem;
+  }
+
+  @include small {
+    padding: 2rem 1rem;
+  }
+
+  // animation: fadeIn 0.8s ease-in-out forwards;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0.5;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+}
+
+/* On screens that are less than 400px, display the bar vertically, instead of horizontally */
+@media screen and (max-width: 400px) {
+  .page-header a {
+    text-align: center;
+  }
+
+  .project-name {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+
+}
+// If the screen is small, set the margin left of the project name to 0
+@media screen and (max-width: 600px) {
+  .project-name {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+  .project-tagline {
+    text-align: center;
+    margin-left: 0px;
+  }
+
+  // Also remove the margin left of the buttons
+  .btn {
+    margin-left: 0px;
+  }
+
+  // Also remove the position x and y of the background image
+  .page-header a {
+    text-align: center;
+    margin-left: 0;
+    background-position-y: 0px;
+  }
+}
+
+
+.project-name {
+  margin-top: 0;
+  margin-bottom: 0.1rem;
+  margin-left: 0px;
+
+
+
+  // Fade in animation
+  animation: fadeIn 0.8s ease-in-out forwards;
+
+  @include large {
+    font-size: 3.25rem;
+  }
+
+  @include medium {
+    font-size: 2.25rem;
+  }
+
+  @include small {
+    font-size: 1.75rem;
+  }
+}
+
+.project-tagline {
+  margin-bottom: 2rem;
+  font-weight: normal;
+  opacity: 1.0;
+  position: relative;
+  margin-left: 0px;
+
+
+  @include large {
+    font-size: 1.25rem;
+  }
+
+  @include medium {
+    font-size: 1.15rem;
+  }
+
+  @include small {
+    font-size: 1rem;
+  }
+}
+
+.main-content {
+  word-wrap: break-word;
+  position: relative;
+
+  :first-child {
+    margin-top: 0;
+  }
+
+  @include large {
+    max-width: 64rem;
+    padding: 2rem 6rem;
+    margin: 0 auto;
+    font-size: 1.1rem;
+  }
+
+  @include medium {
+    padding: 2rem 4rem;
+    font-size: 1.1rem;
+  }
+
+  @include small {
+    padding: 2rem 1rem;
+    font-size: 1rem;
+  }
+  
+  kbd {
+    background-color: #fafbfc;
+    border: 1px solid #c6cbd1;
+    border-bottom-color: #959da5;
+    border-radius: 3px;
+    box-shadow: inset 0 -1px 0 #959da5;
+    color: #444d56;
+    display: inline-block;
+    font-size: 11px;
+    line-height: 10px;
+    padding: 3px 5px;
+    vertical-align: middle;
+  }
+
+  img {
+    max-width: 100%;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: normal;
+    color: $section-headings-color;
+  }
+
+  p {
+    margin-bottom: 1em;
+  }
+
+  code {
+    padding: 2px 4px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    font-size: 0.9rem;
+    color: $code-text-color;
+    background-color: $code-bg-color;
+    border-radius: 0.3rem;
+  }
+
+  pre {
+    padding: 0.8rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font: 1rem Consolas, "Liberation Mono", Menlo, Courier, monospace;
+    color: $code-text-color;
+    word-wrap: normal;
+    background-color: $code-bg-color;
+    border: solid 1px $border-color;
+    border-radius: 0.3rem;
+
+    > code {
+      padding: 0;
+      margin: 0;
+      font-size: 0.9rem;
+      color: $code-text-color;
+      word-break: normal;
+      white-space: pre;
+      background: transparent;
+      border: 0;
+    }
+  }
+
+  .highlight {
+    margin-bottom: 1rem;
+
+    pre {
+      margin-bottom: 0;
+      word-break: normal;
+    }
+  }
+
+  .highlight pre,
+  pre {
+    padding: 0.8rem;
+    overflow: auto;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    border-radius: 0.3rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  pre code,
+  pre tt {
+    display: inline;
+    max-width: initial;
+    padding: 0;
+    margin: 0;
+    overflow: initial;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: transparent;
+    border: 0;
+
+    &:before,
+    &:after {
+      content: normal;
+    }
+  }
+
+  ul,
+  ol {
+    margin-top: 0;
+  }
+
+  blockquote {
+    padding: 0 1rem;
+    margin-left: 0;
+    color: $blockquote-text-color;
+    border-left: 0.3rem solid $border-color;
+
+    > :first-child {
+      margin-top: 0;
+    }
+
+    > :last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    word-break: normal;
+    word-break: keep-all; // For Firefox to horizontally scroll wider tables.
+    -webkit-overflow-scrolling: touch;
+
+    th {
+      font-weight: bold;
+    }
+
+    th,
+    td {
+      padding: 0.5rem 1rem;
+      border: 1px solid $table-border-color;
+    }
+  }
+
+  dl {
+    padding: 0;
+
+    dt {
+      padding: 0;
+      margin-top: 1rem;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    dd {
+      padding: 0;
+      margin-bottom: 1rem;
+    }
+  }
+
+  hr {
+    height: 2px;
+    padding: 0;
+    margin: 1rem 0;
+    background-color: $hr-border-color;
+    border: 0;
+  }
+}
+
+.site-footer {
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: solid 1px $hr-border-color;
+
+  @include large {
+    font-size: 1rem;
+  }
+
+  @include medium {
+    font-size: 1rem;
+  }
+
+  @include small {
+    font-size: 0.9rem;
+  }
+}
+
+.site-footer-owner {
+  display: block;
+  font-weight: bold;
+}
+
+.site-footer-credits {
+  color: $blockquote-text-color;
+}
+
+// Define the width of the sidebar
+$sidebar-width: 200px;
+
+// Define the background color of the sidebar
+$sidebar-bg-color: #f5f5f5;
+
+// Define the font size and color of the links in the sidebar
+$sidebar-link-font-size: 1rem;
+$sidebar-link-color: #333;
+
+// Define the padding and margin of the links in the sidebar
+$sidebar-link-padding: 0.5rem;
+$sidebar-link-margin: 0.5rem 0;
+
+// Define the hover color of the links in the sidebar
+$sidebar-link-hover-color: #007bff;
+
+// Define the active color of the links in the sidebar
+$sidebar-link-active-color: #007bff;
+
+// Define the border color of the sidebar
+$sidebar-border-color: #ddd;
+
+// Define the padding of the content area
+$content-padding: 1rem;
+
+// Define the margin of the content area
+$content-margin: 0 0 0 $sidebar-width;
+
+// Define the background color of the content area
+$content-bg-color: #fff;
+
+// Define the font size and color of the headings in the content area
+$content-heading-font-size: 1.5rem;
+$content-heading-color: #333;
+
+// Define the padding and margin of the headings in the content area
+$content-heading-padding: 0.5rem 0;
+$content-heading-margin: 0 0 1rem;
+
+// Define the color of the text in the content area
+$content-text-color: #333;
+
+// Define the line height of the text in the content area
+$content-text-line-height: 1.5;
+
+// Define the font size and color of the links in the content area
+$content-link-font-size: 1rem;
+$content-link-color: #007bff;
+
+// Define the hover color of the links in the content area
+$content-link-hover-color: #0056b3;
+
+// Define the active color of the links in the content area
+$content-link-active-color: #0056b3;
+
+// THIS IS THANKS TO COPILOT
+
+// Define a simple sidebar
+
+.sidebar {
+  margin: 0;
+  padding: 0;
+  width: 200px;
+  background-color: #f1f1f1;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+  // Always on top
+  z-index: 1;
+}
+
+/* Sidebar links */
+.sidebar a {
+  display: block;
+  color: black;
+  padding: 16px;
+  text-decoration: none;
+}
+
+/* Active/current link */
+.sidebar a.active {
+  background-color: #04AA6D;
+  color: white;
+}
+
+/* Links on mouse-over */
+.sidebar a:hover:not(.active) {
+  background-color: #555;
+  color: white;
+}
+
+/* Page content. The value of the margin-left property should match the value of the sidebar's width property */
+div.content {
+  margin-left: 200px;
+  padding: 1px 16px;
+  height: 1000px;
+}
+
+/* On screens that are less than 700px wide, make the sidebar into a topbar */
+@media screen and (max-width: 700px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  .sidebar a {float: left;}
+  div.content {margin-left: 200px;}
+
+  // Make the title of the page centered
+  .title {
+    text-align: center;
+  }
+
+  // Background image
+  .page-header {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+  }
+
+
+}
+
+/* On screens that are less than 400px, display the bar vertically, instead of horizontally */
+@media screen and (max-width: 400px) {
+  .sidebar a {
+    text-align: center;
+    float: none;
+  }
+
+    // Background image
+    .bg {
+      height: 100%;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+      
+    }
+}
+
+// Define the color of the dropdown button
+$dropdown-button-color: #000000;
+
+// Define the background color of the dropdown button
+$dropdown-button-bg-color: #f1f1f1;
+
+$dropdown-button-hover-bg-color: #555;
+
+// Define the color of the dropdown content
+$dropdown-content-color: #333;
+
+// Define the background color of the dropdown content
+$dropdown-content-bg-color: #f1f1f1;
+
+// Define the hover color of the dropdown links
+$dropdown-link-hover-color: #555;
+
+// Define the active color of the dropdown links
+$dropdown-link-active-color: #F4AA6D;
+
+// Define the padding of the dropdown links
+$dropdown-link-padding: 12px 16px;
+
+// Define the border color of the dropdown
+$dropdown-border-color: #ddd;
+
+// Define the border radius of the dropdown
+$dropdown-border-radius: 6px;
+
+// Define the z-index of the dropdown
+$dropdown-z-index: 1;
+
+// Define the position of the dropdown
+$dropdown-position: relative;
+
+// Define the top and left position of the dropdown
+$dropdown-top: 100%;
+$dropdown-left: 0%;
+
+// Define the transition of the dropdown
+$dropdown-transition: color 0.48s, background-color 0.4s, border-color 0.4s;
+
+// Define the display of the dropdown content
+$dropdown-content-display: none;
+
+// Define the visibility of the dropdown content
+$dropdown-content-visibility: hidden;
+
+// Define the opacity of the dropdown content
+$dropdown-content-opacity: 0;
+
+// Define the display of the dropdown content when the button is hovered
+$dropdown-content-hover-display: block;
+
+// Define the visibility of the dropdown content when the button is hovered
+$dropdown-content-hover-visibility: visible;
+
+// Define the opacity of the dropdown content when the button is hovered
+$dropdown-content-hover-opacity: 1;
+
+// Define the display of the dropdown content when the button is clicked
+$dropdown-content-click-display: block;
+
+// Define the visibility of the dropdown content when the button is clicked
+$dropdown-content-click-visibility: visible;
+
+// Define the opacity of the dropdown content when the button is clicked
+$dropdown-content-click-opacity: 1;
+
+// Define the display of the dropdown content when the button is active
+$dropdown-content-active-display: block;
+
+// Define the visibility of the dropdown content when the button is active
+$dropdown-content-active-visibility: visible;
+
+// Define the opacity of the dropdown content when the button is active
+$dropdown-content-active-opacity: 1;
+
+// Define the display of the dropdown content when the button is focused
+$dropdown-content-focus-display: block;
+
+// Define the visibility of the dropdown content when the button is focused
+$dropdown-content-focus-visibility: visible;
+
+// Define the opacity of the dropdown content when the button is focused
+$dropdown-content-focus-opacity: 1;
+
+// Define the display of the dropdown content when the button is disabled
+$dropdown-content-disabled-display: none;
+
+// Define the visibility of the dropdown content when the button is disabled
+$dropdown-content-disabled-visibility: hidden;
+
+// Define the opacity of the dropdown content when the button is disabled
+$dropdown-content-disabled-opacity: 0.5;
+
+// Define the cursor of the dropdown button when it is disabled
+$dropdown-button-disabled-cursor: not-allowed;
+
+// Define the styles for the dropdown button
+.dropbtn {
+  background-color: $dropdown-button-bg-color;
+  color: $dropdown-button-color;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  // width: 100%;
+  width: 100%;
+  text-align: left;
+  // Transition
+  transition: $dropdown-transition;
+
+}
+
+// Define the styles for the dropdown content
+.dropdown-content {
+  display: $dropdown-content-display;
+  position: $dropdown-position;
+  z-index: $dropdown-z-index;
+  top: $dropdown-top;
+  left: $dropdown-left;
+  border: 1px solid $dropdown-border-color;
+  border-radius: $dropdown-border-radius;
+  background-color: $dropdown-content-bg-color;
+  color: $dropdown-content-color;
+  visibility: $dropdown-content-visibility;
+  opacity: $dropdown-content-opacity;
+  transition: $dropdown-transition;
+}
+
+// Define the styles for the dropdown links
+.dropdown-content a {
+  color: $dropdown-content-color;
+  padding: $dropdown-link-padding;
+  text-decoration: none;
+  display: block;
+  transition: 0.8s;
+  height: 40px;
+}
+
+// Define the styles for the dropdown links on hover
+.dropdown-content a:hover {
+  background-color: $dropdown-link-hover-color;
+  color: $dropdown-content-color;
+  
+}
+
+// Smooth transition to the dropdown content
+.dropdown:hover .dropdown-content {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+  transition: 0.8s;
+}
+
+// Define the styles for the active dropdown link
+.dropdown-content a.active {
+  background-color: $dropdown-link-active-color;
+  color: $dropdown-content-color;
+  transition: 0.8s ease-in-out;
+}
+
+// Define the styles for the dropdown button when it is hovered
+.dropdown:hover .dropdown-content {
+  display: $dropdown-content-hover-display;
+  visibility: $dropdown-content-hover-visibility;
+  opacity: $dropdown-content-hover-opacity;
+}
+
+// Define the styles for the dropdown button when it is clicked
+.dropdown:active .dropdown-content {
+  display: $dropdown-content-click-display;
+  visibility: $dropdown-content-click-visibility;
+  opacity: $dropdown-content-click-opacity;
+}
+
+// Define the styles for the dropdown button when it is active
+.dropdown.active .dropdown-content {
+  display: $dropdown-content-active-display;
+  visibility: $dropdown-content-active-visibility;
+  opacity: $dropdown-content-active-opacity;
+}
+
+// Define the background color of the dropdown button when it is hovered
+.dropdown:hover .dropbtn {
+  background-color: $dropdown-button-hover-bg-color;
+  // Color of the font when hovered
+  color: #fff;
+}
+
+// Define the styles for the dropdown button when it is focused
+.dropdown:focus .dropdown-content {
+  display: $dropdown-content-focus-display;
+  visibility: $dropdown-content-focus-visibility;
+  opacity: $dropdown-content-focus-opacity;
+}
+
+// Define the styles for the dropdown button when it is disabled
+.dropdown:disabled .dropdown-content {
+  display: $dropdown-content-disabled-display;
+  visibility: $dropdown-content-disabled-visibility;
+  opacity: $dropdown-content-disabled-opacity;
+}
+
+// Define the cursor of the dropdown button when it is disabled
+.dropdown:disabled .dropbtn {
+  cursor: $dropdown-button-disabled-cursor;
+}

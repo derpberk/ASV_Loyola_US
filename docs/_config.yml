@@ -1,0 +1,18 @@
+title: ASVs for Environmental Monitoring
+description: Documentación técnica de software y hardware.
+show_downloads: true
+google_analytics:
+theme: jekyll-theme-cayman
+
+# Set the base URL of your site. Defaults to `/` if not set.
+baseurl: "/ASV_Loyola_US"
+
+include:
+  - _pages
+
+defaults:
+  - scope:
+      path: "_pages"
+      type: "pages"
+    values:
+      permalink: /:basename/ # make URL of pages in the folder _pages as on the root.
