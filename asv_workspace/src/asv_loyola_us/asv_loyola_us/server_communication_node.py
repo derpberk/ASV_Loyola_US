@@ -2,10 +2,11 @@
 import rclpy #main librarie
 from rclpy.node import Node #for defining a node
 
+from zed_interfaces.srv import StartSvoRec
 from .submodulos.MQTT import MQTT
 from .submodulos.terminal_handler import ping_google
 from .submodulos.asv_identity import get_asv_identity
-
+from .submodulos.call_service import call_service_extern
 from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState
 from mavros_msgs.srv import SetMode
@@ -15,7 +16,7 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool
 from asv_interfaces.msg import SensorMsg
 from asv_interfaces.msg import SonarMsg
-
+from std_srvs.srv import Trigger
 # Import function to transform quaternion to euler
 from .submodulos.quaternion_to_euler import quaternion_to_euler
 
@@ -85,7 +86,8 @@ class ServerCommunicationNode(Node):
 
         # Service to change the mode of the ASV
         self.set_mode_srv = self.create_client(SetMode, '/mavros/set_mode')
-
+        self.camera_recording_client = self.create_client(StartSvoRec, '/zed2i/zed_node/start_svo_rec')
+        self.camera_stop_recording_client = self.create_client(Trigger, '/zed2i/zed_node/stop_svo_rec')
 
     def __init__(self):
         super().__init__('communication_node')
@@ -108,8 +110,11 @@ class ServerCommunicationNode(Node):
         topics = [self.topic_identity + '/start_asv', 
                 self.topic_identity + '/wp_clear', 
                 self.topic_identity + '/wp_target',
-                self.topic_identity + '/asv_mode']
-        
+                self.topic_identity + '/asv_mode',
+                self.topic_identity + '/camerarecord_on',
+                self.topic_identity + '/camerarecord_off'
+                ]
+                
         for topic in topics:
             self.get_logger().info(f"Subscribing to {topic}")
 
@@ -231,7 +236,27 @@ class ServerCommunicationNode(Node):
             # Call the service
             self.set_mode_srv.call_async(request)
             self.get_logger().info("Change mode command received: " + payload)
-            
+
+
+        elif topic == self.topic_identity + '/camerarecord_on':
+        
+            current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            # Construct the filename with the current date
+            filename = f"/root/CameraRecord/ASV_{current_date}.svo"
+            self.message_zed = {
+                'svo_filename': filename,
+                'compression_mode': 2,
+                'target_framerate': 30,
+                'bitrate': 6000
+            }
+            call_service_extern(self, self.camera_recording_client, self.message_zed)
+            self.get_logger().info("Camera record on command received")
+        
+        elif topic == self.topic_identity + '/camerarecord_off':
+            self.message_stop={}
+            call_service_extern(self, self.camera_stop_recording_client,self.message_stop)
+            self.get_logger().info("Camera record off command received")
+
         else:
             self.get_logger().error("The topic " + topic + " is not recognized")
             self.get_logger().error("The payload is " + str(payload))
