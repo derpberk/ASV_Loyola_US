@@ -1,0 +1,15 @@
+/**:
+  ros__parameters:
+    # General parameters
+    debug: true
+    record_video: true
+    recorded_video_path: "utils/videos/"
+    show_detections: false
+    save_logs: true
+    logs_path: "utils/detection_logs/"
+    # Weights parameters
+    weights_folder_path: "utils/weights/"
+    weights_name: "yolov5su_notrash.engine"
+    conf: 0.5
+    iou: 0.5
+    image_size: 640
