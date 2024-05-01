@@ -66,6 +66,12 @@ class ServerCommunicationNode(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
+        qos_profile_REL=rclpy.qos.QoSProfile(
+			depth=queue_size,
+			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
+			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
+			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
+			)
 
         # Subscriptions
         self.asv_state_subscription = self.create_subscription(State, '/mavros/state', self.asv_state_callback, qos_profile)
@@ -78,7 +84,7 @@ class ServerCommunicationNode(Node):
         # Subscriptions to the sonar
         self.sonar_sensor_subscription = self.create_subscription(SonarMsg, '/sonar_measurements', self.sonar_sensor_callback, qos_profile_BEF)
         # Subscriptions to trash point
-        self.trash_point_subscription = self.create_subscription(TrashMsg, '/zed2i_trash/trash', self.trash_point_callback, qos_profile_BEF)
+        self.trash_point_subscription = self.create_subscription(TrashMsg, '/zed2i_trash_detection/trash_localization', self.trash_point_callback, qos_profile_REL)
 
         # Publications
         self.start_asv_publisher = self.create_publisher(Bool, '/start_asv', qos_profile)
@@ -320,20 +326,20 @@ class ServerCommunicationNode(Node):
         else:
             self.get_logger().error("The message received from the sonar sensor is not correct")
 
-        def trash_point_callback(self, msg):
-            # This function is called when the sonar_sensor topic is updated
-            if msg.success:
-                
-                json_msg = json.dumps({
-                    'Latitude': msg.lat,
-                    'Longitude': msg.lon,
-                    'veh_num': self.vehicle_id,
-                    'date': msg.date
-                })
+    def trash_point_callback(self, msg):
+        # This function is called when the sonar_sensor topic is updated
+        if msg.success:
+            
+            json_msg = json.dumps({
+                'Latitude': msg.lat,
+                'Longitude': msg.lon,
+                'veh_num': self.vehicle_id,
+                'date': msg.date
+            })
 
-                self.mqttConnection.send_new_msg(json_msg, topic = '/database/trash')
-            else:
-                self.get_logger().error("The message received from the sonar sensor is not correct")
+            self.mqttConnection.send_new_msg(json_msg, topic = '/database/trash')
+        else:
+            self.get_logger().error("The message received from the sonar sensor is not correct")
 
 def main(args=None):
     #init ROS2
