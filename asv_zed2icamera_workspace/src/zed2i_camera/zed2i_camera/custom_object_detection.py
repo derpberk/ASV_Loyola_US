@@ -22,6 +22,7 @@ from scipy.spatial.transform import Rotation as R
 from ultralytics import YOLO
 from geographiclib.geodesic import Geodesic
 import pandas as pd
+from asv_interfaces.msg import TrashMsg
 class Custom_object_detection(Node):
 	
 	def parameters(self):
@@ -89,7 +90,7 @@ class Custom_object_detection(Node):
 		self.compass_hdg_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.compass_hdg_callback, qos_profile_REL)
 
 		# self.drone_coordinates = self.create_subscription()
-		self.trash_detections_publisher = self.create_publisher(String, '/zed2i_trash_detections/trash_localization', qos_profile_REL)
+		self.trash_detections_publisher = self.create_publisher(TrashMsg, '/zed2i_trash_detections/trash_localization', qos_profile_REL)
 		
 	def __init__(self):
 		super().__init__('custom_object_detection_node')

@@ -1,0 +1,9 @@
+float64 vbat 
+float64 ph 
+float64 turbidity 
+float64 temperature_ct 
+float64 conductivity 
+string date
+float64 lat
+float64 lon
+bool success
