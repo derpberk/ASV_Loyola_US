@@ -8,5 +8,7 @@ RUN wget -O  SN36011585.conf  http://calib.stereolabs.com/?SN=36011585
 
 WORKDIR /root/ros2_ws
 ENV ROS_DOMAIN_ID=42
+COPY ros_entrypoint_jetson_humble.sh /sbin/ros_entrypoint.sh
+RUN sudo chmod 755 /sbin/ros_entrypoint.sh
 ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
 CMD ["bash"]
