@@ -21,7 +21,7 @@ from asv_interfaces.msg import SonarMsg
 from asv_interfaces.msg import TrashMsg
 # Import function to transform quaternion to euler
 from .submodulos.quaternion_to_euler import quaternion_to_euler
-
+import numpy
 from datetime import datetime
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
@@ -67,7 +67,7 @@ class ServerCommunicationNode(Node):
             depth=1
         )
         qos_profile_REL=rclpy.qos.QoSProfile(
-			depth=queue_size,
+			depth=1,
 			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
 			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
 			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
@@ -84,7 +84,7 @@ class ServerCommunicationNode(Node):
         # Subscriptions to the sonar
         self.sonar_sensor_subscription = self.create_subscription(SonarMsg, '/sonar_measurements', self.sonar_sensor_callback, qos_profile_BEF)
         # Subscriptions to trash point
-        self.trash_point_subscription = self.create_subscription(TrashMsg, '/zed2i_trash_detection/trash_localization', self.trash_point_callback, qos_profile_REL)
+        self.trash_point_subscription = self.create_subscription(TrashMsg, '/zed2i_trash_detections/trash_localization', self.trash_point_callback, qos_profile_REL)
 
         # Publications
         self.start_asv_publisher = self.create_publisher(Bool, '/start_asv', qos_profile)
@@ -329,7 +329,10 @@ class ServerCommunicationNode(Node):
     def trash_point_callback(self, msg):
         # This function is called when the sonar_sensor topic is updated
         if msg.success:
-            
+            if not isinstance(msg.lat,(int, float)) or numpy.isnan(msg.lat) :
+                msg.lat=0.0
+                msg.lon=0.0
+
             json_msg = json.dumps({
                 'Latitude': msg.lat,
                 'Longitude': msg.lon,
