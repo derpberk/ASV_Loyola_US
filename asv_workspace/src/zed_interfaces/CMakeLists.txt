@@ -22,26 +22,11 @@ FILE(GLOB_RECURSE extra_files ${CMAKE_SOURCE_DIR}/*)
 add_custom_target(all_${PROJECT_NAME}_files SOURCES ${extra_files})
 ###############################################################################
 
-set(MSG_FILES
-    "msg/Object.msg"
-    "msg/ObjectsStamped.msg"
-    "msg/Keypoint2Di.msg"
-    "msg/Keypoint2Df.msg"
-    "msg/Keypoint3D.msg"
-    "msg/BoundingBox2Di.msg"
-    "msg/BoundingBox2Df.msg"
-    "msg/BoundingBox3D.msg"
-    "msg/Skeleton2D.msg"
-    "msg/Skeleton3D.msg"
-)
-
 set(SRV_FILES
-    "srv/SetPose.srv"
     "srv/StartSvoRec.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}    
-    ${MSG_FILES}
     ${SRV_FILES}
     DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )
