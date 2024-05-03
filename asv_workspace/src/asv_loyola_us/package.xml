@@ -13,6 +13,7 @@
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
   <exec_depend>mavros_msgs</exec_depend> <!-- for interfaces -->
   <exec_depend>rcl_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>zed_interfaces</exec_depend> <!-- for interfaces -->
   <exec_depend>python3-paho-mqtt</exec_depend> <!-- for mqtt -->
   <exec_depend>python3-numpy</exec_depend> <!-- for mqtt -->
   <exec_depend>python3-geopy</exec_depend> <!-- for mqtt -->
@@ -21,9 +22,11 @@
   <build_depend>rclpy</build_depend> <!-- for python -->
   <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
   <build_depend>rcl_interfaces</build_depend> <!-- for interfaces -->
+   <build_depend>zed_interfaces</build_depend> <!-- for interfaces -->
   <build_depend>python3-paho-mqtt</build_depend> <!-- for mqtt -->
   <build_depend>python3-numpy</build_depend> <!-- for mqtt -->
   <build_depend>python3-geopy</build_depend> <!-- for mqtt -->
+  <build_depend>std_srvs</build_depend> <!-- for mqtt -->
 
   <!-- some tests to run for the packet, inherent -->
   <test_depend>ament_copyright</test_depend>

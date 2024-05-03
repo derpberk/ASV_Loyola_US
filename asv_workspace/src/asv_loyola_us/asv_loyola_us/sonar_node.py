@@ -59,7 +59,7 @@ class Sonar_node(Node):
         while True:
             # Try sonar connection
             self.ping_device = Ping1D()
-            self.ping_device.connect_serial(self.sonar_device_name, self.baudrate)
+            self.ping_device.connect_serial(self.sonar_USB_string, self.baudrate)
 
             if self.ping_device.get_ping_enable:
                 self.get_logger().info(f"Sonar connected!")
