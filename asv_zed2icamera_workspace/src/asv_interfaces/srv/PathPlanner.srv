@@ -1,0 +1,7 @@
+#request
+asv_interfaces/Location origin
+asv_interfaces/Location destination
+---
+#response
+asv_interfaces/Path path
+bool success true
