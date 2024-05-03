@@ -19,7 +19,7 @@ set(msg_files
   "msg/SensorMsg.msg"
   "msg/SonarMsg.msg"
   "msg/Path.msg"
-
+  "msg/TrashMsg.msg"
   )
 
 set(srv_files
