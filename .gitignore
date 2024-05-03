@@ -79,3 +79,4 @@ asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/detection_logs/
 *.pt
 *.engine
 *.avi
+*.onnx
