@@ -14,6 +14,7 @@ import cv2
 import torch
 import quaternion
 import os
+from ament_index_python.packages import get_package_share_directory
 import utm
 import time
 from datetime import datetime
@@ -44,7 +45,7 @@ class Custom_object_detection(Node):
 		# Show the images of the detections
 		self.declare_parameter('save_logs', True)
 		self.save_logs = self.get_parameter('save_logs').get_parameter_value().bool_value	
-		self.declare_parameter('logs_path', "utils/weights/")
+		self.declare_parameter('logs_path', "utils/detection_logs/")
 		self.logs_path = self.get_parameter('logs_path').get_parameter_value().string_value	
 
 		# Weights parameters
@@ -68,15 +69,14 @@ class Custom_object_detection(Node):
 		queue_size = 1
 		qos_profile_BEF=rclpy.qos.QoSProfile(
 			depth=queue_size,
-			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
-			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
+			reliability=rclpy.qos.QoSReliabilityPolicy.BEST_EFFORT,
 			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
 			)
 		qos_profile_REL=rclpy.qos.QoSProfile(
 			depth=queue_size,
 			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
-			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
-			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
+			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST,
+			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE
 			)
 
 		self.depth_sub = message_filters.Subscriber(self, Image, '/zed/zed_node/depth/depth_registered', qos_profile=qos_profile_REL)
@@ -87,7 +87,7 @@ class Custom_object_detection(Node):
 		# Create a subscription to the position and the compass heading of the ASV
 		self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
 
-		self.compass_hdg_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.compass_hdg_callback, qos_profile_REL)
+		self.compass_hdg_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.compass_hdg_callback, qos_profile_BEF)
 
 		# self.drone_coordinates = self.create_subscription()
 		self.trash_detections_publisher = self.create_publisher(TrashMsg, '/zed2i_trash_detections/trash_localization', qos_profile_REL)
@@ -101,7 +101,9 @@ class Custom_object_detection(Node):
 
 		np.bool = np.bool_ # Quick fix for some deprecation problems 
 		self.geod = Geodesic.WGS84
-		self.current_directory = os.path.dirname(os.path.abspath(__file__))
+		
+		self.current_directory = get_package_share_directory("zed2i_camera")
+		#self.current_directory = setup_tools.find_package("zed2i_camera")
 		yolo_directory = os.path.join(self.current_directory,self.weights_folder_path,self.weights_name)
 		self.model = YOLO(yolo_directory, task='detect')
 		np.bool = np.bool_ # Quick fix for some deprecation problems
@@ -128,11 +130,17 @@ class Custom_object_detection(Node):
 		date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 		if self.save_logs:
 			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Latitude","Longitude"]) # self.current_directory
-			self.df_path = os.path.join(self.current_directory,self.logs_path,f"Detections_{date}.log")
+			if not os.path.exists(self.logs_path): 
+				os.makedirs(self.logs_path) 
+			self.df_path = os.path.join(self.logs_path,f"Detections_{date}.log")
 
 		if self.record_video:
 			weights, _ = self.weights_name.split(".")
-			self.out_video = cv2.VideoWriter(os.path.join(self.current_directory,self.recorded_video_path,f"{date}_{weights}.avi"),cv2.VideoWriter_fourcc(*'XVID'),10.0,(1280,720))
+			if not os.path.exists(self.recorded_video_path): 
+				os.makedirs(self.recorded_video_path) 
+			video_name = os.path.join(self.recorded_video_path,f"{date}_{weights}.avi")
+			self.out_video = cv2.VideoWriter(video_name,cv2.VideoWriter_fourcc(*"MJPG"),10.0,(self.imgsz,self.imgsz))
+			os.chmod(video_name, 0o777)
 
 	def asv_position_callback(self, msg):
 
@@ -178,15 +186,22 @@ class Custom_object_detection(Node):
 			if self.compass_hdg is not None and not any(np.isnan(self.drone_position)):
 				for cls in self.distance.keys():
 					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],self.compass_hdg,self.distance[cls][0])
-					msg = String()
-					msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
+					#msg = String()
+					#msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
+					date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 					if self.save_logs:
-						date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 						data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Latitude':g['lat2'],'Longitude':g['lon2']}
 						dataframe2 = pd.DataFrame([data])
 						self.df = self.df.append(dataframe2)
 
+					msg = TrashMsg()
+					msg.lat = g['lat2']
+					msg.lon = g['lon2']
+					msg.date = date
+					#msg.cls = cls
+					msg.success = True
+     
 					self.trash_detections_publisher.publish(msg)
 
 				if self.save_logs:
@@ -199,13 +214,14 @@ class Custom_object_detection(Node):
 			self.counter = 0
 			self.start_time = time.time()
 		
-		if self.show_detections or True:
+		if self.show_detections or self.record_video:
 			img_ = self.draw_boxes(detected_classes, bounding_boxes,result.plot(conf=False))
-			#cv2.imshow("Object Detection", cv2.resize(img_,(1280,720)))
-			#cv2.waitKey(1)
+			if self.show_detections:
+				cv2.imshow("Object Detection", cv2.resize(img_,(1280,720)))
+				cv2.waitKey(1)
 
 		if self.record_video:
-			self.out_video.write(img_)
+			self.out_video.write(cv2.resize(img_,(self.imgsz,self.imgsz)))
 
 	def calculate_distance(self, detected_classes, bboxes): # returns a dict with the distance of each detection in meters
 		if self.depth_image is None:

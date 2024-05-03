@@ -116,11 +116,17 @@ COPY ./asv_zed2icamera_workspace /home/asv_zed2icamera_workspace
 
 
 # Source ROS 2 setup file
-RUN /bin/bash -c "source /opt/ros/humble/install/setup.bash"
-RUN /bin/bash -c "colcon build --symlink-install"
-RUN echo 'source /home/asv_zed2icamera_workspace/install/setup.bash' >> /root/.bashrc
+#RUN /bin/bash -c "source /opt/ros/humble/install/setup.bash"
+#RUN /bin/bash -c "colcon build --symlink-install"
+#RUN echo 'source /home/asv_zed2icamera_workspace/install/setup.bash' >> /root/.bashrc
 
 #WORKDIR /usr/local/zed
+RUN /bin/bash -c "source /opt/ros/humble/install/setup.bash; colcon build"
+RUN echo 'source /opt/ros/humble/install/setup.bash; source /home/asv_zed2icamera_workspace/install/setup.bash;' >> /root/.bashrc
+
+
+CMD ["/bin/bash", "-c", "source /opt/ros/humble/install/setup.bash; source install/setup.bash;. ./exec_trash_detection.sh"]
 
 # Setup environment variables
-CMD ["bash"]
+#CMD ["/bin/bash", "-c", ". ./exec_trash_detection.sh"]
+#CMD ["/bin/bash"]
