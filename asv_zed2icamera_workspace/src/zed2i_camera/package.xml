@@ -4,7 +4,7 @@
   <name>zed2i_camera</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="root@todo.todo">root</maintainer>
+  <maintainer email="dseck@us.es">root</maintainer>
   <license>Apache-2.0</license>
 
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
