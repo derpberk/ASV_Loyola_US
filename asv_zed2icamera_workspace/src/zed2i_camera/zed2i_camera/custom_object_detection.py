@@ -129,7 +129,7 @@ class Custom_object_detection(Node):
 
 		date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 		if self.save_logs:
-			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Latitude","Longitude"]) # self.current_directory
+			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Drone Position","Latitude","Longitude"]) # self.current_directory
 			if not os.path.exists(self.logs_path): 
 				os.makedirs(self.logs_path) 
 			self.df_path = os.path.join(self.logs_path,f"Detections_{date}.log")
@@ -162,8 +162,8 @@ class Custom_object_detection(Node):
 		self.cv_image = self.bridge.imgmsg_to_cv2(camera_image_msg, desired_encoding='bgr8') # left camera color image to pass YOLO
 
 		# Get a pointer to the depth values casting the data pointer to floating point
-		self.depth_image = memoryview(depth_msg.data).cast('f')
-#		self.depth_image = self.bridge.imgmsg_to_cv2(camera_image_msg, desired_encoding='passthrough') # left camera color image to pass YOLO
+		#self.depth_image = memoryview(depth_msg.data).cast('f')
+		self.depth_image = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")  # encoding: 32FC1
 		self.width=depth_msg.width
 		
 		# Infer with YOLO
@@ -177,21 +177,22 @@ class Custom_object_detection(Node):
 		for result in results:
 			detected_classes = [result.names[i] for i in result.boxes.cls.to('cpu').numpy()]
 			bounding_boxes = result.boxes.xyxy.to('cpu').numpy()
-			self.distance = self.calculate_distance(detected_classes, bounding_boxes)
+			self.distance = self.calculate_closest_distance(detected_classes, bounding_boxes)
 
 			for cls in self.distance.keys():
-				self.get_logger().info(f"Class: {cls}, Distance: {self.distance[cls][0]} meters")
+				self.get_logger().info(f"Class: {cls}, Distance: {self.distance[cls][0]} meters, Object Heading: {self.distance[cls][3]}")
 
 			
 			if self.compass_hdg is not None and not any(np.isnan(self.drone_position)):
 				for cls in self.distance.keys():
-					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],self.compass_hdg,self.distance[cls][0])
+					hdg_object = self.compass_hdg - self.distance[cls][3]
+					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],hdg_object,self.distance[cls][0])
 					#msg = String()
 					#msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
 					date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 					if self.save_logs:
-						data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Latitude':g['lat2'],'Longitude':g['lon2']}
+						data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Drone Position':self.drone_position , 'Latitude':g['lat2'],'Longitude':g['lon2']}
 						dataframe2 = pd.DataFrame([data])
 						self.df = self.df.append(dataframe2)
 
@@ -245,7 +246,7 @@ class Custom_object_detection(Node):
 		return real_distance
 	def calculate_closest_distance(self, detected_classes, bboxes):
 		
-		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(3,) for i,cls_id in enumerate(detected_classes)}
+		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(4,) for i,cls_id in enumerate(detected_classes)}
 		for i, cls in enumerate(real_distance):
 			xmin, ymin, xmax, ymax= bboxes[i] 
 			
@@ -264,9 +265,13 @@ class Custom_object_detection(Node):
 			
 			distance = np.sqrt(X**2 + Y**2 + Z**2)
 
+			point_XZ = np.array([X,0,Z])
+			z_axis = np.array([0,0,1])
+			
 			real_distance[cls][0] = distance 
 			real_distance[cls][1] = center_x
 			real_distance[cls][2] = center_y
+			real_distance[cls][3] = np.degrees(np.arcsin(X/np.linalg.norm(point_XZ))) #self.angle_between_vectors(point_XZ,z_axis)
 		
 		return real_distance
 
@@ -292,6 +297,26 @@ class Custom_object_detection(Node):
 
 	def dimension_of_bb(self,xmin, xmax, ymin, ymax):
 		return self.proportion_of_bb*(xmax-xmin), self.proportion_of_bb*(ymax-ymin)
+
+	@staticmethod
+	def angle_between_vectors(v1, v2):
+		# Calculate dot product
+		dot_product = np.dot(v1, v2)
+		
+		# Calculate magnitudes of vectors
+		mag_v1 = np.linalg.norm(v1)
+		mag_v2 = np.linalg.norm(v2)
+		
+		# Calculate cosine of the angle between the vectors
+		cos_angle = dot_product / (mag_v1 * mag_v2)
+		
+		# Convert cosine to angle in radians
+		angle_rad = np.arccos(np.clip(cos_angle, -1.0, 1.0))
+		
+		# Convert angle from radians to degrees
+		angle_deg = np.degrees(angle_rad)
+		
+		return angle_deg
 
 def main(args=None):
 	rclpy.init(args=args)
