@@ -16,9 +16,6 @@ from std_msgs.msg import Bool
 from asv_interfaces.msg import SensorMsg
 from asv_interfaces.msg import SonarMsg
 
-# Import function to transform quaternion to euler
-from .submodulos.quaternion_to_euler import quaternion_to_euler
-
 from datetime import datetime
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
@@ -68,7 +65,7 @@ class ServerCommunicationNode(Node):
         self.asv_state_subscription = self.create_subscription(State, '/mavros/state', self.asv_state_callback, qos_profile)
         self.asv_battery_subscription = self.create_subscription(BatteryState, '/mavros/battery', self.asv_battery_callback, qos_profile_BEF)
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
-        self.asv_orientation_subscription = self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.asv_orientation_callback, qos_profile_BEF)
+        self.asv_orientation_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.asv_orientation_callback, qos_profile_BEF)
 
         # Subscriptions to the sensors
         self.wqp_sensor_subscription = self.create_subscription(SensorMsg, '/wqp_measurements', self.wqp_sensor_callback, qos_profile_BEF)
@@ -251,9 +248,7 @@ class ServerCommunicationNode(Node):
 
     def asv_orientation_callback(self, msg):
          
-         euler = quaternion_to_euler([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
-        
-         self.asv_position['heading'] = euler[2]
+        self.asv_position['heading'] = msg.data
 
     def wqp_sensor_callback(self, msg):
         # This function is called when the wqp_sensor topic is updated
