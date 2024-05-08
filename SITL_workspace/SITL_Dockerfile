@@ -48,8 +48,7 @@ COPY sitl_launch.sh sitl_launch.sh
 
 EXPOSE 5760
 EXPOSE 5788
-EXPOSE 14555
-
+EXPOSE 5798
 
 RUN chmod +x sitl_launch.sh
 
