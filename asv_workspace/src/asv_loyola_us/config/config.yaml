@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     # General parameters
-    debug: true
+    debug: False
     use_path_planner: true
     # Path planner parameters
     path_planner_timeout: 20.0

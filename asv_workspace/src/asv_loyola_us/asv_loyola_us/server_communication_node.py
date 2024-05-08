@@ -5,6 +5,9 @@ from rclpy.node import Node #for defining a node
 from .submodulos.MQTT import MQTT
 from .submodulos.terminal_handler import ping_google
 from .submodulos.asv_identity import get_asv_identity
+from zed_interfaces.srv import StartSvoRec
+from std_srvs.srv import Trigger
+from .submodulos.call_service import call_service,call_service_extern
 
 from mavros_msgs.msg import State
 from sensor_msgs.msg import BatteryState
@@ -15,7 +18,10 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Bool, Float64  
 from asv_interfaces.msg import SensorMsg
 from asv_interfaces.msg import SonarMsg
-
+from asv_interfaces.msg import TrashMsg
+# Import function to transform quaternion to euler
+from .submodulos.quaternion_to_euler import quaternion_to_euler
+import numpy
 from datetime import datetime
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy
 import json 
@@ -60,6 +66,12 @@ class ServerCommunicationNode(Node):
             history=QoSHistoryPolicy.KEEP_LAST,
             depth=1
         )
+        qos_profile_REL=rclpy.qos.QoSProfile(
+			depth=1,
+			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
+			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
+			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
+			)
 
         # Subscriptions
         self.asv_state_subscription = self.create_subscription(State, '/mavros/state', self.asv_state_callback, qos_profile)
@@ -71,6 +83,8 @@ class ServerCommunicationNode(Node):
         self.wqp_sensor_subscription = self.create_subscription(SensorMsg, '/wqp_measurements', self.wqp_sensor_callback, qos_profile_BEF)
         # Subscriptions to the sonar
         self.sonar_sensor_subscription = self.create_subscription(SonarMsg, '/sonar_measurements', self.sonar_sensor_callback, qos_profile_BEF)
+        # Subscriptions to trash point
+        self.trash_point_subscription = self.create_subscription(TrashMsg, '/zed2i_trash_detections/trash_localization', self.trash_point_callback, qos_profile_REL)
 
         # Publications
         self.start_asv_publisher = self.create_publisher(Bool, '/start_asv', qos_profile)
@@ -82,7 +96,8 @@ class ServerCommunicationNode(Node):
 
         # Service to change the mode of the ASV
         self.set_mode_srv = self.create_client(SetMode, '/mavros/set_mode')
-
+        self.camera_recording_client = self.create_client(StartSvoRec, '/zed/zed_node/start_svo_rec')
+        self.camera_stop_recording_client = self.create_client(Trigger, '/zed/zed_node/stop_svo_rec')
 
     def __init__(self):
         super().__init__('communication_node')
@@ -105,7 +120,9 @@ class ServerCommunicationNode(Node):
         topics = [self.topic_identity + '/start_asv', 
                 self.topic_identity + '/wp_clear', 
                 self.topic_identity + '/wp_target',
-                self.topic_identity + '/asv_mode']
+                self.topic_identity + '/asv_mode',
+                self.topic_identity + '/camerarecord_on',
+                self.topic_identity + '/camerarecord_off']
         
         for topic in topics:
             self.get_logger().info(f"Subscribing to {topic}")
@@ -228,7 +245,24 @@ class ServerCommunicationNode(Node):
             # Call the service
             self.set_mode_srv.call_async(request)
             self.get_logger().info("Change mode command received: " + payload)
-            
+        
+        elif topic == self.topic_identity + '/camerarecord_on':
+            current_date = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            # Construct the filename with the current date
+            filename = f"/root/CameraRecord/ASV_{current_date}.svo"
+            self.message_zed = {
+                    'svo_filename': filename,
+                    'compression_mode': 2,
+                    'target_framerate': 30,
+                    'bitrate': 6000
+                }
+            self.get_logger().info("start record")
+            call_service_extern(self, self.camera_recording_client, self.message_zed)
+        
+        elif topic == self.topic_identity + '/camerarecord_off':
+            self.message_stop={}
+            self.get_logger().info("stop record")
+            call_service_extern(self, self.camera_stop_recording_client, self.message_stop)
         else:
             self.get_logger().error("The topic " + topic + " is not recognized")
             self.get_logger().error("The payload is " + str(payload))
@@ -290,6 +324,23 @@ class ServerCommunicationNode(Node):
         else:
             self.get_logger().error("The message received from the sonar sensor is not correct")
 
+    def trash_point_callback(self, msg):
+        # This function is called when the sonar_sensor topic is updated
+        if msg.success:
+            if not isinstance(msg.lat,(int, float)) or numpy.isnan(msg.lat) :
+                msg.lat=0.0
+                msg.lon=0.0
+
+            json_msg = json.dumps({
+                'Latitude': msg.lat,
+                'Longitude': msg.lon,
+                'veh_num': self.vehicle_id,
+                'date': msg.date
+            })
+
+            self.mqttConnection.send_new_msg(json_msg, topic = '/database/trash')
+        else:
+            self.get_logger().error("The message received from the sonar sensor is not correct")
 
 def main(args=None):
     #init ROS2
