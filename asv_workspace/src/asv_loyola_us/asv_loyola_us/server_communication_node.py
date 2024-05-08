@@ -12,7 +12,7 @@ from mavros_msgs.srv import SetMode
 from mavros_msgs.msg import GlobalPositionTarget
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float64  
 from asv_interfaces.msg import SensorMsg
 from asv_interfaces.msg import SonarMsg
 
