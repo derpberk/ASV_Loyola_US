@@ -7,7 +7,7 @@ WORKDIR /home/asv_workspace
 ENV QT_X11_NO_MITSHM=1
 ENV EDITOR=nano
 ENV XDG_RUNTIME_DIR=/tmp
-
+ENV ROS_DOMAIN_ID=42
 RUN apt-get update && apt-get install -y \
     cmake \
     curl \
@@ -32,6 +32,7 @@ RUN pip3 install bluerobotics-ping
 RUN pip3 install "paho-mqtt<2.0.0"
 RUN pip3 install pyserial
 RUN pip3 install getmac
+RUN pip3 install scipy
 
 
 RUN apt-get autoremove -y \
@@ -45,8 +46,7 @@ COPY ./asv_workspace /home/asv_workspace
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
 
 
-CMD ["/bin/bash", "-c", "source /opt/ros/humble/setup.bash; source install/setup.bash;", ". ./exec_system.sh"]
-
+CMD ["/bin/bash", "-c", ". ./exec_system.sh"]
 
 
 
