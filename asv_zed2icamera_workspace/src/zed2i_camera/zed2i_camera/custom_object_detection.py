@@ -39,7 +39,7 @@ class Custom_object_detection(Node):
 		self.recorded_video_path = self.get_parameter('recorded_video_path').get_parameter_value().string_value	
 
 		# Show the images of the detections
-		self.declare_parameter('show_detections', True)
+		self.declare_parameter('show_detections', False)
 		self.show_detections = self.get_parameter('show_detections').get_parameter_value().bool_value	
 
 		# Show the images of the detections
@@ -63,6 +63,9 @@ class Custom_object_detection(Node):
 
 		self.declare_parameter('image_size', 1280)
 		self.imgsz = self.get_parameter('image_size').get_parameter_value().integer_value	
+
+		self.declare_parameter('savelogs_timer_period', 1.0) # 0.5  # seconds
+		self.savelogs_timer_period = self.get_parameter('savelogs_timer_period').get_parameter_value().double_value	
 	
 	def declare_topics(self):
 
@@ -105,11 +108,12 @@ class Custom_object_detection(Node):
 		self.current_directory = get_package_share_directory("zed2i_camera")
 		#self.current_directory = setup_tools.find_package("zed2i_camera")
 		yolo_directory = os.path.join(self.current_directory,self.weights_folder_path,self.weights_name)
+		self.get_logger().info(f"Loading weights from {yolo_directory}")
 		self.model = YOLO(yolo_directory, task='detect')
 		np.bool = np.bool_ # Quick fix for some deprecation problems
 
 		self.model(np.zeros((640,640,3)), imgsz=self.imgsz)
-		self.get_logger().info(yolo_directory)
+		self.get_logger().info("Weights Loaded Succesfully")
 
 		self.bridge = CvBridge()
 		self.distance=None
@@ -129,7 +133,8 @@ class Custom_object_detection(Node):
 
 		date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 		if self.save_logs:
-			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Drone Position","Latitude","Longitude"]) # self.current_directory
+			self.df_list = []
+			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Drone Lat","Drone Lon","Drone Heading","Object Lat","Object Lon","Object Heading"]) # self.current_directory
 			if not os.path.exists(self.logs_path): 
 				os.makedirs(self.logs_path) 
 			self.df_path = os.path.join(self.logs_path,f"Detections_{date}.log")
@@ -140,7 +145,24 @@ class Custom_object_detection(Node):
 				os.makedirs(self.recorded_video_path) 
 			video_name = os.path.join(self.recorded_video_path,f"{date}_{weights}.avi")
 			self.out_video = cv2.VideoWriter(video_name,cv2.VideoWriter_fourcc(*"MJPG"),10.0,(self.imgsz,self.imgsz))
+			self.out_video_imgs = []
 			os.chmod(video_name, 0o777)
+
+		
+		self.timer = self.create_timer(self.savelogs_timer_period, self.savelogs_timer_callback)
+
+	def savelogs_timer_callback(self):
+		if self.save_logs:
+			self.save_logs_fnc()
+
+	def save_logs_fnc(self):
+		#self.get_logger().info(f'{self.df_list}')
+		self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Lat","Drone Lon","Drone Heading","Object Lat","Object Lon","Object Heading"]) # self.current_directory
+		self.df.to_csv(self.df_path, index=False)
+
+	def save_video_fnc(self):
+		for img in self.out_video_imgs:
+			self.out_video.write(img)
 
 	def asv_position_callback(self, msg):
 
@@ -185,28 +207,35 @@ class Custom_object_detection(Node):
 			
 			if self.compass_hdg is not None and not any(np.isnan(self.drone_position)):
 				for cls in self.distance.keys():
-					hdg_object = self.compass_hdg - self.distance[cls][3]
+					hdg_object = self.compass_hdg + self.distance[cls][3]
 					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],hdg_object,self.distance[cls][0])
 					#msg = String()
 					#msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
 					date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 					if self.save_logs:
-						data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Drone Position':self.drone_position , 'Latitude':g['lat2'],'Longitude':g['lon2']}
-						dataframe2 = pd.DataFrame([data])
-						self.df = self.df.append(dataframe2)
+						self.df_list.append([date, cls, self.distance[cls][0],*self.drone_position, self.compass_hdg, g['lat2'], g['lon2'], hdg_object])
+						#data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Drone Position':self.drone_position , 'Latitude':g['lat2'],'Longitude':g['lon2']}
+						#dataframe2 = pd.DataFrame([data])
+						#self.df = self.df.append(dataframe2)
 
 					msg = TrashMsg()
-					msg.lat = g['lat2']
-					msg.lon = g['lon2']
+					msg.drone_lat = self.drone_position[0]
+					msg.drone_lon = self.drone_position[1]
+					msg.drone_heading = self.compass_hdg
+					msg.object_lat = g['lon2']
+					msg.object_lon = g['lon2']
+					msg.object_heading = hdg_object
 					msg.date = date
 					#msg.cls = cls
 					msg.success = True
      
 					self.trash_detections_publisher.publish(msg)
 
-				if self.save_logs:
-					self.df.to_csv(self.df_path, index=False)
+				# if self.save_logs:
+				# 	self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Position","Drone Heading","Object Position","Object Heading"])
+				# 	self.df.to_csv(self.df_path, index=False)
+
 		# Calculate the frame rate
 		self.counter+=1
 		if (time.time() - self.start_time) > self.display_every :
@@ -222,7 +251,8 @@ class Custom_object_detection(Node):
 				cv2.waitKey(1)
 
 		if self.record_video:
-			self.out_video.write(cv2.resize(img_,(self.imgsz,self.imgsz)))
+			#self.out_video.write(cv2.resize(img_,(self.imgsz,self.imgsz)))
+			self.out_video_imgs.append(cv2.resize(img_,(self.imgsz,self.imgsz)))
 
 	def calculate_distance(self, detected_classes, bboxes): # returns a dict with the distance of each detection in meters
 		if self.depth_image is None:
@@ -322,15 +352,29 @@ def main(args=None):
 	rclpy.init(args=args)
 
 	custom_object_detection = Custom_object_detection()
-
-	rclpy.spin(custom_object_detection)
-
+	try:
+		rclpy.spin(custom_object_detection)
+	except:
+		custom_object_detection.get_logger().info("Shutting Down!")
+		if custom_object_detection.save_logs:
+			custom_object_detection.save_logs_fnc()
+			custom_object_detection.get_logger().info("Logs saved")
+		if custom_object_detection.record_video:
+			custom_object_detection.save_video_fnc()
+			custom_object_detection.out_video.release()
+			custom_object_detection.get_logger().info("Video saved")
 	# Destroy the node explicitly
 	# (optional - otherwise it will be done automatically
 	# when the garbage collector destroys the node object)
 	custom_object_detection.destroy_node()
 	rclpy.shutdown()
+	# try:
+	# 	rclpy.spin(custom_object_detection)
+	# except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
 
+	# 	custom_object_detection.get_logger().info("on shutdown!!!!")
+	# finally:
+	# 	rclpy.try_shutdown()
 
 if __name__ == '__main__':
 	main()
