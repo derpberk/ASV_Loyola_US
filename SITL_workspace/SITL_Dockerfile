@@ -45,26 +45,13 @@ RUN pip install MAVProxy
 
 COPY sitl_launch.sh sitl_launch.sh
 
-# SITL 1
-EXPOSE 5760/tcp
-EXPOSE 5762/tcp
-EXPOSE 5763/tcp
-EXPOSE 5501
-# SITL 2
-EXPOSE 5770/tcp
-EXPOSE 5772/tcp
-EXPOSE 5773/tcp
-EXPOSE 5511
-# SITL 3
-EXPOSE 5780/tcp
-EXPOSE 5782/tcp
-EXPOSE 5783/tcp
-EXPOSE 5521
 
-# Multicast
-EXPOSE 14550/tcp
-EXPOSE 14550/udp
+EXPOSE 5760
+EXPOSE 5788
+EXPOSE 14555
+
 
 RUN chmod +x sitl_launch.sh
 
 CMD ["/bin/sh","/ardupilot/sitl_launch.sh"]
+
