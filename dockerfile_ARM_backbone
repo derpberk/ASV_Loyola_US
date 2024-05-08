@@ -32,6 +32,7 @@ RUN pip3 install bluerobotics-ping
 RUN pip3 install "paho-mqtt<2.0.0"
 RUN pip3 install pyserial
 RUN pip3 install getmac
+RUN pip3 install scipy
 
 
 RUN apt-get autoremove -y \
