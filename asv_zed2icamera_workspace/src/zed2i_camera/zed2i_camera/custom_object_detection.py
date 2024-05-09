@@ -223,7 +223,7 @@ class Custom_object_detection(Node):
 					msg.drone_lat = self.drone_position[0]
 					msg.drone_lon = self.drone_position[1]
 					msg.drone_heading = self.compass_hdg
-					msg.object_lat = g['lon2']
+					msg.object_lat = g['lat2']
 					msg.object_lon = g['lon2']
 					msg.object_heading = hdg_object
 					msg.date = date
