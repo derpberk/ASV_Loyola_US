@@ -1,4 +1,4 @@
-FROM syanes/asv_us:backbone
+FROM syanes/asv_us:amd_backbone
 
 EXPOSE 1883 1880 5688 5678
 

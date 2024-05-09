@@ -76,3 +76,7 @@ asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/weights/
 asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/svos/
 asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/videos/
 asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/detection_logs/
+*.pt
+*.engine
+*.avi
+*.onnx

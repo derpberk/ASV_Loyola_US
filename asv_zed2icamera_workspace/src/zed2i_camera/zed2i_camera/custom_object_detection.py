@@ -14,6 +14,7 @@ import cv2
 import torch
 import quaternion
 import os
+from ament_index_python.packages import get_package_share_directory
 import utm
 import time
 from datetime import datetime
@@ -38,13 +39,13 @@ class Custom_object_detection(Node):
 		self.recorded_video_path = self.get_parameter('recorded_video_path').get_parameter_value().string_value	
 
 		# Show the images of the detections
-		self.declare_parameter('show_detections', True)
+		self.declare_parameter('show_detections', False)
 		self.show_detections = self.get_parameter('show_detections').get_parameter_value().bool_value	
 
 		# Show the images of the detections
 		self.declare_parameter('save_logs', True)
 		self.save_logs = self.get_parameter('save_logs').get_parameter_value().bool_value	
-		self.declare_parameter('logs_path', "utils/weights/")
+		self.declare_parameter('logs_path', "utils/detection_logs/")
 		self.logs_path = self.get_parameter('logs_path').get_parameter_value().string_value	
 
 		# Weights parameters
@@ -62,21 +63,23 @@ class Custom_object_detection(Node):
 
 		self.declare_parameter('image_size', 1280)
 		self.imgsz = self.get_parameter('image_size').get_parameter_value().integer_value	
+
+		self.declare_parameter('savelogs_timer_period', 1.0) # 0.5  # seconds
+		self.savelogs_timer_period = self.get_parameter('savelogs_timer_period').get_parameter_value().double_value	
 	
 	def declare_topics(self):
 
 		queue_size = 1
 		qos_profile_BEF=rclpy.qos.QoSProfile(
 			depth=queue_size,
-			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
-			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
+			reliability=rclpy.qos.QoSReliabilityPolicy.BEST_EFFORT,
 			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
 			)
 		qos_profile_REL=rclpy.qos.QoSProfile(
 			depth=queue_size,
 			reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
-			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
-			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
+			history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST,
+			durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE
 			)
 
 		self.depth_sub = message_filters.Subscriber(self, Image, '/zed/zed_node/depth/depth_registered', qos_profile=qos_profile_REL)
@@ -87,7 +90,7 @@ class Custom_object_detection(Node):
 		# Create a subscription to the position and the compass heading of the ASV
 		self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
 
-		self.compass_hdg_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.compass_hdg_callback, qos_profile_REL)
+		self.compass_hdg_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.compass_hdg_callback, qos_profile_BEF)
 
 		# self.drone_coordinates = self.create_subscription()
 		self.trash_detections_publisher = self.create_publisher(TrashMsg, '/zed2i_trash_detections/trash_localization', qos_profile_REL)
@@ -101,13 +104,16 @@ class Custom_object_detection(Node):
 
 		np.bool = np.bool_ # Quick fix for some deprecation problems 
 		self.geod = Geodesic.WGS84
-		self.current_directory = os.path.dirname(os.path.abspath(__file__))
+		
+		self.current_directory = get_package_share_directory("zed2i_camera")
+		#self.current_directory = setup_tools.find_package("zed2i_camera")
 		yolo_directory = os.path.join(self.current_directory,self.weights_folder_path,self.weights_name)
+		self.get_logger().info(f"Loading weights from {yolo_directory}")
 		self.model = YOLO(yolo_directory, task='detect')
 		np.bool = np.bool_ # Quick fix for some deprecation problems
 
 		self.model(np.zeros((640,640,3)), imgsz=self.imgsz)
-		self.get_logger().info(yolo_directory)
+		self.get_logger().info("Weights Loaded Succesfully")
 
 		self.bridge = CvBridge()
 		self.distance=None
@@ -127,12 +133,36 @@ class Custom_object_detection(Node):
 
 		date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 		if self.save_logs:
-			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Latitude","Longitude"]) # self.current_directory
-			self.df_path = os.path.join(self.current_directory,self.logs_path,f"Detections_{date}.log")
+			self.df_list = []
+			self.df = pd.DataFrame(columns=["Datetime","Class","Distance (m)","Drone Lat","Drone Lon","Drone Heading","Object Lat","Object Lon","Object Heading"]) # self.current_directory
+			if not os.path.exists(self.logs_path): 
+				os.makedirs(self.logs_path) 
+			self.df_path = os.path.join(self.logs_path,f"Detections_{date}.log")
 
 		if self.record_video:
 			weights, _ = self.weights_name.split(".")
-			self.out_video = cv2.VideoWriter(os.path.join(self.current_directory,self.recorded_video_path,f"{date}_{weights}.avi"),cv2.VideoWriter_fourcc(*'XVID'),10.0,(1280,720))
+			if not os.path.exists(self.recorded_video_path): 
+				os.makedirs(self.recorded_video_path) 
+			video_name = os.path.join(self.recorded_video_path,f"{date}_{weights}.avi")
+			self.out_video = cv2.VideoWriter(video_name,cv2.VideoWriter_fourcc(*"MJPG"),10.0,(self.imgsz,self.imgsz))
+			self.out_video_imgs = []
+			os.chmod(video_name, 0o777)
+
+		
+		self.timer = self.create_timer(self.savelogs_timer_period, self.savelogs_timer_callback)
+
+	def savelogs_timer_callback(self):
+		if self.save_logs:
+			self.save_logs_fnc()
+
+	def save_logs_fnc(self):
+		#self.get_logger().info(f'{self.df_list}')
+		self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Lat","Drone Lon","Drone Heading","Object Lat","Object Lon","Object Heading"]) # self.current_directory
+		self.df.to_csv(self.df_path, index=False)
+
+	def save_video_fnc(self):
+		for img in self.out_video_imgs:
+			self.out_video.write(img)
 
 	def asv_position_callback(self, msg):
 
@@ -154,8 +184,8 @@ class Custom_object_detection(Node):
 		self.cv_image = self.bridge.imgmsg_to_cv2(camera_image_msg, desired_encoding='bgr8') # left camera color image to pass YOLO
 
 		# Get a pointer to the depth values casting the data pointer to floating point
-		self.depth_image = memoryview(depth_msg.data).cast('f')
-#		self.depth_image = self.bridge.imgmsg_to_cv2(camera_image_msg, desired_encoding='passthrough') # left camera color image to pass YOLO
+		#self.depth_image = memoryview(depth_msg.data).cast('f')
+		self.depth_image = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")  # encoding: 32FC1
 		self.width=depth_msg.width
 		
 		# Infer with YOLO
@@ -169,28 +199,43 @@ class Custom_object_detection(Node):
 		for result in results:
 			detected_classes = [result.names[i] for i in result.boxes.cls.to('cpu').numpy()]
 			bounding_boxes = result.boxes.xyxy.to('cpu').numpy()
-			self.distance = self.calculate_distance(detected_classes, bounding_boxes)
+			self.distance = self.calculate_closest_distance(detected_classes, bounding_boxes)
 
 			for cls in self.distance.keys():
-				self.get_logger().info(f"Class: {cls}, Distance: {self.distance[cls][0]} meters")
+				self.get_logger().info(f"Class: {cls}, Distance: {self.distance[cls][0]} meters, Object Heading: {self.distance[cls][3]}")
 
 			
 			if self.compass_hdg is not None and not any(np.isnan(self.drone_position)):
 				for cls in self.distance.keys():
-					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],self.compass_hdg,self.distance[cls][0])
-					msg = String()
-					msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
+					hdg_object = self.compass_hdg + self.distance[cls][3]
+					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],hdg_object,self.distance[cls][0])
+					#msg = String()
+					#msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
+					date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 					if self.save_logs:
-						date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
-						data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Latitude':g['lat2'],'Longitude':g['lon2']}
-						dataframe2 = pd.DataFrame([data])
-						self.df = self.df.append(dataframe2)
+						self.df_list.append([date, cls, self.distance[cls][0],*self.drone_position, self.compass_hdg, g['lat2'], g['lon2'], hdg_object])
+						#data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Drone Position':self.drone_position , 'Latitude':g['lat2'],'Longitude':g['lon2']}
+						#dataframe2 = pd.DataFrame([data])
+						#self.df = self.df.append(dataframe2)
 
+					msg = TrashMsg()
+					msg.drone_lat = self.drone_position[0]
+					msg.drone_lon = self.drone_position[1]
+					msg.drone_heading = self.compass_hdg
+					msg.object_lat = g['lon2']
+					msg.object_lon = g['lon2']
+					msg.object_heading = hdg_object
+					msg.date = date
+					#msg.cls = cls
+					msg.success = True
+     
 					self.trash_detections_publisher.publish(msg)
 
-				if self.save_logs:
-					self.df.to_csv(self.df_path, index=False)
+				# if self.save_logs:
+				# 	self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Position","Drone Heading","Object Position","Object Heading"])
+				# 	self.df.to_csv(self.df_path, index=False)
+
 		# Calculate the frame rate
 		self.counter+=1
 		if (time.time() - self.start_time) > self.display_every :
@@ -199,13 +244,15 @@ class Custom_object_detection(Node):
 			self.counter = 0
 			self.start_time = time.time()
 		
-		if self.show_detections or True:
+		if self.show_detections or self.record_video:
 			img_ = self.draw_boxes(detected_classes, bounding_boxes,result.plot(conf=False))
-			#cv2.imshow("Object Detection", cv2.resize(img_,(1280,720)))
-			#cv2.waitKey(1)
+			if self.show_detections:
+				cv2.imshow("Object Detection", cv2.resize(img_,(1280,720)))
+				cv2.waitKey(1)
 
 		if self.record_video:
-			self.out_video.write(img_)
+			#self.out_video.write(cv2.resize(img_,(self.imgsz,self.imgsz)))
+			self.out_video_imgs.append(cv2.resize(img_,(self.imgsz,self.imgsz)))
 
 	def calculate_distance(self, detected_classes, bboxes): # returns a dict with the distance of each detection in meters
 		if self.depth_image is None:
@@ -229,7 +276,7 @@ class Custom_object_detection(Node):
 		return real_distance
 	def calculate_closest_distance(self, detected_classes, bboxes):
 		
-		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(3,) for i,cls_id in enumerate(detected_classes)}
+		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(4,) for i,cls_id in enumerate(detected_classes)}
 		for i, cls in enumerate(real_distance):
 			xmin, ymin, xmax, ymax= bboxes[i] 
 			
@@ -248,9 +295,13 @@ class Custom_object_detection(Node):
 			
 			distance = np.sqrt(X**2 + Y**2 + Z**2)
 
+			point_XZ = np.array([X,0,Z])
+			z_axis = np.array([0,0,1])
+			
 			real_distance[cls][0] = distance 
 			real_distance[cls][1] = center_x
 			real_distance[cls][2] = center_y
+			real_distance[cls][3] = np.degrees(np.arcsin(X/np.linalg.norm(point_XZ))) #self.angle_between_vectors(point_XZ,z_axis)
 		
 		return real_distance
 
@@ -277,19 +328,53 @@ class Custom_object_detection(Node):
 	def dimension_of_bb(self,xmin, xmax, ymin, ymax):
 		return self.proportion_of_bb*(xmax-xmin), self.proportion_of_bb*(ymax-ymin)
 
+	@staticmethod
+	def angle_between_vectors(v1, v2):
+		# Calculate dot product
+		dot_product = np.dot(v1, v2)
+		
+		# Calculate magnitudes of vectors
+		mag_v1 = np.linalg.norm(v1)
+		mag_v2 = np.linalg.norm(v2)
+		
+		# Calculate cosine of the angle between the vectors
+		cos_angle = dot_product / (mag_v1 * mag_v2)
+		
+		# Convert cosine to angle in radians
+		angle_rad = np.arccos(np.clip(cos_angle, -1.0, 1.0))
+		
+		# Convert angle from radians to degrees
+		angle_deg = np.degrees(angle_rad)
+		
+		return angle_deg
+
 def main(args=None):
 	rclpy.init(args=args)
 
 	custom_object_detection = Custom_object_detection()
-
-	rclpy.spin(custom_object_detection)
-
+	try:
+		rclpy.spin(custom_object_detection)
+	except:
+		custom_object_detection.get_logger().info("Shutting Down!")
+		if custom_object_detection.save_logs:
+			custom_object_detection.save_logs_fnc()
+			custom_object_detection.get_logger().info("Logs saved")
+		if custom_object_detection.record_video:
+			custom_object_detection.save_video_fnc()
+			custom_object_detection.out_video.release()
+			custom_object_detection.get_logger().info("Video saved")
 	# Destroy the node explicitly
 	# (optional - otherwise it will be done automatically
 	# when the garbage collector destroys the node object)
 	custom_object_detection.destroy_node()
 	rclpy.shutdown()
+	# try:
+	# 	rclpy.spin(custom_object_detection)
+	# except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
 
+	# 	custom_object_detection.get_logger().info("on shutdown!!!!")
+	# finally:
+	# 	rclpy.try_shutdown()
 
 if __name__ == '__main__':
 	main()

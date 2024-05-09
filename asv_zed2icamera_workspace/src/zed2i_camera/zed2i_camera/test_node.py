@@ -5,6 +5,7 @@ from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import NavSatStatus
 from std_msgs.msg import Header, Float64
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy,QoSDurabilityPolicy
+from asv_interfaces.msg import TrashMsg
 
 class Test_node(Node):
     def __init__(self):
@@ -12,7 +13,7 @@ class Test_node(Node):
         queue_size = 1
         qos_profile_BEF=rclpy.qos.QoSProfile(
             depth=queue_size,
-            reliability=rclpy.qos.QoSReliabilityPolicy.RELIABLE,
+            reliability=rclpy.qos.QoSReliabilityPolicy.BEST_EFFORT,
             durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
             history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
             )
@@ -22,12 +23,12 @@ class Test_node(Node):
             durability=rclpy.qos.QoSDurabilityPolicy.VOLATILE,
             history=rclpy.qos.QoSHistoryPolicy.KEEP_LAST
             )
-        self.navsatfix_publisher = self.create_publisher(NavSatFix, '/mavros/global_position/global', qos_profile_REL)
-        self.compass_hdg_publisher = self.create_publisher(Float64, '/mavros/global_position/compass_hdg', qos_profile_REL)
+        self.navsatfix_publisher = self.create_publisher(NavSatFix, '/mavros/global_position/global', qos_profile_BEF)
+        self.compass_hdg_publisher = self.create_publisher(Float64, '/mavros/global_position/compass_hdg', qos_profile_BEF)
         timer_period = 0.1  # seconds
         self.timer = self.create_timer(timer_period, self.navsatfix_compass_hdg_publisher_callback)
 
-        self.trash_detections_subscription = self.create_subscription(String, '/camera_node/trash_detections', self.trash_detections_callback, qos_profile_BEF)
+        self.trash_detections_subscription = self.create_subscription(TrashMsg, '/zed2i_trash_detections/trash_localization', self.trash_detections_callback, qos_profile_BEF)
     
     def navsatfix_compass_hdg_publisher_callback(self):
         #self.get_logger().info('Timer event')
@@ -53,11 +54,12 @@ class Test_node(Node):
 
         msg_heading = Float64()
         msg_heading.data = 55.0
-        #self.navsatfix_publisher.publish(msg)
-        #self.compass_hdg_publisher.publish(msg_heading)
+        self.navsatfix_publisher.publish(msg)
+        self.compass_hdg_publisher.publish(msg_heading)
 
     def trash_detections_callback(self,msg):
-        self.get_logger().info(f'Detections: {msg.data}')
+        
+        self.get_logger().info("The position is ({:.10f}), {:.10f}).".format(msg.drone_lat,msg.drone_lon))
 
 def main(args=None):
     rclpy.init(args=args)

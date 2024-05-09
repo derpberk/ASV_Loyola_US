@@ -15,7 +15,7 @@ from mavros_msgs.srv import SetMode
 from mavros_msgs.msg import GlobalPositionTarget
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, Float64  
 from asv_interfaces.msg import SensorMsg
 from asv_interfaces.msg import SonarMsg
 from asv_interfaces.msg import TrashMsg
@@ -77,7 +77,7 @@ class ServerCommunicationNode(Node):
         self.asv_state_subscription = self.create_subscription(State, '/mavros/state', self.asv_state_callback, qos_profile)
         self.asv_battery_subscription = self.create_subscription(BatteryState, '/mavros/battery', self.asv_battery_callback, qos_profile_BEF)
         self.asv_position_subscription = self.create_subscription(NavSatFix, '/mavros/global_position/global', self.asv_position_callback, qos_profile_BEF)
-        self.asv_orientation_subscription = self.create_subscription(PoseStamped, '/mavros/local_position/pose', self.asv_orientation_callback, qos_profile_BEF)
+        self.asv_orientation_subscription = self.create_subscription(Float64, '/mavros/global_position/compass_hdg', self.asv_orientation_callback, qos_profile_BEF)
 
         # Subscriptions to the sensors
         self.wqp_sensor_subscription = self.create_subscription(SensorMsg, '/wqp_measurements', self.wqp_sensor_callback, qos_profile_BEF)
@@ -282,9 +282,7 @@ class ServerCommunicationNode(Node):
 
     def asv_orientation_callback(self, msg):
          
-         euler = quaternion_to_euler([msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z, msg.pose.orientation.w])
-        
-         self.asv_position['heading'] = euler[2]
+        self.asv_position['heading'] = msg.data
 
     def wqp_sensor_callback(self, msg):
         # This function is called when the wqp_sensor topic is updated
@@ -334,8 +332,12 @@ class ServerCommunicationNode(Node):
                 msg.lon=0.0
 
             json_msg = json.dumps({
-                'Latitude': msg.lat,
-                'Longitude': msg.lon,
+                'Latitude_Drone': msg.drone_lat,
+                'Longitude_Drone': msg.drone_lon,
+                'Latitude_Obj': msg.object_lat,
+                'Longitude_obj':msg.object_lon,
+                'Heading_Drone':msg.drone_heading,
+                'Heading_Obj':msg.object_heading,
                 'veh_num': self.vehicle_id,
                 'date': msg.date
             })
