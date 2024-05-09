@@ -332,8 +332,12 @@ class ServerCommunicationNode(Node):
                 msg.lon=0.0
 
             json_msg = json.dumps({
-                'Latitude': msg.lat,
-                'Longitude': msg.lon,
+                'Latitude_Drone': msg.drone_lat,
+                'Longitude_Drone': msg.drone_lon,
+                'Latitude_Obj': msg.object_lat,
+                'Longitude_obj':msg.object_lon,
+                'Heading_Drone':msg.drone_heading,
+                'Heading_Obj':msg.object_heading,
                 'veh_num': self.vehicle_id,
                 'date': msg.date
             })
