@@ -6,6 +6,7 @@
     recorded_video_path: "utils/videos/"
     show_detections: false
     save_logs: true
+    savelogs_timer_period: 1.0 # seconds
     logs_path: "utils/detection_logs/"
     # Weights parameters
     weights_folder_path: "utils/weights/"

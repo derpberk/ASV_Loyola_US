@@ -59,7 +59,7 @@ class Test_node(Node):
 
     def trash_detections_callback(self,msg):
         
-        self.get_logger().info("The position of "+ msg.date + " is ({:.10f}), {:.10f}).".format(msg.lat,msg.lon))
+        self.get_logger().info("The position is ({:.10f}), {:.10f}).".format(msg.drone_lat,msg.drone_lon))
 
 def main(args=None):
     rclpy.init(args=args)

@@ -1,5 +1,5 @@
 FROM arm64v8/ros:humble
-
+# FROM osrf/ros:humble-desktop-full
 RUN chmod +x ros_entrypoint.sh
 
 WORKDIR /home/asv_workspace
