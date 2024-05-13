@@ -327,15 +327,14 @@ class ServerCommunicationNode(Node):
     def trash_point_callback(self, msg):
         # This function is called when the sonar_sensor topic is updated
         if msg.success:
-            if not isinstance(msg.lat,(int, float)) or numpy.isnan(msg.lat) :
-                msg.lat=0.0
-                msg.lon=0.0
+            if not isinstance(msg.object_lat,(int, float)) or numpy.isnan(msg.object_lat) :
+                return 
 
             json_msg = json.dumps({
                 'Latitude_Drone': msg.drone_lat,
                 'Longitude_Drone': msg.drone_lon,
                 'Latitude_Obj': msg.object_lat,
-                'Longitude_obj':msg.object_lon,
+                'Longitude_Obj':msg.object_lon,
                 'Heading_Drone':msg.drone_heading,
                 'Heading_Obj':msg.object_heading,
                 'veh_num': self.vehicle_id,
