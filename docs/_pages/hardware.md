@@ -15,25 +15,33 @@ El sistema se compone de los siguientes elementos:
 * Antena LoRa para comunicación con la estación base Emlid Reach RS+
 * Receptor RC con SBUS
 * Jetson Nano Xavier NX (Flight Companion Board)
-* Cámara estéreo ZED 2
+* Cámara estéreo ZED 2i
 * Router 4G WiFi
-* Batería 6S 20000 mAh
-* Convertidor DC-DC 6S a 12V
+* Batería 4S 10000 mAh (16V nominal)
+* Convertidor DC-DC 16V a 9V
 * Power Module 6S
 * 2x ESC para motores de propulsión
 * Interruptor de seguridad
 
 El conexionado del vehículo con el autopiloto se puede ver en la siguiente imagen:
 
-![Conexionado del vehículo con el autopiloto](/ASV_Loyola_US/images/diagrama_hardware.svg)
+![Conexionado del vehículo con el autopiloto](/ASV_Loyola_US/images/placa.png)
 
 ---
 ## Funcionamiento general del sistema
+
+Aqui se muestra un esquemático del funcionamiento del sistema 
+![Esquemático del funcionamiento general del sistema](/ASV_Loyola_US/images/asv_scheme.png)
+
 El Navio2 y la Raspberry Pi 4 conforman la unidad de control del vehículo. Dentro de la Raspberry Pi 4 se ejecuta Ardupilot 4.0.0, que permite el guiado del vehículo. La configuración de Ardupilot se puede encontrar en el siguiente [enlace](https://docs.emlid.com/navio2/ardupilot/installation-and-running). A través del rail de pines se controla la velocidad de los motores mediante los circuitos variadores (ESCs). El primer pin del rail de pines está reservado para el receptor del Radio Control en modo SBUS, para la maniobra manual del vehículo.
 
 La RPi4 solo funciona como Autopiloto y no realiza tareas de planificación más que las de atender a las llamadas de alto nivel provenientes de la Jetson Xavier (FCB). La Jetson Xavier es la encargada de realizar la planificación de la misión y de la navegación autónoma. La Jetson Xavier se comunica con la RPi4 a través de una conexión TCP mediante el Router, que establece las IPs de cada elemento de forma fija. La comunicación entre la Jetson Xavier y la RPi4 se realiza mediante el protocolo MAVLink, mientras que la comunicación entre la Jetson Xavier y el Navio2 se realiza mediante el protocolo MAVROS.
 
 El GPS RTK Reach M+ se comunica con Navio2 a través del puerto USB, que también proporciona su alimentación. El Reach M+, aparte de su posición GPS, recibe las correcciones de la estación base mediante la antena LoRa. 
+
+
+
+Los sensores [sonar](/ASV_Loyola_US/sonar/) y [sensor](/ASV_Loyola_US/sensoresaml/) , asi como la camara ZED2i son conectados a traves de un socket por la parte lateral de la caja a la Jetson Xavier.    
 
 Por último, el router cuenta con una tarjeta SIM que permite la conexión a la red celular de telefonía y la consiguiente comunicación con el servidor central.
 

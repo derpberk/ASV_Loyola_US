@@ -39,6 +39,6 @@ son los nombres de los sensores en cada mensaje:
 * pH: `pH`
 * Turbidity: `Turbidity`
 
+ [Volver](../)   
 
-
-
+ [Siguiente: Preparación del Navio2](/ASV_Loyola_US/sonar/)

@@ -11,7 +11,7 @@ Este docker se encarga del funcionamiento de la cámara ZED2i a través de ROS2 
 
 Para la construcción del dockerfile se a utilizado la siguiente imagen, extraída del siguiente repositorio:
 ```bash
-dustynv/ros:eloquent-ros-base-l4t-r32.7.1
+dustynv/ros:humble-ros-base-l4t-r32.7.1
 ```
 Con esta imagen nos permite utilizar la versión de ROS2 Eloquent, junto con el uso de la librería CUDA para la versión seleccionada. La versión seleccionada debe ser la misma que este instalada en la Jetson. LA versión instala del JetPack es la 4.6.1(L4T 32.7.1) , que contiene una versión de Cuda 10.2.
 
@@ -19,43 +19,56 @@ Con esta imagen nos permite utilizar la versión de ROS2 Eloquent, junto con el 
 
 Este siguiente paso es opcional:
 ```bash
-ARG ZED_SDK_MAJOR=3
-ARG ZED_SDK_MINOR=7
+ARG ZED_SDK_MAJOR=4
+ARG ZED_SDK_MINOR=0
 ARG ZED_SDK_PATCH=7
-ARG L4T_MAJOR=32
-ARG L4T_MINOR=7
-ARG ROS2_DIST=eloquent       # ROS2 distribution
+ARG L4T_MAJOR=35
+ARG L4T_MINOR=1
+ARG ROS2_DIST=humble      # ROS2 distribution
 ```
 
-Con este paso lo que se realiza es poner las versiones que se quieran utilizar en otras líneas del dockerfile de manera fija. Son como variables de un fichero en un lenguaje de programación
+Con este paso lo que se realiza es poner las versiones que se quieran utilizar en otras líneas del dockerfile de manera fija. Son como variables de un fichero en un lenguaje de programación. Por ultimo clonamos el repositorio de de ROS-Wrapper-ZED [enlace](https://github.com/stereolabs/zed-ros2-wrapper)
 
 Actualizamos el sistema
 
 ```bash
+# Disable apt-get warnings
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 42D5A192B819C5DA || true && \
   apt-get update || true && apt-get install -y --no-install-recommends apt-utils dialog && \
   rm -rf /var/lib/apt/lists/*
   
 ENV TZ=Europe/Paris
-
+ENV ROS_DOMAIN_ID=42
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \ 
   apt-get update && \
   apt-get install --yes lsb-release wget less udev sudo build-essential cmake python3 python3-dev python3-pip python3-wheel git jq libpq-dev zstd usbutils && \    
   rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    apt-utils dialog \
-    python3.7 python3.7-dev python3.7-distutils \
-    build-essential cmake python3-pip python3-wheel git jq libpq-dev zstd usbutils && \
-    rm -rf /var/lib/apt/lists/*
+# Install the ZED SDK
+RUN echo "# R${L4T_MAJOR} (release), REVISION: ${L4T_MINOR}" > /etc/nv_tegra_release && \
+  apt-get update -y || true && \
+  apt-get install -y --no-install-recommends zstd wget less cmake curl gnupg2 \
+  build-essential python3 python3-pip python3-dev python3-setuptools libusb-1.0-0-dev -y && \
+  pip install protobuf && \
+  wget -q --no-check-certificate -O ZED_SDK_Linux_JP.run \
+  https://download.stereolabs.com/zedsdk/${ZED_SDK_MAJOR}.${ZED_SDK_MINOR}/l4t${L4T_MAJOR}.${L4T_MINOR}/jetsons && \
+  chmod +x ZED_SDK_Linux_JP.run ; ./ZED_SDK_Linux_JP.run silent skip_tools && \
+  rm -rf /usr/local/zed/resources/* && \
+  rm -rf ZED_SDK_Linux_JP.run && \
+  rm -rf /var/lib/apt/lists/*
 
-# Update pip and setuptools
-RUN python3 -m pip install --upgrade pip setuptools
+# Install the ZED ROS2 Wrapper
+ENV ROS_DISTRO ${ROS2_DIST}
+
+# Install the ZED ROS2 Wrapper
+WORKDIR /root/ros2_ws/src
+RUN git clone --recursive https://github.com/stereolabs/zed-ros2-wrapper.git
 ```
 
 Instalamos el ZED SDK, en este caso se utilizo las variables mencionadas anteriormente, si no se utilizan se debe poner las version en las lineas del dockerfile
+
 ```bash
+
 # Install the ZED SDK
 RUN echo "# R${L4T_MAJOR} (release), REVISION: ${L4T_MINOR}" > /etc/nv_tegra_release && \
   apt-get update -y || true && \
@@ -74,48 +87,38 @@ RUN echo "# R${L4T_MAJOR} (release), REVISION: ${L4T_MINOR}" > /etc/nv_tegra_rel
 RUN ln -sf /usr/lib/aarch64-linux-gnu/tegra/libv4l2.so.0 /usr/lib/aarch64-linux-gnu/libv4l2.so
 ```
 
-Instalamos el ZED ROS2 Wrapper, en nuestro caso ya tenemos el código en una carpeta para poder modificar tanto el código como algún dato o fichero de las carpetas config ,launch y src. Primeros establecemos la versión del ROS y luego copiamos de nuestra carpeta en local todo el código de Zed-wrapper en una carpeta dentro del docker para su utilización
 
-```bash
-# Install the ZED ROS2 Wrapper
-ENV ROS_DISTRO ${ROS2_DIST}
-
-# Install the ZED ROS2 Wrapper
-COPY ./zed-ros2-wrapper-eloquent/zed-ros2-wrapper-eloquent /root/ros2_ws/src
-```
 
 Copiamos los paquetes de Ros2 que utiliza el wrapper, se puede realizar de dos maneras
 
 ```bash
+# Install missing dependencies
 WORKDIR /root/ros2_ws/src
-RUN git clone https://github.com/ament/ament_cmake.git --branch eloquent
-RUN git clone https://github.com/ros2/rcutils.git --branch eloquent
-RUN git clone https://github.com/ros2/rclcpp.git --branch eloquent
-RUN git clone https://github.com/ros2/rcl_interfaces.git --branch eloquent
-RUN git clone https://github.com/ros2/common_interfaces.git --branch eloquent
-RUN git clone https://github.com/ros2/geometry2.git --branch eloquent
-RUN git clone https://github.com/ros-perception/image_common.git --branch eloquent
-RUN git clone https://github.com/ros2/rosidl_defaults.git --branch eloquent
-RUN git clone https://github.com/ros2/rviz.git --branch eloquent
+RUN wget https://github.com/ros/xacro/archive/refs/tags/${XACRO_VERSION}.tar.gz -O - | tar -xvz && mv xacro-${XACRO_VERSION} xacro && \
+  wget https://github.com/ros/diagnostics/archive/refs/tags/${DIAGNOSTICS_VERSION}.tar.gz -O - | tar -xvz && mv diagnostics-${DIAGNOSTICS_VERSION} diagnostics && \
+  wget https://github.com/ament/ament_lint/archive/refs/tags/${AMENT_LINT_VERSION}.tar.gz -O - | tar -xvz && mv ament_lint-${AMENT_LINT_VERSION} ament-lint && \
+  wget https://github.com/cra-ros-pkg/robot_localization/archive/refs/tags/${ROBOT_LOCALIZATION_VERSION}.tar.gz -O - | tar -xvz && mv robot_localization-${ROBOT_LOCALIZATION_VERSION} robot-localization && \
+  wget https://github.com/ros-geographic-info/geographic_info/archive/refs/tags/${GEOGRAPHIC_INFO_VERSION}.tar.gz -O - | tar -xvz && mv geographic_info-${GEOGRAPHIC_INFO_VERSION} geographic-info && \
+  cp -r geographic-info/geographic_msgs/ . && \
+  rm -rf geographic-info && \
+  git clone https://github.com/ros-drivers/nmea_msgs.git --branch ros2 && \  
+  git clone https://github.com/ros/angles.git --branch humble-devel
+
 ```
 
 Realizamos un update para ROS eloquent
 ```bash
-# # Check that all the dependencies are satisfied
+# Check that all the dependencies are satisfied
 WORKDIR /root/ros2_ws
-
-RUN apt-get update -y || true && rosdep update --rosdistro eloquent && \
+RUN apt-get update -y || true && rosdep update && \
   rosdep install --from-paths src --ignore-src -r -y && \
   rm -rf /var/lib/apt/lists/*
+
 # Install cython
 RUN python3 -m pip install --upgrade cython
 ```
 
-Establecemos que el directorio de la versión cuda dentro del dockerfile, es necesario para evitar errores al realizar la build del código juntos con los paquetes de ROS2
-```bash
-WORKDIR /usr/local/zed
-ENV CUDA_HOME=/usr/local/cuda
-```
+
 
 Realizamos la build de todo el código, para ello en los argumentos del colcon build necesitamos especificar la dirección de las carpeta donde se encuentran los archivos de Cuda. Los argumentos serían los siguientes:
 
@@ -129,15 +132,14 @@ Realizamos la build de todo el código, para ello en los argumentos del colcon b
 ```bash
 WORKDIR /root/ros2_ws
 
-RUN /bin/bash -c "source /opt/ros/eloquent/setup.bash && \
+# Build the dependencies and the ZED ROS2 Wrapper
+RUN /bin/bash -c "source /opt/ros/$ROS_DISTRO/install/setup.bash && \
   colcon build --parallel-workers $(nproc) \
-  --symlink-install \
   --event-handlers console_direct+ --base-paths src \
   --cmake-args ' -DCMAKE_BUILD_TYPE=Release' \
-  '-DCUDA_CUDART_LIBRARY=/usr/local/cuda/lib64/stubs'\
   ' -DCMAKE_LIBRARY_PATH=/usr/local/cuda/lib64/stubs' \
   ' -DCMAKE_CXX_FLAGS="-Wl,--allow-shlib-undefined"' \
-  ' --no-warn-unused-cli'"
+  ' --no-warn-unused-cli' "
 
 ```
 
@@ -192,8 +194,7 @@ Estas líneas ejecutan dos comandos de ROS 2 en segundo plano. El primero ejecut
 
 ```bash
 # Run your command in the background
-ros2 run tf2_ros static_transform_publisher 0 0.06 0 0 0 0 base_link zed2i_camera_center &
-ros2 launch zed_wrapper zed2i.launch.py
+ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i
 ```
 
 Esta línea ejecuta cualquier comando adicional que se pase al script como argumento. Esto permite al usuario sobreescribir el comportamiento predeterminado del script proporcionando comandos personalizados al ejecutar el contenedor. 
@@ -227,3 +228,6 @@ docker run -it --gpus all  --privileged --net host -e DISPLAY -v /tmp/.X11-unix:
 -v <path folder in host>:<path folder destination>: Esta opción monta un directorio del sistema host dentro del contenedor en una ubicación específica. Esto puede ser útil para compartir archivos o datos entre el host y el contenedor.
 
 rhobtor/wrapper_zed: Este es el nombre de la imagen del contenedor que se utilizará para crear la instancia del contenedor.
+
+ [Volver](../)   
+
