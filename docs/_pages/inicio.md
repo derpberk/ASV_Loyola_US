@@ -5,7 +5,6 @@ description:
 permalink: /inicio/
 ---
 
-
 ## Introducción
 
 Esta es la página de documentación de los ASV de Vigilancia Ambiental realizados por el grupo de investigación electrónica (ACETI) en colaboración de la Universidad de Sevilla y la Universidad de Loyola.
