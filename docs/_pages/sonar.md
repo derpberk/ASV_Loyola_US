@@ -1,5 +1,3 @@
-sonar 
-
 ---
 layout: default
 title: Sonar
