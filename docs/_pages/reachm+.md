@@ -28,6 +28,6 @@ Los parámetros que se han configurado son los siguientes:
 * `GPS_AUTO_SWITCH `: 1 (Enabled)
 * `GPS_INJECT_TO  `: 1 (Secondary)
 
- [Volver](../)   
+ [Volver](/ASV_Loyola_US/udevrule/) 
 
- [Siguiente: Configuración del Reach M+](/ASV_Loyola_US/reachm+/)
+ [Siguiente: Configuración Sonda AML-3 XC](/ASV_Loyola_US/sensoresaml/)

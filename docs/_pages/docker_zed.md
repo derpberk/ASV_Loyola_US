@@ -227,3 +227,10 @@ docker run -it --gpus all  --privileged --net host -e DISPLAY -v /tmp/.X11-unix:
 -v <path folder in host>:<path folder destination>: Esta opción monta un directorio del sistema host dentro del contenedor en una ubicación específica. Esto puede ser útil para compartir archivos o datos entre el host y el contenedor.
 
 rhobtor/wrapper_zed: Este es el nombre de la imagen del contenedor que se utilizará para crear la instancia del contenedor.
+
+
+
+
+ [Volver](/ASV_Loyola_US/docker_asv/)
+
+ [Inicio](../)

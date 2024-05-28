@@ -103,3 +103,10 @@ docker run: Este comando se utiliza para ejecutar un contenedor Docker a partir 
 --network bridge: Esta opción especifica que el contenedor utilice la red bridge, que es la red predeterminada de Docker. La red bridge permite que el contenedor se comunique con otros contenedores y con el host Docker utilizando la configuración de red predeterminada.
 
 syanes/asv:arm64: Esta es la imagen de Docker que se utilizará para ejecutar el contenedor. La imagen se identifica mediante su nombre (syanes/asv) y su etiqueta (arm64), que indica que esta es una imagen específica para la arquitectura ARM64.
+
+
+
+
+ [Volver](/ASV_Loyola_US/sonar/) 
+
+ [Siguiente: Configuración Docker ZED2i](/ASV_Loyola_US/docker_zed/)

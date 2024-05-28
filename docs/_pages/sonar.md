@@ -5,7 +5,7 @@ description: Sonar Blue Robotics
 permalink: /sonar/
 ---
 
-## Sonar Blue Robotic
+## Sonar Blue Robotics
 
 La sonda Ping2 es una ecosonda de un solo haz que mide distancias de hasta 100 metros (328 pies) bajo el agua. Un ancho de haz de 25 grados, una profundidad nominal de 300 metros (984 pies) y una interfaz de software de código abierto lo convierten en una poderosa herramienta para la robótica marina.
 
@@ -32,4 +32,10 @@ sonar.device = Ping1D()
 
 ```
 
+
+
+
+ [Volver](/ASV_Loyola_US/sensoresaml/)
+
+ [Siguiente: Configuración Docker ASV](/ASV_Loyola_US/docker_asv/)
 

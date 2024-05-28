@@ -61,6 +61,6 @@ Para iniciar el servicio de Ardupilot al arrancar el Navio2, se ejecuta el sigui
 pi@navio: ~ $ sudo systemctl enable ardurover
 ```
 
- [Volver](../)   
+ [Volver](/ASV_Loyola_US/hardware/)   
 
  [Siguiente: Creación de una UDEV Rule](/ASV_Loyola_US/udevrule/)
