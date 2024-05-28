@@ -7,6 +7,13 @@ permalink: /ros2/
 
 # ASV NODE
 
+Este es un esquemático del funcionamiento del código de navegación y utilización de los sensores :
+
+![Esquematico del codigo de ASV](/ASV_Loyola_US/images/ROS2scheme.png)
+
+ 
+A continuación, se detalla una explicacion mas detallada del codigo de navegacion y utilizacion de los sensores: 
+
 En este fragmento de código se encarga de inicializar parámetros, declarar servicios y declarar temas para el nodo asv_node:
 
 ```bash
