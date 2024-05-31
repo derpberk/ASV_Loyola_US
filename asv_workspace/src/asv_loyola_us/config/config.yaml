@@ -1,7 +1,7 @@
 /**:
   ros__parameters:
     # General parameters
-    debug: False
+    debug: True
     use_path_planner: true
     # Path planner parameters
     path_planner_timeout: 20.0
@@ -18,11 +18,14 @@
     sonar_baudrate: 115200
     # Server parameters
     internet_loss_timeout: 30.0
-    mqtt_addr: "bender.us.es"
+    # mqtt_addr: "bender.us.es"
+    # mqtt_port: 1883
+    # mqtt_user: "asv3" # TODO: Change to avoid collisions
+    # mqtt_password: "azkenmuga"
+
+    mqtt_addr: "192.168.1.3"
     mqtt_port: 1883
     mqtt_user: "asv3" # TODO: Change to avoid collisions
     mqtt_password: "azkenmuga"
-
-
 
 

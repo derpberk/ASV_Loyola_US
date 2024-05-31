@@ -1,0 +1,74 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@8.19.4
+2 info using node@v16.20.2
+3 timing npm:load:whichnode Completed in 1ms
+4 timing config:load:defaults Completed in 1ms
+5 timing config:load:file:/usr/local/lib/node_modules/npm/npmrc Completed in 2ms
+6 timing config:load:builtin Completed in 2ms
+7 warn config production Use `--omit=dev` instead.
+8 timing config:load:cli Completed in 3ms
+9 timing config:load:env Completed in 0ms
+10 timing config:load:file:/data/.npmrc Completed in 1ms
+11 timing config:load:project Completed in 6ms
+12 timing config:load:file:/usr/src/node-red/.npmrc Completed in 0ms
+13 timing config:load:user Completed in 0ms
+14 timing config:load:file:/usr/local/etc/npmrc Completed in 2ms
+15 timing config:load:global Completed in 2ms
+16 timing config:load:validate Completed in 0ms
+17 timing config:load:credentials Completed in 1ms
+18 timing config:load:setEnvs Completed in 1ms
+19 timing config:load Completed in 16ms
+20 timing npm:load:configload Completed in 16ms
+21 timing npm:load:mkdirpcache Completed in 5ms
+22 timing npm:load:mkdirplogs Completed in 5ms
+23 verbose title npm install node-red-node-ui-table@0.4.3
+24 verbose argv "install" "--no-audit" "--no-update-notifier" "--no-fund" "--save" "--save-prefix" "~" "--production" "--engine-strict" "node-red-node-ui-table@0.4.3"
+25 timing npm:load:setTitle Completed in 1ms
+26 timing config:load:flatten Completed in 3ms
+27 timing npm:load:display Completed in 5ms
+28 verbose logfile logs-max:10 dir:/data/.npm/_logs
+29 verbose logfile /data/.npm/_logs/2024-05-29T09_38_55_642Z-debug-0.log
+30 timing npm:load:logFile Completed in 15ms
+31 timing npm:load:timers Completed in 0ms
+32 timing npm:load:configScope Completed in 0ms
+33 timing npm:load Completed in 49ms
+34 timing arborist:ctor Completed in 1ms
+35 silly logfile done cleaning log files
+36 timing idealTree:init Completed in 167ms
+37 timing idealTree:userRequests Completed in 2ms
+38 silly idealTree buildDeps
+39 silly fetch manifest node-red-node-ui-table@0.4.3
+40 timing arborist:ctor Completed in 0ms
+41 http fetch GET 200 https://registry.npmjs.org/node-red-node-ui-table 329ms (cache miss)
+42 silly fetch manifest node-red-dashboard@~3.6.5
+43 http fetch GET 200 https://registry.npmjs.org/node-red-dashboard 45ms (cache hit)
+44 silly placeDep ROOT node-red-node-ui-table@0.4.3 OK for: node-red-project@0.0.1 want: 0.4.3
+45 timing idealTree:#root Completed in 387ms
+46 timing idealTree:node_modules/node-red-node-ui-table Completed in 0ms
+47 timing idealTree:buildDeps Completed in 389ms
+48 timing idealTree:fixDepFlags Completed in 4ms
+49 timing idealTree Completed in 567ms
+50 timing reify:loadTrees Completed in 568ms
+51 timing reify:diffTrees Completed in 71ms
+52 silly reify moves {}
+53 timing reify:retireShallow Completed in 1ms
+54 timing reify:createSparse Completed in 4ms
+55 timing reify:trashOmits Completed in 0ms
+56 timing reify:loadBundles Completed in 0ms
+57 silly tarball no local data for node-red-node-ui-table@https://registry.npmjs.org/node-red-node-ui-table/-/node-red-node-ui-table-0.4.3.tgz. Extracting by manifest.
+58 http fetch GET 200 https://registry.npmjs.org/node-red-node-ui-table/-/node-red-node-ui-table-0.4.3.tgz 234ms (cache miss)
+59 timing reifyNode:node_modules/node-red-node-ui-table Completed in 246ms
+60 timing reify:unpack Completed in 246ms
+61 timing reify:unretire Completed in 1ms
+62 timing build:queue Completed in 2ms
+63 timing build:deps Completed in 2ms
+64 timing build Completed in 3ms
+65 timing reify:build Completed in 3ms
+66 timing reify:trash Completed in 0ms
+67 timing reify:save Completed in 69ms
+68 timing reify Completed in 994ms
+69 silly ADD node_modules/node-red-node-ui-table
+70 timing command:install Completed in 999ms
+71 verbose exit 0
+72 timing npm Completed in 1122ms
+73 info ok

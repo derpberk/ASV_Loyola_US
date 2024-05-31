@@ -1,0 +1,167 @@
+0 verbose cli /usr/local/bin/node /usr/local/bin/npm
+1 info using npm@8.19.4
+2 info using node@v16.20.2
+3 timing npm:load:whichnode Completed in 1ms
+4 timing config:load:defaults Completed in 2ms
+5 timing config:load:file:/usr/local/lib/node_modules/npm/npmrc Completed in 1ms
+6 timing config:load:builtin Completed in 1ms
+7 warn config production Use `--omit=dev` instead.
+8 timing config:load:cli Completed in 3ms
+9 timing config:load:env Completed in 0ms
+10 timing config:load:file:/data/.npmrc Completed in 1ms
+11 timing config:load:project Completed in 5ms
+12 timing config:load:file:/usr/src/node-red/.npmrc Completed in 0ms
+13 timing config:load:user Completed in 0ms
+14 timing config:load:file:/usr/local/etc/npmrc Completed in 5ms
+15 timing config:load:global Completed in 5ms
+16 timing config:load:validate Completed in 0ms
+17 timing config:load:credentials Completed in 1ms
+18 timing config:load:setEnvs Completed in 1ms
+19 timing config:load Completed in 19ms
+20 timing npm:load:configload Completed in 19ms
+21 timing npm:load:mkdirpcache Completed in 6ms
+22 timing npm:load:mkdirplogs Completed in 5ms
+23 verbose title npm install node-red-node-mysql@2.0.0
+24 verbose argv "install" "--no-audit" "--no-update-notifier" "--no-fund" "--save" "--save-prefix" "~" "--production" "--engine-strict" "node-red-node-mysql@2.0.0"
+25 timing npm:load:setTitle Completed in 1ms
+26 timing config:load:flatten Completed in 3ms
+27 timing npm:load:display Completed in 6ms
+28 verbose logfile logs-max:10 dir:/data/.npm/_logs
+29 verbose logfile /data/.npm/_logs/2024-05-29T09_38_32_590Z-debug-0.log
+30 timing npm:load:logFile Completed in 21ms
+31 timing npm:load:timers Completed in 0ms
+32 timing npm:load:configScope Completed in 0ms
+33 timing npm:load Completed in 62ms
+34 timing arborist:ctor Completed in 1ms
+35 silly logfile done cleaning log files
+36 timing idealTree:init Completed in 116ms
+37 timing idealTree:userRequests Completed in 2ms
+38 silly idealTree buildDeps
+39 silly fetch manifest node-red-node-mysql@2.0.0
+40 timing arborist:ctor Completed in 1ms
+41 http fetch GET 200 https://registry.npmjs.org/node-red-node-mysql 667ms (cache miss)
+42 silly placeDep ROOT node-red-node-mysql@2.0.0 OK for: node-red-project@0.0.1 want: 2.0.0
+43 silly fetch manifest mysql2@^3.6.5
+44 http fetch GET 200 https://registry.npmjs.org/mysql2 88ms (cache miss)
+45 timing idealTree:#root Completed in 768ms
+46 silly placeDep ROOT mysql2@3.9.8 OK for: node-red-node-mysql@2.0.0 want: ^3.6.5
+47 silly fetch manifest denque@^2.1.0
+48 silly fetch manifest generate-function@^2.3.1
+49 silly fetch manifest iconv-lite@^0.6.3
+50 silly fetch manifest long@^5.2.1
+51 silly fetch manifest lru-cache@^8.0.0
+52 silly fetch manifest named-placeholders@^1.1.3
+53 silly fetch manifest seq-queue@^0.0.5
+54 silly fetch manifest sqlstring@^2.3.2
+55 http fetch GET 200 https://registry.npmjs.org/generate-function 102ms (cache miss)
+56 http fetch GET 200 https://registry.npmjs.org/long 159ms (cache miss)
+57 http fetch GET 200 https://registry.npmjs.org/denque 163ms (cache miss)
+58 http fetch GET 200 https://registry.npmjs.org/sqlstring 159ms (cache miss)
+59 http fetch GET 200 https://registry.npmjs.org/iconv-lite 166ms (cache miss)
+60 http fetch GET 200 https://registry.npmjs.org/named-placeholders 165ms (cache miss)
+61 http fetch GET 200 https://registry.npmjs.org/seq-queue 173ms (cache miss)
+62 http fetch GET 200 https://registry.npmjs.org/lru-cache 212ms (cache miss)
+63 timing idealTree:node_modules/node-red-node-mysql Completed in 220ms
+64 silly placeDep ROOT denque@2.1.0 OK for: mysql2@3.9.8 want: ^2.1.0
+65 silly placeDep ROOT generate-function@2.3.1 OK for: mysql2@3.9.8 want: ^2.3.1
+66 silly placeDep ROOT iconv-lite@0.6.3 OK for: mysql2@3.9.8 want: ^0.6.3
+67 silly placeDep ROOT long@5.2.3 OK for: mysql2@3.9.8 want: ^5.2.1
+68 silly placeDep ROOT lru-cache@8.0.5 OK for: mysql2@3.9.8 want: ^8.0.0
+69 silly placeDep ROOT named-placeholders@1.1.3 OK for: mysql2@3.9.8 want: ^1.1.3
+70 silly placeDep ROOT seq-queue@0.0.5 OK for: mysql2@3.9.8 want: ^0.0.5
+71 silly placeDep ROOT sqlstring@2.3.3 OK for: mysql2@3.9.8 want: ^2.3.2
+72 silly fetch manifest is-property@^1.0.2
+73 silly fetch manifest safer-buffer@>= 2.1.2 < 3.0.0
+74 silly fetch manifest lru-cache@^7.14.1
+75 http fetch GET 200 https://registry.npmjs.org/safer-buffer 80ms (cache miss)
+76 http fetch GET 200 https://registry.npmjs.org/is-property 81ms (cache miss)
+77 timing idealTree:node_modules/mysql2 Completed in 95ms
+78 timing idealTree:node_modules/denque Completed in 0ms
+79 silly placeDep ROOT is-property@1.0.2 OK for: generate-function@2.3.1 want: ^1.0.2
+80 timing idealTree:node_modules/generate-function Completed in 3ms
+81 silly placeDep ROOT safer-buffer@2.1.2 OK for: iconv-lite@0.6.3 want: >= 2.1.2 < 3.0.0
+82 timing idealTree:node_modules/iconv-lite Completed in 2ms
+83 timing idealTree:node_modules/is-property Completed in 0ms
+84 timing idealTree:node_modules/long Completed in 0ms
+85 timing idealTree:node_modules/lru-cache Completed in 0ms
+86 silly placeDep node_modules/named-placeholders lru-cache@7.18.3 OK for: named-placeholders@1.1.3 want: ^7.14.1
+87 timing idealTree:node_modules/named-placeholders Completed in 3ms
+88 timing idealTree:node_modules/safer-buffer Completed in 0ms
+89 timing idealTree:node_modules/seq-queue Completed in 0ms
+90 timing idealTree:node_modules/sqlstring Completed in 0ms
+91 timing idealTree:node_modules/named-placeholders/node_modules/lru-cache Completed in 0ms
+92 timing idealTree:buildDeps Completed in 1098ms
+93 timing idealTree:fixDepFlags Completed in 4ms
+94 timing idealTree Completed in 1224ms
+95 timing reify:loadTrees Completed in 1225ms
+96 timing reify:diffTrees Completed in 51ms
+97 silly reify moves {}
+98 timing reify:retireShallow Completed in 2ms
+99 timing reify:createSparse Completed in 24ms
+100 timing reify:trashOmits Completed in 0ms
+101 timing reify:loadBundles Completed in 0ms
+102 silly tarball no local data for sqlstring@https://registry.npmjs.org/sqlstring/-/sqlstring-2.3.3.tgz. Extracting by manifest.
+103 silly tarball no local data for is-property@https://registry.npmjs.org/is-property/-/is-property-1.0.2.tgz. Extracting by manifest.
+104 silly tarball no local data for safer-buffer@https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz. Extracting by manifest.
+105 silly tarball no local data for seq-queue@https://registry.npmjs.org/seq-queue/-/seq-queue-0.0.5.tgz. Extracting by manifest.
+106 silly tarball no local data for named-placeholders@https://registry.npmjs.org/named-placeholders/-/named-placeholders-1.1.3.tgz. Extracting by manifest.
+107 silly tarball no local data for iconv-lite@https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz. Extracting by manifest.
+108 silly tarball no local data for long@https://registry.npmjs.org/long/-/long-5.2.3.tgz. Extracting by manifest.
+109 silly tarball no local data for denque@https://registry.npmjs.org/denque/-/denque-2.1.0.tgz. Extracting by manifest.
+110 silly tarball no local data for node-red-node-mysql@https://registry.npmjs.org/node-red-node-mysql/-/node-red-node-mysql-2.0.0.tgz. Extracting by manifest.
+111 silly tarball no local data for lru-cache@https://registry.npmjs.org/lru-cache/-/lru-cache-8.0.5.tgz. Extracting by manifest.
+112 silly tarball no local data for generate-function@https://registry.npmjs.org/generate-function/-/generate-function-2.3.1.tgz. Extracting by manifest.
+113 silly tarball no local data for mysql2@https://registry.npmjs.org/mysql2/-/mysql2-3.9.8.tgz. Extracting by manifest.
+114 silly tarball no local data for lru-cache@https://registry.npmjs.org/lru-cache/-/lru-cache-7.18.3.tgz. Extracting by manifest.
+115 http fetch GET 200 https://registry.npmjs.org/named-placeholders/-/named-placeholders-1.1.3.tgz 312ms (cache miss)
+116 timing reifyNode:node_modules/named-placeholders Completed in 346ms
+117 http fetch GET 200 https://registry.npmjs.org/is-property/-/is-property-1.0.2.tgz 354ms (cache miss)
+118 timing reifyNode:node_modules/is-property Completed in 386ms
+119 http fetch GET 200 https://registry.npmjs.org/sqlstring/-/sqlstring-2.3.3.tgz 358ms (cache miss)
+120 timing reifyNode:node_modules/sqlstring Completed in 386ms
+121 http fetch GET 200 https://registry.npmjs.org/denque/-/denque-2.1.0.tgz 361ms (cache miss)
+122 timing reifyNode:node_modules/denque Completed in 399ms
+123 http fetch GET 200 https://registry.npmjs.org/seq-queue/-/seq-queue-0.0.5.tgz 371ms (cache miss)
+124 timing reifyNode:node_modules/seq-queue Completed in 404ms
+125 http fetch GET 200 https://registry.npmjs.org/generate-function/-/generate-function-2.3.1.tgz 363ms (cache miss)
+126 timing reifyNode:node_modules/generate-function Completed in 405ms
+127 http fetch GET 200 https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz 414ms (cache miss)
+128 timing reifyNode:node_modules/safer-buffer Completed in 447ms
+129 http fetch GET 200 https://registry.npmjs.org/node-red-node-mysql/-/node-red-node-mysql-2.0.0.tgz 453ms (cache miss)
+130 timing reifyNode:node_modules/node-red-node-mysql Completed in 491ms
+131 http fetch GET 200 https://registry.npmjs.org/long/-/long-5.2.3.tgz 464ms (cache miss)
+132 timing reifyNode:node_modules/long Completed in 501ms
+133 http fetch GET 200 https://registry.npmjs.org/lru-cache/-/lru-cache-7.18.3.tgz 484ms (cache miss)
+134 timing reifyNode:node_modules/named-placeholders/node_modules/lru-cache Completed in 546ms
+135 http fetch GET 200 https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.6.3.tgz 660ms (cache miss)
+136 timing reifyNode:node_modules/iconv-lite Completed in 695ms
+137 http fetch GET 200 https://registry.npmjs.org/lru-cache/-/lru-cache-8.0.5.tgz 707ms (cache miss)
+138 timing reifyNode:node_modules/lru-cache Completed in 749ms
+139 http fetch GET 200 https://registry.npmjs.org/mysql2/-/mysql2-3.9.8.tgz 935ms (cache miss)
+140 timing reifyNode:node_modules/mysql2 Completed in 994ms
+141 timing reify:unpack Completed in 996ms
+142 timing reify:unretire Completed in 0ms
+143 timing build:queue Completed in 6ms
+144 timing build:deps Completed in 7ms
+145 timing build Completed in 8ms
+146 timing reify:build Completed in 9ms
+147 timing reify:trash Completed in 0ms
+148 timing reify:save Completed in 51ms
+149 timing reify Completed in 2386ms
+150 silly ADD node_modules/safer-buffer
+151 silly ADD node_modules/is-property
+152 silly ADD node_modules/sqlstring
+153 silly ADD node_modules/seq-queue
+154 silly ADD node_modules/named-placeholders
+155 silly ADD node_modules/named-placeholders/node_modules/lru-cache
+156 silly ADD node_modules/lru-cache
+157 silly ADD node_modules/long
+158 silly ADD node_modules/iconv-lite
+159 silly ADD node_modules/generate-function
+160 silly ADD node_modules/denque
+161 silly ADD node_modules/mysql2
+162 silly ADD node_modules/node-red-node-mysql
+163 timing command:install Completed in 2395ms
+164 verbose exit 0
+165 timing npm Completed in 2552ms
+166 info ok
