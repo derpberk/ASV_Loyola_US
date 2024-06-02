@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>asv_loyola_us</name>
+  <version>1.3.0</version>
+  <description> Firmware of the Unmanned Surface Vehicles for Monitoring Environmental Water Resources </description>
+  <maintainer email="syanes@us.es">Samuel Yanes</maintainer>
+  <license>Apache License 2.0</license>
+
+
+  <!-- some dependencies -->
+  <exec_depend>rclpy</exec_depend> <!-- for python -->
+  <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>mavros_msgs</exec_depend> <!-- for interfaces -->
+  <exec_depend>rcl_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>zed_interfaces</exec_depend> <!-- for interfaces -->
+  <exec_depend>python3-paho-mqtt</exec_depend> <!-- for mqtt -->
+  <exec_depend>python3-numpy</exec_depend> <!-- for mqtt -->
+  <exec_depend>python3-geopy</exec_depend> <!-- for mqtt -->
+  <!-- dronekit must be instaled from apt, still not in rosdep, add as depend in the future -->
+
+  <build_depend>rclpy</build_depend> <!-- for python -->
+  <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
+  <build_depend>rcl_interfaces</build_depend> <!-- for interfaces -->
+   <build_depend>zed_interfaces</build_depend> <!-- for interfaces -->
+  <build_depend>python3-paho-mqtt</build_depend> <!-- for mqtt -->
+  <build_depend>python3-numpy</build_depend> <!-- for mqtt -->
+  <build_depend>python3-geopy</build_depend> <!-- for mqtt -->
+  <build_depend>std_srvs</build_depend> <!-- for mqtt -->
+
+  <!-- some tests to run for the packet, inherent -->
+  <test_depend>ament_copyright</test_depend>
+  <test_depend>ament_flake8</test_depend>
+  <test_depend>ament_pep257</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_python</build_type> <!-- we will only use python for the time being, no C++ -->
+  </export>
+</package>
