@@ -18,7 +18,7 @@
     sonar_baudrate: 115200
     # Server parameters
     internet_loss_timeout: 30.0
-    mqtt_addr: "aceti_ip"
+    mqtt_addr: "192.168.1.104"
     mqtt_port: 1883
     mqtt_user: "asv3" # TODO: Change to avoid collisions
     mqtt_password: "azkenmuga"
