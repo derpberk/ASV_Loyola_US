@@ -48,9 +48,12 @@ RUN echo 'alias source_ros2="source /opt/ros/humble/setup.bash && source install
 
 
 
-CMD ["/bin/bash", "-c", ". ./exec_system.sh"]
+# CMD ["/bin/bash", "-c", ". ./exec_system.sh"]
 
-
+COPY ip_entrypoint.sh /sbin/ros_entrypoint.sh
+RUN sudo chmod 755 /sbin/ros_entrypoint.sh
+ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
+CMD ["bash"]
 
 
 
