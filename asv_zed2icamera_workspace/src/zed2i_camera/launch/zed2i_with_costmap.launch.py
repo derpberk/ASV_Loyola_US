@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node,SetParameter,ExecuteProcess
-from launch.actions import DeclareLaunchArgument, OpaqueFunction, GroupAction, IncludeLaunchDescription, RegisterEventHandler, LogInfo
+from launch_ros.actions import Node,SetParameter
+from launch.actions import DeclareLaunchArgument,ExecuteProcess, OpaqueFunction, GroupAction, IncludeLaunchDescription, RegisterEventHandler, LogInfo
 from ament_index_python.packages import get_package_share_directory
 import os
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -12,7 +12,7 @@ def launch_setup(context, *args, **kwargs):
     create_bag = LaunchConfiguration('create_bag')
     today_str=datetime.now().strftime('%H:%M:%S')
     result=IfCondition(create_bag)
-    print(f"started rosbag at {today_str} with result{result} ")
+    print(f"started rosbag at {today_str} with result{context.perform_substitution(create_bag)} ")
     rosbag_node=LaunchDescription([
                 ExecuteProcess(
                     cmd=['ros2', 'bag', 'record', '-a'],
