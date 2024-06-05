@@ -16,7 +16,10 @@ RUN npm install
 # Set the WORKDIR for Node-RED
 WORKDIR /usr/src/node-red
 
-# Note: Do not copy settings and flow files here; we'll use an external volume instead
+# Note: Two options you can use the copy lines to use the docker but its not persistant. 
+# If you want a persist docker, copy the folder nodered to other place and call the docker with a volume with the path to the folder nodered, 
+# it will execute the nodered with the same flows but its persist 
+
 # COPY settings.js /data/settings.js
 # COPY flows_cred.json /data/flows_cred.json
 # COPY flows.json /data/flows.json
