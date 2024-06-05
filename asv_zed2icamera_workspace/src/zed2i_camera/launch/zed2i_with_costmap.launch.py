@@ -11,7 +11,7 @@ from datetime import datetime
 def launch_setup(context, *args, **kwargs):
     create_bag = LaunchConfiguration('create_bag')
     today_str=datetime.now().strftime('%H:%M:%S')
-    result=IfCondition(create_bag)
+    result=context.perform_substitution(create_bag)in "True"
     print(f"started rosbag at {today_str} with result{context.perform_substitution(create_bag)} ")
     rosbag_node=LaunchDescription([
                 ExecuteProcess(
