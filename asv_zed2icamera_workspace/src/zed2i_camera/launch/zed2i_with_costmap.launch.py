@@ -1,6 +1,6 @@
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node,SetParameter
+from launch_ros.actions import Node,SetParameter,ExecuteProcess
 from launch.actions import DeclareLaunchArgument, OpaqueFunction, GroupAction, IncludeLaunchDescription, RegisterEventHandler, LogInfo
 from ament_index_python.packages import get_package_share_directory
 import os
@@ -11,18 +11,24 @@ from datetime import datetime
 def launch_setup(context, *args, **kwargs):
     create_bag = LaunchConfiguration('create_bag')
     today_str=datetime.now().strftime('%H:%M:%S')
-    print(f"started rosbag at {today_str} ")
-    rosbag_node=Node(
-            package='rosbag',
-            executable='play',
-            arguments= f"--loop ~/.ros/bags/{today_str}.db3",
-            output='screen'
-        ),
+    result=IfCondition(create_bag)
+    print(f"started rosbag at {today_str} with result{result} ")
+    rosbag_node=LaunchDescription([
+                ExecuteProcess(
+                    cmd=['ros2', 'bag', 'record', '-a'],
+                    output='screen'
+                )
+    ])
     set_createbag_arg = SetParameter(name="create_bag", value=create_bag)
-    return [
-        set_createbag_arg,
-        rosbag_node,
-    ]
+    if result:
+        return [
+            set_createbag_arg,
+            rosbag_node,
+        ]
+    else:
+        return[
+            set_createbag_arg,
+        ]
 
 
 def generate_launch_description():
