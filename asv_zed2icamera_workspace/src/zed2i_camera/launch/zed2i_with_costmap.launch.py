@@ -40,6 +40,30 @@ def launch_setup(context, *args, **kwargs):
         ]
     )
 
+
+    slam_launch=GroupAction( #launch of camera wrapper with configuration
+        actions=[IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('slam_toolbox'), 'launch'),'/online_async_launch.py']),
+            launch_arguments = {
+                'slam_params_file' : "",
+             }.items(),
+            )
+        ]
+    )
+
+
+    nav2_with_costmap=GroupAction( #launch of camera wrapper with configuration
+        actions=[IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([os.path.join(
+                get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.launch.py']),
+            launch_arguments = {
+                'params_file' : "",
+             }.items(),
+            )
+        ]
+    )
+
     return [
         set_createbag_arg,
         rosbag_node,
