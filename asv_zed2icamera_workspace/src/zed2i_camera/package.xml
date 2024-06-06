@@ -9,9 +9,11 @@
 
   <exec_depend>asv_interfaces</exec_depend> <!-- for interfaces -->
   <exec_depend>rclpy</exec_depend> <!-- for python -->
+  <exec_depend>zed_wrapper</exec_depend> <!-- for interfaces -->
   
   <depend>sensor_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>zed_wrapper</depend> <!-- for interfaces -->
   <depend>message_filters</depend>
   
   <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
