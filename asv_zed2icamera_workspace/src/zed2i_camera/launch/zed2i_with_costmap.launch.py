@@ -41,32 +41,60 @@ def launch_setup(context, *args, **kwargs):
     )
 
 
+    default_config_common_slam = os.path.join( #path of common yaml file for camera node but with gnss enabled
+        get_package_share_directory('zed2i_camera'),'config','slam.yaml')
+    
     slam_launch=GroupAction( #launch of camera wrapper with configuration
         actions=[IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
                 get_package_share_directory('slam_toolbox'), 'launch'),'/online_async_launch.py']),
             launch_arguments = {
-                'slam_params_file' : "",
+                'slam_params_file' : default_config_common_slam,
              }.items(),
             )
         ]
     )
 
+
+    default_config_common_nav2 = os.path.join( #path of common yaml file for camera node but with gnss enabled
+        get_package_share_directory('zed2i_camera'),'config','nav2.yaml')
 
     nav2_with_costmap=GroupAction( #launch of camera wrapper with configuration
         actions=[IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.launch.py']),
+                get_package_share_directory('   '), 'launch'),'/navigation_launch.launch.py']),
             launch_arguments = {
-                'params_file' : "",
+                'params_file' : default_config_common_nav2,
              }.items(),
             )
         ]
     )
 
+
+    pintcloud_to_laserscan= Node(
+            package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
+            remappings=[('cloud_in', 'zed/zed_node/point_cloud/cloud_registered'),
+                        ('scan', 'scan')],
+            parameters=[{
+                'target_frame': 'cloud',
+                'transform_tolerance': 0.01,
+                'min_height': 0.0,
+                'max_height': 1.0,
+                'angle_min': -1.5708,  # -M_PI/2
+                'angle_max': 1.5708,  # M_PI/2
+                'angle_increment': 0.0087,  # M_PI/360.0
+                'scan_time': 0.3333,
+                'range_min': 0.45,
+                'range_max': 4.0,
+                'use_inf': True,
+                'inf_epsilon': 1.0
+            }],
+            name='pointcloud_to_laserscan'
+
     return [
         set_createbag_arg,
         rosbag_node,
+        pintcloud_to_laserscan,
         # zed2_launch
     ]
 
