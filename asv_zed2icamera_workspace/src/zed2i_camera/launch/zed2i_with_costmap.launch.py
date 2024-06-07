@@ -97,7 +97,7 @@ def launch_setup(context, *args, **kwargs):
         set_createbag_arg,
         rosbag_node,
         pintcloud_to_laserscan,
-        # zed2_launch
+        zed2_launch
     ]
 
 
