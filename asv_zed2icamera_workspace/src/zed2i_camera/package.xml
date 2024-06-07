@@ -15,6 +15,7 @@
   <depend>zed_wrapper</depend> <!-- for camera initialization -->
   <depend>slam_toolbox</depend> <!-- for slam -->
   <depend>nav2_bringup</depend> <!-- for nav2 initialization -->
+  <depend>pointcloud_to_laserscan</depend> <!-- for nav2 initialization -->
   <depend>message_filters</depend>
   
   <build_depend>asv_interfaces</build_depend> <!-- for interfaces -->
