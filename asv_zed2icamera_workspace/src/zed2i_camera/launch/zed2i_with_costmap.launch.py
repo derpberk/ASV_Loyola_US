@@ -71,7 +71,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
 
-    pintcloud_to_laserscan= Node(
+    pintcloud_to_laserscan= LaunchDescription([Node(
             package='pointcloud_to_laserscan', executable='pointcloud_to_laserscan_node',
             remappings=[('cloud_in', 'zed/zed_node/point_cloud/cloud_registered'),
                         ('scan', 'scan')],
@@ -90,6 +90,8 @@ def launch_setup(context, *args, **kwargs):
                 'inf_epsilon': 1.0
             }],
             name='pointcloud_to_laserscan'
+            )
+    ])
 
     return [
         set_createbag_arg,
