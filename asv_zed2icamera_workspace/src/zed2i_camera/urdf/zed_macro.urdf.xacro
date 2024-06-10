@@ -135,7 +135,7 @@
     <joint name="base_laser_joint" type="fixed">
       <origin xyz="0 0 0" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
       <parent link="${name}_left_camera_frame"/>
-      <child link="$base_laser_frame"/>
+      <child link="base_laser_frame"/>
     </joint>
     
   </xacro:macro>
