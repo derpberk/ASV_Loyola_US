@@ -27,6 +27,8 @@ def launch_setup(context, *args, **kwargs):
 
     default_config_common = os.path.join( #path of common yaml file for camera node but with gnss enabled
         get_package_share_directory('zed2i_camera'),'config','gnss_with_fusion.yaml')
+    default_xacro_common = os.path.join( #path of common yaml file for camera node but with gnss enabled
+        get_package_share_directory('zed2i_camera'),'urdf','ship_descr.urdf.xacro')
 
     zed2_launch=GroupAction( #launch of camera wrapper with configuration
         actions=[IncludeLaunchDescription(
@@ -34,7 +36,8 @@ def launch_setup(context, *args, **kwargs):
                 get_package_share_directory('zed_wrapper'), 'launch'),'/zed_camera.launch.py']),
             launch_arguments = {
                 'camera_model' : "zed2i",
-                'config_path'  : default_config_common
+                'config_path'  : default_config_common,
+                'xacro_path' : default_xacro_common
              }.items(),
             )
         ]
@@ -76,7 +79,7 @@ def launch_setup(context, *args, **kwargs):
             remappings=[('cloud_in', 'zed/zed_node/point_cloud/cloud_registered'),
                         ('scan', 'scan')],
             parameters=[{
-                'use_sim_time' : 'true',
+                'use_sim_time' : True,
                 'target_frame': 'zed_left_camera_frame',
                 'transform_tolerance': 0.01,
                 'min_height': 0.0,
@@ -99,8 +102,8 @@ def launch_setup(context, *args, **kwargs):
         rosbag_node,
         pintcloud_to_laserscan,
         zed2_launch,
-        slam_launch,
-        nav2_with_costmap,
+        # slam_launch,
+        # nav2_with_costmap,
     ]
 
 

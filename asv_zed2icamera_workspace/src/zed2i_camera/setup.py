@@ -15,6 +15,7 @@ setup(
         # Include all launch files.
         (os.path.join('share', package_name, 'launch'), glob(os.path.join('launch', '*launch.[pxy][yma]*'))),
         (os.path.join('share', package_name, "config"), glob('config/*.yaml')),
+        (os.path.join('share', package_name, "urdf"), glob('urdf/*.xacro')),
         (os.path.join('share',  package_name, "utils", "weights"), glob(os.path.join('zed2i_camera','utils','weights/*'))),
     ],
     install_requires=['setuptools'],
