@@ -1,7 +1,7 @@
 from launch import LaunchDescription
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node,SetParameter
-from launch.actions import DeclareLaunchArgument,ExecuteProcess, OpaqueFunction, GroupAction, IncludeLaunchDescription, RegisterEventHandler, LogInfo
+from launch.actions import TimerAction, DeclareLaunchArgument,ExecuteProcess, OpaqueFunction, GroupAction, IncludeLaunchDescription, RegisterEventHandler, LogInfo
 from ament_index_python.packages import get_package_share_directory
 import os
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -62,15 +62,17 @@ def launch_setup(context, *args, **kwargs):
     default_config_common_nav2 = os.path.join( #path of common yaml file for camera node but with gnss enabled
         get_package_share_directory('zed2i_camera'),'config','nav2.yaml')
 
-    nav2_with_costmap=GroupAction( #launch of camera wrapper with configuration
-        actions=[IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.py']),
-            launch_arguments = {
-                'params_file' : default_config_common_nav2,
-             }.items(),
-            )
-        ]
+    nav2_with_costmap=TimerAction(period=5.0,
+        actions=[GroupAction( #launch of camera wrapper with configuration
+            actions=[IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([os.path.join(
+                    get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.py']),
+                launch_arguments = {
+                    'params_file' : default_config_common_nav2,
+                }.items(),
+                )
+            ]
+        )]
     )
 
 
@@ -103,7 +105,7 @@ def launch_setup(context, *args, **kwargs):
         pintcloud_to_laserscan,
         zed2_launch,
         # slam_launch,
-        # nav2_with_costmap,
+        nav2_with_costmap,
     ]
 
 
