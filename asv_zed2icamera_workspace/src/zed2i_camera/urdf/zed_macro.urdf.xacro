@@ -17,7 +17,9 @@
 -->
 
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
-  <xacro:include filename="$(find zed_wrapper)/urdf/include/materials.urdf.xacro" />
+  <material name="zed2i_mat">
+    <color rgba="0.25 0.25 0.25 1.0"/>
+  </material>
   <xacro:property name="M_PI"     value="3.1415926535897931" />
   <xacro:macro name="zed_camera" params="enable_gnss=false custom_baseline=0 *gnss_origin">
     <xacro:property name="baseline" value="0.12" />
