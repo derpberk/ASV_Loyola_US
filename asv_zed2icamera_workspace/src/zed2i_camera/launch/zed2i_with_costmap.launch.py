@@ -76,7 +76,7 @@ def launch_setup(context, *args, **kwargs):
             remappings=[('cloud_in', 'zed/zed_node/point_cloud/cloud_registered'),
                         ('scan', 'scan')],
             parameters=[{
-                'target_frame': 'cloud',
+                'target_frame': 'zed_left_camera_frame',
                 'transform_tolerance': 0.01,
                 'min_height': 0.0,
                 'max_height': 1.0,
@@ -84,8 +84,8 @@ def launch_setup(context, *args, **kwargs):
                 'angle_max': 1.5708,  # M_PI/2
                 'angle_increment': 0.0087,  # M_PI/360.0
                 'scan_time': 0.3333,
-                'range_min': 0.45,
-                'range_max': 4.0,
+                'range_min': 0.2,
+                'range_max': 10.0,
                 'use_inf': True,
                 'inf_epsilon': 1.0
             }],
@@ -97,7 +97,7 @@ def launch_setup(context, *args, **kwargs):
         set_createbag_arg,
         rosbag_node,
         pintcloud_to_laserscan,
-        zed2_launch
+        # zed2_launch
     ]
 
 
