@@ -79,7 +79,7 @@ def launch_setup(context, *args, **kwargs):
             remappings=[('cloud_in', 'zed/zed_node/point_cloud/cloud_registered'),
                         ('scan', 'scan')],
             parameters=[{
-                'use_sim_time' : True,
+                'use_sim_time' : False,
                 'target_frame': 'zed_left_camera_frame',
                 'transform_tolerance': 0.01,
                 'min_height': 0.0,
