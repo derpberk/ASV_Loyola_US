@@ -26,8 +26,19 @@
   <xacro:arg name="gnss_y" default="0.0" />
   <xacro:arg name="gnss_z" default="0.0" />
 
+  <link name="base_link"/>
+
   <xacro:include filename="$(find zed2i_camera)/urdf/zed_macro.urdf.xacro" />
   <xacro:zed_camera custom_baseline="$(arg custom_baseline)" enable_gnss="$(arg enable_gnss)">
 	    <origin xyz="$(arg gnss_x) $(arg gnss_y) $(arg gnss_z)" rpy="0 0 0"/>
   </xacro:zed_camera>
+  
+
+  <joint name="base_camera_joint" type="fixed">
+      <origin xyz="0 2.0 0" rpy="0.0 0.0 0.0"/>
+      <parent link="base_link"/>
+      <child link="${name}_camera_link"/>
+    </joint>
+
+  
 </robot>
