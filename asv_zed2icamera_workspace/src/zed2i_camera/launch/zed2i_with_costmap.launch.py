@@ -62,7 +62,7 @@ def launch_setup(context, *args, **kwargs):
     nav2_with_costmap=GroupAction( #launch of camera wrapper with configuration
         actions=[IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.launch.py']),
+                get_package_share_directory('nav2_bringup'), 'launch'),'/navigation_launch.py']),
             launch_arguments = {
                 'params_file' : default_config_common_nav2,
              }.items(),
