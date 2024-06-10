@@ -4,7 +4,7 @@
 ---
 /**:
     ros__parameters:
-        use_sim_time: true # Set to `true` only if there is a publisher for the simulated clock to the `/clock` topic. Normally used in simulation mode.
+        use_sim_time: false # Set to `true` only if there is a publisher for the simulated clock to the `/clock` topic. Normally used in simulation mode.
 
         simulation:
             sim_enabled: false # Set to `true` to enable the simulation mode and connect to a simulation server
