@@ -18,7 +18,7 @@
 
 <robot name="ASV_LOYOLA_US" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:arg name="camera_name"   default="zed" />
-  <xacro:arg name="camera_model"  default="zed" />
+  <xacro:arg name="camera_model"  default="zed2i" />
   <xacro:arg name="custom_baseline"  default="0.0" />
   <!-- If GNSS fusion is enabled the position of the antenna with respect to the camera mount point is required -->
   <xacro:arg name="enable_gnss"   default="false" />
