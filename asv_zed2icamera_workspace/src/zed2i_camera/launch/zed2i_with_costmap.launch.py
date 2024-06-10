@@ -18,7 +18,7 @@ def launch_setup(context, *args, **kwargs):
     
     rosbag_node=LaunchDescription([ #ros2 bag launch
                 ExecuteProcess(
-                    cmd=['ros2', 'bag', 'record', '-a'],
+                    cmd=['ros2', 'bag', 'record', '-a', '--compression-mode', 'file', '--compression-format', 'zstd'],
                     output='screen',
                     cwd=bag_path,
                     condition=IfCondition(create_bag),
