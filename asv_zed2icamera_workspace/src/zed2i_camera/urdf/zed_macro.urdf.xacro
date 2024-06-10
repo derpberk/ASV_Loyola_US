@@ -23,6 +23,8 @@
   <xacro:property name="M_PI"     value="3.1415926535897931" />
   <xacro:macro name="zed_camera" params="enable_gnss=false custom_baseline=0 *gnss_origin">
     <xacro:property name="baseline" value="0.12" />
+    <xacro:property name="name" value="zed" />
+    <xacro:property name="model" value="zed2i" />
     <xacro:property name="height" value="0.03" />
     <xacro:property name="bottom_slope" value="0.0" />
     <xacro:property name="screw_offset_x" value="-0.01" />
