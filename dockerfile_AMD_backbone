@@ -47,7 +47,7 @@ RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
 RUN echo 'alias source_ros2="source /opt/ros/humble/setup.bash && source install/setup.bash"' >> .bashrc
 
 
-COPY ros_entrypoint_amd.sh /sbin/ros_entrypoint.sh
+COPY ros_entrypoint.sh /sbin/ros_entrypoint.sh
 RUN sudo chmod 755 /sbin/ros_entrypoint.sh
 ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
 CMD ["bash"]

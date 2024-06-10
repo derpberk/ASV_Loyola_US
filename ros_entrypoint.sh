@@ -30,13 +30,17 @@ if [ "$BUILD_NEEDED" = true ]; then
   colcon build
 fi
 
+# Check if the NAVIO_ADDR environment variable is set
+if [ -n "$NAVIO_ADDR" ]; then
+  NEW_NAVIO_ADDR="$NAVIO_ADDR"
+fi
 
 COMMAND="$@"
 
 source /opt/ros/humble/setup.bash
 source install/setup.bash
 # Launch the ROS nodes
-ros2 launch asv_loyola_us system.launch.py & ros2 launch mavros apm.launch fcu_url:=tcp://192.168.1.203:5678 gcs_url:=udp://@
+ros2 launch asv_loyola_us system.launch.py & ros2 launch mavros apm.launch fcu_url:=tcp://"$NEW_NAVIO_ADDR" gcs_url:=udp://@
 
 # Execute the main process
 exec $COMMAND
