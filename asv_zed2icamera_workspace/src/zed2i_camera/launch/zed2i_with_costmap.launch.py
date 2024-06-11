@@ -37,7 +37,8 @@ def launch_setup(context, *args, **kwargs):
             launch_arguments = {
                 'camera_model' : "zed2i",
                 'config_path'  : default_config_common,
-                'xacro_path' : default_xacro_common
+                'xacro_path' : default_xacro_common,
+                'enable_gnss' : True
              }.items(),
             )
         ]
