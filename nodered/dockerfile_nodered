@@ -1,0 +1,25 @@
+FROM nodered/node-red
+
+# Copy package.json to the WORKDIR so npm builds all of your added nodes modules for Node-RED
+WORKDIR /data
+COPY package.json /data
+
+# Change ownership of the /data directory to the Node-RED user
+USER root
+RUN chown -R node-red:node-red /data
+
+# Switch to the Node-RED user
+USER node-red
+
+RUN npm install 
+
+# Set the WORKDIR for Node-RED
+WORKDIR /usr/src/node-red
+
+# Note: Two options you can use the copy lines to use the docker but its not persistant. 
+# If you want a persist docker, copy the folder nodered to other place and call the docker with a volume with the path to the folder nodered, 
+# it will execute the nodered with the same flows but its persist 
+
+# COPY settings.js /data/settings.js
+# COPY flows_cred.json /data/flows_cred.json
+# COPY flows.json /data/flows.json

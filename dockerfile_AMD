@@ -7,4 +7,5 @@ COPY ./asv_workspace /home/asv_workspace
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; colcon build"
 
 
-CMD ["/bin/bash", "-c", ". ./exec_system.sh"]
+ENTRYPOINT ["/sbin/ros_entrypoint.sh"]
+CMD ["bash"]
