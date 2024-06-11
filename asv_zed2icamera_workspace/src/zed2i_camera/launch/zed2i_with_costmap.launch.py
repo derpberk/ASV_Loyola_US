@@ -38,7 +38,7 @@ def launch_setup(context, *args, **kwargs):
                 'camera_model' : "zed2i",
                 'config_path'  : default_config_common,
                 'xacro_path' : default_xacro_common,
-                #'enable_gnss' : True,
+                'enable_gnss' : 'True',
              }.items(),
             )
         ]
@@ -51,9 +51,10 @@ def launch_setup(context, *args, **kwargs):
     slam_launch=GroupAction( #launch of camera wrapper with configuration
         actions=[IncludeLaunchDescription(
             PythonLaunchDescriptionSource([os.path.join(
-                get_package_share_directory('slam_toolbox'), 'launch'),'/online_sync_launch.py']),
+                get_package_share_directory('slam_toolbox'), 'launch'),'/online_async_launch.py']),
             launch_arguments = {
                 'slam_params_file' : default_config_common_slam,
+                'use_sim_time':'False',
              }.items(),
             )
         ]

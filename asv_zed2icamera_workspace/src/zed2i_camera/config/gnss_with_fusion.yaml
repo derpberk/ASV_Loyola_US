@@ -88,7 +88,7 @@
             path_max_count: -1 # use '-1' for unlimited path size
             two_d_mode: false # Force navigation on a plane. If true the Z value will be fixed to 'fixed_z_value', roll and pitch to zero
             fixed_z_value: 0.00 # Value to be used for Z coordinate if `two_d_mode` is true
-            transform_time_offset: 0.0   # The value added to the timestamp of `map->odom` and `odom->camera_link` transform being generated
+            transform_time_offset: 0.2   # The value added to the timestamp of `map->odom` and `odom->camera_link` transform being generated
 
         gnss_fusion:
             gnss_fusion_enabled: true # fuse 'sensor_msg/NavSatFix' message information into pose data
