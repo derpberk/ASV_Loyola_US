@@ -104,8 +104,8 @@ def launch_setup(context, *args, **kwargs):
         rosbag_node,
         pintcloud_to_laserscan,
         zed2_launch,
-        # slam_launch,
-        nav2_with_costmap,
+        slam_launch,
+        # nav2_with_costmap,
     ]
 
 
