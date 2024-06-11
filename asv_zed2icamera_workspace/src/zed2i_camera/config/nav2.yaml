@@ -75,7 +75,7 @@ bt_navigator:
     use_sim_time: True
     global_frame: map
     robot_base_frame: zed_camera_link
-    odom_topic: /odom
+    odom_topic: /zed/zed_node/odom
     enable_groot_monitoring: True
     groot_zmq_publisher_port: 1666
     groot_zmq_server_port: 1667
