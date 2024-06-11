@@ -73,7 +73,7 @@
             pos_tracking_mode: "GEN_2" # Matches the ZED SDK setting: 'GEN_1', 'GEN_2'
             imu_fusion: true # enable/disable IMU fusion. When set to false, only the optical odometry will be used.
             publish_tf: true # [usually overwritten by launch file] publish `odom -> camera_link` TF
-            publish_map_tf: false # [usually overwritten by launch file] publish `map -> odom` TF
+            publish_map_tf: true # [usually overwritten by launch file] publish `map -> odom` TF
             map_frame: "map"
             odometry_frame: "odom"
             area_memory_db_path: ""
@@ -88,7 +88,7 @@
             path_max_count: -1 # use '-1' for unlimited path size
             two_d_mode: false # Force navigation on a plane. If true the Z value will be fixed to 'fixed_z_value', roll and pitch to zero
             fixed_z_value: 0.00 # Value to be used for Z coordinate if `two_d_mode` is true
-            transform_time_offset: 0.5   # The value added to the timestamp of `map->odom` and `odom->camera_link` transform being generated
+            transform_time_offset: 0.0   # The value added to the timestamp of `map->odom` and `odom->camera_link` transform being generated
 
         gnss_fusion:
             gnss_fusion_enabled: true # fuse 'sensor_msg/NavSatFix' message information into pose data
