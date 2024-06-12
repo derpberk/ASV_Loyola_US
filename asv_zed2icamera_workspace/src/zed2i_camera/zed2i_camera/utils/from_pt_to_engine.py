@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import tensorrt
 import numpy as np
 # Load the YOLOv8 model
-model = YOLO('./orin_weights/yolov5su_notrash.pt')
+model = YOLO('./xavier_weights/yolov5su_notrash.pt')
 
 # Export the model to TensorRT format
 model.export(format='engine', half=True)  # creates 'yolov8n.engine'
