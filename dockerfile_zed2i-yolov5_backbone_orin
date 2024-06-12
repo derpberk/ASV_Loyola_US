@@ -125,10 +125,6 @@ ENV WEIGHT_PATH=$weight_path
 # Now you can use the ENV variable in the RUN command
 RUN sed -i.bak "s|weights_folder_path: .*|weights_folder_path: ${WEIGHT_PATH}|" "/home/asv_zed2icamera_workspace/src/zed2i_camera/config/config.yaml"
 
-
-
-
-
 #WORKDIR /usr/local/zed
 RUN /bin/bash -c "source /opt/ros/humble/install/setup.bash; colcon build"
 RUN echo 'source /opt/ros/humble/install/setup.bash; source /home/asv_zed2icamera_workspace/install/setup.bash;' >> /root/.bashrc
