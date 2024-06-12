@@ -8,7 +8,6 @@ from sensor_msgs.msg import NavSatFix
 from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy,QoSDurabilityPolicy
 import message_filters
 import numpy as np
-#import pyzed.sl as sl
 import tensorrt
 import cv2
 import torch
@@ -106,7 +105,6 @@ class Custom_object_detection(Node):
 		self.geod = Geodesic.WGS84
 		
 		self.current_directory = get_package_share_directory("zed2i_camera")
-		#self.current_directory = setup_tools.find_package("zed2i_camera")
 		yolo_directory = os.path.join(self.current_directory,self.weights_folder_path,self.weights_name)
 		self.get_logger().info(f"Loading weights from {yolo_directory}")
 		self.model = YOLO(yolo_directory, task='detect')
@@ -118,7 +116,6 @@ class Custom_object_detection(Node):
 		self.bridge = CvBridge()
 		self.distance=None
 		self.cv_image=None
-		self.point_cloud_data=None
 		self.depth_image=None
 		self.drone_position = np.nan*np.ones((2,))
 		self.compass_hdg = None  
@@ -156,7 +153,6 @@ class Custom_object_detection(Node):
 			self.save_logs_fnc()
 
 	def save_logs_fnc(self):
-		#self.get_logger().info(f'{self.df_list}')
 		self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Lat","Drone Lon","Drone Heading","Object Lat","Object Lon","Object Heading"]) # self.current_directory
 		self.df.to_csv(self.df_path, index=False)
 
@@ -174,9 +170,6 @@ class Custom_object_detection(Node):
 		self.get_logger().info(f'Received compass heading {msg.data}')
 		self.compass_hdg = msg.data
 
-	def camera_info_callback(self, msg):
-		# Almacenar la información de la cámara
-		self.camera_info = msg
 	
 	def image_callback(self, camera_info_msg, camera_image_msg, depth_msg):
 
@@ -184,7 +177,7 @@ class Custom_object_detection(Node):
 		self.cv_image = self.bridge.imgmsg_to_cv2(camera_image_msg, desired_encoding='bgr8') # left camera color image to pass YOLO
 
 		# Get a pointer to the depth values casting the data pointer to floating point
-		#self.depth_image = memoryview(depth_msg.data).cast('f')
+		
 		self.depth_image = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding="passthrough")  # encoding: 32FC1
 		self.width=depth_msg.width
 		
@@ -209,15 +202,11 @@ class Custom_object_detection(Node):
 				for cls in self.distance.keys():
 					hdg_object = self.compass_hdg + self.distance[cls][3]
 					g = self.geod.Direct(self.drone_position[0], self.drone_position[1],hdg_object,self.distance[cls][0])
-					#msg = String()
-					#msg.data = "The position of "+ cls + " is ({:.10f}), {:.10f}).".format(g['lat2'],g['lon2'])
 					date = datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
 
 					if self.save_logs:
 						self.df_list.append([date, cls, self.distance[cls][0],*self.drone_position, self.compass_hdg, g['lat2'], g['lon2'], hdg_object])
-						#data = {'Datetime': date ,'Class': cls ,'Distance (m)': self.distance[cls][0],'Drone Position':self.drone_position , 'Latitude':g['lat2'],'Longitude':g['lon2']}
-						#dataframe2 = pd.DataFrame([data])
-						#self.df = self.df.append(dataframe2)
+
 
 					msg = TrashMsg()
 					msg.drone_lat = self.drone_position[0]
@@ -227,20 +216,16 @@ class Custom_object_detection(Node):
 					msg.object_lon = g['lon2']
 					msg.object_heading = hdg_object
 					msg.date = date
-					#msg.cls = cls
+
 					msg.success = True
      
 					self.trash_detections_publisher.publish(msg)
 
-				# if self.save_logs:
-				# 	self.df = pd.DataFrame(self.df_list, columns=["Datetime","Class","Distance (m)","Drone Position","Drone Heading","Object Position","Object Heading"])
-				# 	self.df.to_csv(self.df_path, index=False)
 
 		# Calculate the frame rate
 		self.counter+=1
 		if (time.time() - self.start_time) > self.display_every :
 			self.fps = self.counter / (time.time() - self.start_time)
-			#print("FPS: ", self.fps)
 			self.counter = 0
 			self.start_time = time.time()
 		
@@ -251,29 +236,10 @@ class Custom_object_detection(Node):
 				cv2.waitKey(1)
 
 		if self.record_video:
-			#self.out_video.write(cv2.resize(img_,(self.imgsz,self.imgsz)))
+
 			self.out_video_imgs.append(cv2.resize(img_,(self.imgsz,self.imgsz)))
 
-	def calculate_distance(self, detected_classes, bboxes): # returns a dict with the distance of each detection in meters
-		if self.depth_image is None:
-			return -1
-		
-		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(3,) for i,cls_id in enumerate(detected_classes)}
-		for i, cls in enumerate(real_distance):
-			xmin, ymin, xmax, ymax= bboxes[i] 
-			center_x = (xmin + xmax) // 2
-			center_y = (ymin + ymax) // 2
-			depth_image_np = np.array(self.depth_image)
-			depth_value = depth_image_np[int(center_y * self.width + center_x)]
 
-			Z = depth_value
-			X = (center_x - self.camera_info.k[2]) * Z / (self.camera_info.k[0]) # from https://github.com/stereolabs/zed-ros2-wrapper/blob/master/zed_components/src/zed_camera/src/zed_camera_component.cpp line 3067
-			Y = (center_y - self.camera_info.k[5]) * Z / (self.camera_info.k[4])
-			real_distance[cls][0] = np.sqrt(X**2 + Y**2 + Z**2)
-			real_distance[cls][1] = center_x
-			real_distance[cls][2] = center_y
-		
-		return real_distance
 	def calculate_closest_distance(self, detected_classes, bboxes):
 		
 		real_distance = {f"{cls_id}_{i}": np.nan*np.ones(4,) for i,cls_id in enumerate(detected_classes)}
@@ -301,7 +267,7 @@ class Custom_object_detection(Node):
 			real_distance[cls][0] = distance 
 			real_distance[cls][1] = center_x
 			real_distance[cls][2] = center_y
-			real_distance[cls][3] = np.degrees(np.arcsin(X/np.linalg.norm(point_XZ))) #self.angle_between_vectors(point_XZ,z_axis)
+			real_distance[cls][3] = np.degrees(np.arcsin(X/np.linalg.norm(point_XZ))) 
 		
 		return real_distance
 
@@ -328,25 +294,6 @@ class Custom_object_detection(Node):
 	def dimension_of_bb(self,xmin, xmax, ymin, ymax):
 		return self.proportion_of_bb*(xmax-xmin), self.proportion_of_bb*(ymax-ymin)
 
-	@staticmethod
-	def angle_between_vectors(v1, v2):
-		# Calculate dot product
-		dot_product = np.dot(v1, v2)
-		
-		# Calculate magnitudes of vectors
-		mag_v1 = np.linalg.norm(v1)
-		mag_v2 = np.linalg.norm(v2)
-		
-		# Calculate cosine of the angle between the vectors
-		cos_angle = dot_product / (mag_v1 * mag_v2)
-		
-		# Convert cosine to angle in radians
-		angle_rad = np.arccos(np.clip(cos_angle, -1.0, 1.0))
-		
-		# Convert angle from radians to degrees
-		angle_deg = np.degrees(angle_rad)
-		
-		return angle_deg
 
 def main(args=None):
 	rclpy.init(args=args)
@@ -363,18 +310,10 @@ def main(args=None):
 			custom_object_detection.save_video_fnc()
 			custom_object_detection.out_video.release()
 			custom_object_detection.get_logger().info("Video saved")
-	# Destroy the node explicitly
-	# (optional - otherwise it will be done automatically
-	# when the garbage collector destroys the node object)
+
 	custom_object_detection.destroy_node()
 	rclpy.shutdown()
-	# try:
-	# 	rclpy.spin(custom_object_detection)
-	# except (KeyboardInterrupt, rclpy.executors.ExternalShutdownException):
 
-	# 	custom_object_detection.get_logger().info("on shutdown!!!!")
-	# finally:
-	# 	rclpy.try_shutdown()
 
 if __name__ == '__main__':
 	main()
