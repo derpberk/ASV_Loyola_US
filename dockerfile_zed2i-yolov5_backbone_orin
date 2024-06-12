@@ -117,7 +117,7 @@ COPY ./asv_zed2icamera_workspace /home/asv_zed2icamera_workspace
 RUN rm -rf /home/asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/xavier_weights
 
 # Define the ARG
-ARG weight_path="utils/orin_weights/"
+ARG weight_path="/home/asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/orin_weights/"
 
 # Set the ARG as an ENV variable to persist its value
 ENV WEIGHT_PATH=$weight_path
