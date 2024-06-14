@@ -1,0 +1,134 @@
+ARG L4T_MAJOR_VERSION=35
+ARG L4T_MINOR_VERSION=1
+ARG L4T_PATCH_VERSION=0
+ARG L4T_BASE_IMAGE="l4t-jetpack"
+
+ARG IMAGE_NAME=dustynv/ros:humble-pytorch-l4t-r35.3.1
+
+FROM ${IMAGE_NAME}
+
+ARG ZED_SDK_MAJOR=4
+ARG ZED_SDK_MINOR=0
+ARG ZED_SDK_PATCH=7
+ARG L4T_MAJOR=35
+ARG L4T_MINOR=1
+
+ARG ROS2_DIST=humble
+
+ENV QT_X11_NO_MITSHM=1
+ENV EDITOR=nano
+ENV XDG_RUNTIME_DIR=/tmp
+ENV ROS_DOMAIN_ID=42
+
+# Disable apt-get warnings
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 42D5A192B819C5DA || true && \
+  apt-get update || true && apt-get install -y --no-install-recommends apt-utils dialog && \
+  rm -rf /var/lib/apt/lists/*
+  
+ENV TZ=Europe/Paris
+
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone && \ 
+  apt-get update && \
+  apt-get install --yes lsb-release wget less udev sudo build-essential cmake python3 python3-dev python3-pip python3-wheel git jq libpq-dev zstd usbutils && \    
+  rm -rf /var/lib/apt/lists/*
+
+# YOLOv5 requirements ------------------------------------------------------------------------
+
+#From Ultralytic NVIDIA Jetson Nano Deployment
+RUN sudo apt update
+RUN sudo apt install -y python3-pip 
+RUN pip3 install --upgrade pip   
+RUN sudo apt install -y libfreetype6-dev
+
+#From Yolov5 requirements.txt
+RUN pip3 install setuptools>=65.5.1 # Snyk vulnerability fix
+RUN pip3 install gitpython>=3.1.30
+RUN pip3 install matplotlib>=3.3
+RUN pip3 install numpy>=1.23.5
+RUN pip3 install Pillow>=9.4.0
+RUN pip3 install psutil  # system resources
+RUN pip3 install PyYAML>=5.3.1
+RUN pip3 install requests>=2.23.0
+RUN pip3 install scipy>=1.4.1
+RUN pip3 install thop>=0.1.1  # FLOPs computation
+RUN pip3 install tqdm>=4.64.0
+RUN pip3 install -U ultralytics --no-deps # nodeps to avoid opencv overwrite
+RUN pip3 install cycler --no-deps
+RUN pip3 install kiwisolver --no-deps
+RUN pip3 install pandas>=1.1.4
+RUN pip3 install seaborn>=0.11.0
+RUN pip3 install onnx>=1.12.0
+
+#From old versions of this image
+RUN pip3 install numpy-quaternion
+RUN pip3 install utm
+
+#This environment variable is needed to use the streaming features on Jetson inside a container
+ENV LOGNAME root
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt-get update -y || true ; apt-get install --no-install-recommends lsb-release wget less zstd udev sudo apt-transport-https -y && \
+    echo "# R${L4T_MAJOR_VERSION} (release), REVISION: ${L4T_MINOR_VERSION}.${L4T_PATCH_VERSION}" > /etc/nv_tegra_release ; \
+    wget -q --no-check-certificate -O ZED_SDK_Linux.run https://download.stereolabs.com/zedsdk/4.0/l4t35.1/jetsons  && \
+    chmod +x ZED_SDK_Linux.run ; ./ZED_SDK_Linux.run silent runtime_only skip_drivers && \
+    rm -rf /usr/local/zed/resources/* \
+    rm -rf ZED_SDK_Linux.run && \
+    rm -rf /var/lib/apt/lists/*
+
+# ZED Python API
+RUN apt-get update -y || true ; apt-get install --no-install-recommends python3 python3-pip python3-dev python3-setuptools build-essential -y && \ 
+    pip install requests && \
+    wget download.stereolabs.com/zedsdk/pyzed -O /usr/local/zed/get_python_api.py && \
+    python3 /usr/local/zed/get_python_api.py && \
+    python3 -m pip install cython wheel && \
+    python3 -m pip install numpy *.whl 
+RUN apt update -y ;\
+    python3 -m pip install pyopengl;\
+    apt install nano -y;\
+    apt install git -y;
+    
+#This symbolic link is needed to use the streaming features on Jetson inside a container
+RUN ln -sf /usr/lib/aarch64-linux-gnu/tegra/libv4l2.so.0 /usr/lib/aarch64-linux-gnu/libv4l2.so
+
+WORKDIR /usr/local/zed
+
+RUN git clone https://github.com/stereolabs/zed-sdk.git
+
+#WORKDIR /usr/src/tensorrt/samples/trtexec/ 
+#RUN make
+RUN echo 'alias trtexec="/usr/src/tensorrt/bin/trtexec"' >> /root/.bashrc
+RUN /bin/bash -c 'alias trtexec="/usr/src/tensorrt/bin/trtexec"'
+
+# Needed to work with pyzed on ARM
+ENV OPENBLAS_CORETYPE=ARMV8
+
+# For Geodesic calculations
+RUN pip3 install geographiclib
+
+# To use colcon build
+RUN pip3 install setuptools==58.2.0
+
+
+WORKDIR /home/asv_zed2icamera_workspace
+COPY ./asv_zed2icamera_workspace /home/asv_zed2icamera_workspace
+
+
+
+# Remove the unwanted directory
+RUN rm -rf /home/asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/xavier_weights
+
+# Define the ARG
+ARG weight_path="/home/asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/orin_weights/"
+
+# Set the ARG as an ENV variable to persist its value
+ENV WEIGHT_PATH=$weight_path
+
+# Now you can use the ENV variable in the RUN command
+RUN sed -i.bak "s|weights_folder_path: .*|weights_folder_path: ${WEIGHT_PATH}|" "/home/asv_zed2icamera_workspace/src/zed2i_camera/config/config.yaml"
+
+#WORKDIR /usr/local/zed
+RUN /bin/bash -c "source /opt/ros/humble/install/setup.bash; colcon build"
+RUN echo 'source /opt/ros/humble/install/setup.bash; source /home/asv_zed2icamera_workspace/install/setup.bash;' >> /root/.bashrc
+
+
+CMD ["/bin/bash", "-c", "source /opt/ros/humble/install/setup.bash; source install/setup.bash;. ./exec_trash_detection.sh"]
+
