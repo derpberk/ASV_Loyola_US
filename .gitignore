@@ -70,6 +70,8 @@ src/simulator/COLCON_IGNORE
 
 src/asv_loyola_us/config/config.yaml
 temp/
+*.log
+
 
 # # Ignore weights and videos
 # asv_zed2icamera_workspace/src/zed2i_camera/zed2i_camera/utils/weights/
