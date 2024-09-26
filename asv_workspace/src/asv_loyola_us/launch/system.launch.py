@@ -10,15 +10,23 @@ from launch.event_handlers import (OnExecutionComplete, OnProcessExit,
                                 OnProcessIO, OnProcessStart, OnShutdown)
 
 
+
 def generate_launch_description():
 
     namespace = DeclareLaunchArgument(
         "namespace", default_value=TextSubstitution(text="ASV")
     )
+
+    use_sensors_argument = DeclareLaunchArgument(
+        "use_sensors", default_value="True"    )
+    
+
+
     node_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
             get_package_share_directory('asv_loyola_us'), 'launch'),
-            '/nodes.launch.py'])
+            '/nodes.launch.py']),
+            launch_arguments = {'use_sensors': LaunchConfiguration('use_sensors')}.items()
     )
 
     launch_file = GroupAction(
@@ -33,6 +41,7 @@ def generate_launch_description():
 
     return launch.LaunchDescription([
         namespace,
+        use_sensors_argument,
         launch_file,
         RegisterEventHandler(
             OnShutdown(
