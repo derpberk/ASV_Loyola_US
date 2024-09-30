@@ -9,7 +9,7 @@ permalink: /blueOS/
 
 Primero debemos concetarnos a la red wifi para poder acceder, tenemos dos opciones WLAN_ASVBLUE (modem 4g) o BlueBoatAP (moden de larga distancia). La contraseña de BlueBoatAP es blueboat.
 
-Para acceder al docker de BluesOS, bastará con ir a la direccion 192.168.2.2 , donde nos cunducira al docker del BlueOS.
+Para acceder al docker de BluesOS, bastará con ir a la direccion 192.168.1.202 , donde nos cunducira a la interfaz del docker del BlueOS.
 
 Para activar todas la funciones debemos activar el modo pirata, es un boton en la esquina superior derecha.
 
@@ -20,6 +20,8 @@ Ahora que tenemos acceso a todos los parametros podemos configurar el BlueOS par
 # Ardupilot firmware
 
 Podemos cambiar la verison de Ardupilot , asi como tambien el tipo de vehiculo que usemos. Ademas, podremos configurar la concexion de los puertos serial, dependiendo de lo que se quiera concetar tanto por USB como por Serial en el hub encima de la raspberry.Tambien podremos realizar un restart del ardupilot si fuera necesario
+
+Actualmente el vehiculo esta en la ultima version estable
 
 ![Puertos serial y version de Ardupilot](/ASV_Loyola_US/images/ardupilot_firmware.png)
 
@@ -33,20 +35,24 @@ Se pueden cambiar los parametros de ardupilot dentro del Docker en la pestaña "
 # BlueOs Version
 En la pestaña de BlueOS version se puede modificar la version que esta corriendo el docker, actualmente hay varias versiones ademas de la version de fabrica
 
-![Versiones del docker BlueOS](/ASV_Loyola_US/images/BlueOS_version.png)
+Actualmente se encuentra en la version 1.2 del docker de BlueOS
 
+![Versiones del docker BlueOS](/ASV_Loyola_US/images/BlueOS_version.png)
 
 ## Importante
 Si sale el mensaje de que se ha produzido un error y que se ha vuelto a la version de fabrica, se puede volver a la versión que se estaba utilizando sin problemas.
 
+Para realizarlo , id a la pestaña de BlueOS version y aplicar la version descargaga que se quiera emplear. Esto reiniciara el barco
+
 # MAVLink Injector
 En la pestana de Mavlink Endpoints podemos crear nuevos puertos realcionados con mavlink para sus uso. No se reomienda modificar los que ya estan creados desde el inicio
+Altualmente se tiene habierto el puerto 5778 para la comunicacion con el navegador y la jetson orin mediante MavLink.
 
 ![Configuración de mavlink](/ASV_Loyola_US/images/mavlink_Endpoints.png)
 
 
 # Mavlink Inspector
-Podremos ver los log de mavlink en la pestaña Mavlink inspector
+Podremos ver los logs de mavlink en la pestaña Mavlink inspector
 
 ![Logs de mavlink](/ASV_Loyola_US/images/mavlink_inspector.png)
 

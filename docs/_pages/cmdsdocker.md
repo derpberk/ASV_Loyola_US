@@ -10,41 +10,36 @@ Aqui se encuentran varios comandos de utilidad para los dockers
 # Docker ASV
 
 Lanzar el docker_ASV ARM:
-- Comando
+
+- Comando completo (ejemplo)
 ```bash
-docker run -it --rm --device /dev/SONAR --device /dev/SENSOR -e DEBUG="True" -e MQTT_ADDR="IP a usar" -e NAVIO_ADDR="IP a usar" --network host bender.us.es:5000/asv_us:arm
+docker run -it --rm --device /dev/SONAR --device /dev/SENSOR -e DEBUG="True/False" -e MQTT_ADDR="IP a usar" -e NAVIO_ADDR="IP a usar" --network host bender.us.es:5000/asv_us:arm
 ```
 
-Lanzar el docker_ASV ARM:
-- Comando
+Lanzar el docker_ASV AMD:
+- Comando commpleto (ejemplo)
 ```bash
-docker run -it --rm --device /dev/SONAR --device /dev/SENSOR -e DEBUG="True" -e MQTT_ADDR="IP a usar" -e NAVIO_ADDR="IP a usar" --network host bender.us.es:5000/asv_us:amd
+docker run -it --rm --device /dev/SONAR --device /dev/SENSOR -e DEBUG="True/False" -e MQTT_ADDR="IP a usar" -e NAVIO_ADDR="IP a usar" --network host bender.us.es:5000/asv_us:amd
 ```
-
+En el barco se encuentra bajo la llamada de este comando:
 - Alias
 ```bash
 run_docker_asv_us
 ```
-# Importante!!!!
-Todas las flags "-e " son opcionales, si no se quiere usar no hace falta escribirlas, el codigo se lanzará con la configuración con la que se haya creado el docker 
 
-La flag DEBUG es True o False dependiendo si queremos el codigo en modo debug o normal
+con este comando se realiza la llamada del docker con la siguiente configuracion
 
-Si queremos concetarnos al navio2 debemos usar la flag como:
+Barco amarillo:
+
 ```bash
- -e NAVIO_ADDR="192.168.1.203:5678" 
- ```
-
-si es con el SITL poner
-```bash
--e NAVIO_ADDR="127.0.0.1:5788"
+docker run -it --rm --device /dev/SONAR --device /dev/SENSOR -e NAVIO_ADDR="192.168.1.203:5678" --network host bender.us.es:5000/asv_us:arm
 ```
-o 
-```bash
--e NAVIO_ADDR="(vuestra ip):5788"
-```
-Para lanzar el docker con el con bash deberemos añadir el siguiente flag:
 
+Barco azul:
+```bash
+docker run -it --rm -e NAVIO_ADDR="192.168.1.203:5778" --network host bender.us.es:5000/asv_us:arm
+```
+Para lanzarlo sin que ejecute nada, deberemos lanzar el comando del docker junto con alguno de los siguentes comandos 
 ```bash
 --entrypoint bash
 ```
@@ -52,35 +47,49 @@ o
 ```bash
 --entrypoint bin/bash
 ```
+ejemplo:
+```bash
+docker run -it --rm -e NAVIO_ADDR="192.168.1.203:5778" --entrypoint bin/bash --network host bender.us.es:5000/asv_us:arm
+```
 
 # Docker Wrappe_Zed
 
-Antes de lanzar el docker de wrapper_zed
-
-xhost +si:localuser:root
-
-Lanzar el docker wrapper_zed con :
+Para lanzar el docker wrapper_zed en el barco amarillo, se ejecuta el siguente comando:
 - Comando
 
 ```bash
  docker run -it --gpus all  --privileged --net host -e DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /home/xavier/CameraFolder:root/CameraFolder bender.us.es:5000/asv_us:zed_wrapper
 ```
-- alias
+- Para mayor facilidad, este comando de docker esta bajo el alias:
 
 ```bash 
 run_docker_wrapper
 ```
 
-# Comandos comunes
+Para usar el wrapper con el docker y una pantalla concetada deberemos introducir el siguente comando primero antes de lanzar el docker wrapper_zed:
+```bash 
+xhost +si:localuser:root
+```
 
-ver el ID de las imagenes que se estan ejecutando
+# Docker trash detecttion
 
-docker ps 
+Para lanzar el docker de deteccion de basura, se realizara para ambos barcos con la siguente llamada del docker:
 
-acceder a la imagen mediante otro terminal
-docker exec -it (ID) /bin/bash
+Barco amarillo:
+```bash
+docker run -it --network host --runtime nvidia --privileged  bender.us.es:5000/asv_us:trash_xavier_detection
+```
+Barco azul:
+```bash
+docker run -it --network host --runtime nvidia --privileged  bender.us.es:5000/asv_us:trash_orin_detection
+```
 
+Se ha realizado un mismo alias para la llamada de los dockers:
+alias
 
+```bash
+run_docker_trash
+```
 
  [Volver](../)   
 
